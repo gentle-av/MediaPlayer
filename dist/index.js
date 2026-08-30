@@ -2,3 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const Application_1 = require("./core/app/Application");
 const application = new Application_1.Application();
+window.app = application;
+window.Application = Application_1.Application;
+const Metadata_1 = require("./core/entities/music/Metadata");
+const MusicStore_1 = require("./core/store/MusicStore");
+const PlaylistStore_1 = require("./core/store/PlaylistStore");
+window.Metadata = Metadata_1.Metadata;
+window.MusicStore = MusicStore_1.MusicStore;
+window.PlaylistStore = PlaylistStore_1.PlaylistStore;
+console.log('✅ Application initialized! Use "app" in console.');
+console.log('📝 Commands:');
+console.log('  app.musicStore.getAllTracks() - Show all tracks');
+console.log('  app.musicStore.getLibrarySize() - Show track count');
+console.log('  app.playlistStore.getAllPlaylists() - Show playlists');
