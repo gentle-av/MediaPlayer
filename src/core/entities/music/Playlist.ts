@@ -1,26 +1,18 @@
-import { Metadata } from "./Metadata";
-import { MusicLibrary } from "./MusicLibrary";
-
 export class Playlist {
   private name: string;
-  private trackPaths: Set<string> = new Set();
-  private musicLibrary: MusicLibrary;
+  private trackPaths: Set<string>;
 
-  constructor(name: string, musicLibrary: MusicLibrary) {
+  constructor(name: string) {
     if (!name || !name.trim()) {
       throw new Error('Playlist name is required');
     }
     this.name = name.trim();
-    this.musicLibrary = musicLibrary;
+    this.trackPaths = new Set<string>();
   }
 
   addTrack(filePath: string): void {
     if (!filePath || !filePath.trim()) {
       throw new Error('File path is required');
-    }
-    const track = this.musicLibrary['findTrackByPath'](filePath);
-    if (!track) {
-      throw new Error(`Track with path "${filePath}" not found in library`);
     }
     if (this.trackPaths.has(filePath)) {
       throw new Error(`Track "${filePath}" already in playlist`);
@@ -35,10 +27,8 @@ export class Playlist {
     this.trackPaths.delete(filePath);
   }
 
-  get tracks(): Metadata[] {
-    return Array.from(this.trackPaths)
-      .map(path => this.musicLibrary['findTrackByPath'](path))
-      .filter((track): track is Metadata => track !== undefined);
+  getTrackPaths(): string[] {
+    return Array.from(this.trackPaths);
   }
 
   get size(): number {
@@ -68,7 +58,7 @@ export class Playlist {
     return {
       name: this.name,
       size: this.size,
-      tracks: this.tracks.map(track => track.toJSON())
+      tracks: Array.from(this.trackPaths)
     };
   }
 }

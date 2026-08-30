@@ -1,14 +1,14 @@
 import { Metadata } from "../entities/music/Metadata";
-import { MusicLibrary } from "../entities/music/MusicLibrary";
+import { MusicStore } from "./MusicStore";
 import { Playlist } from "../entities/music/Playlist";
 
 export class PlaylistStore {
-  private musicLibrary: MusicLibrary;
+  private musicStore: MusicStore;
   private playlists: Map<string, Playlist>;
   private listeners: (() => void)[];
 
-  constructor(musicLibrary: MusicLibrary) {
-    this.musicLibrary = musicLibrary;
+  constructor(musicStore: MusicStore) {
+    this.musicStore = musicStore;
     this.playlists = new Map<string, Playlist>();
     this.listeners = [];
   }
@@ -32,7 +32,7 @@ export class PlaylistStore {
     if (this.playlists.has(trimmedName)) {
       throw new Error(`Playlist "${trimmedName}" already exists`);
     }
-    const playlist = new Playlist(trimmedName, this.musicLibrary);
+    const playlist = new Playlist(trimmedName);
     this.playlists.set(trimmedName, playlist);
     this.notifyListeners();
   }
@@ -71,12 +71,38 @@ export class PlaylistStore {
     if (!filePath || !filePath.trim()) {
       throw new Error('File path is required');
     }
+    const track = this.musicStore.getTrack(filePath);
+    if (!track) {
+      throw new Error(`Track with path "${filePath}" not found in music library`);
+    }
     const trimmedName = playlistName.trim();
     const playlist = this.playlists.get(trimmedName);
     if (!playlist) {
       throw new Error(`Playlist "${trimmedName}" not found`);
     }
     playlist.addTrack(filePath);
+    this.notifyListeners();
+  }
+
+  addTracksToPlaylist(playlistName: string, filePaths: string[]): void {
+    if (!playlistName || !playlistName.trim()) {
+      throw new Error('Playlist name is required');
+    }
+    if (!filePaths || filePaths.length === 0) {
+      throw new Error('At least one file path is required');
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    for (const filePath of filePaths) {
+      const track = this.musicStore.getTrack(filePath);
+      if (!track) {
+        throw new Error(`Track with path "${filePath}" not found in music library`);
+      }
+      playlist.addTrack(filePath);
+    }
     this.notifyListeners();
   }
 
@@ -105,7 +131,22 @@ export class PlaylistStore {
     if (!playlist) {
       throw new Error(`Playlist "${trimmedName}" not found`);
     }
-    return playlist.tracks;
+    const trackPaths = playlist.getTrackPaths();
+    return trackPaths
+      .map((path: string) => this.musicStore.getTrack(path))
+      .filter((track: Metadata | undefined): track is Metadata => track !== undefined);
+  }
+
+  getPlaylistTrackPaths(playlistName: string): string[] {
+    if (!playlistName || !playlistName.trim()) {
+      return [];
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    return playlist.getTrackPaths();
   }
 
   getPlaylistSize(playlistName: string): number {
@@ -177,6 +218,31 @@ export class PlaylistStore {
     const lowerQuery = query.toLowerCase().trim();
     return this.getAllPlaylists().filter(playlist =>
       playlist.playlistName.toLowerCase().includes(lowerQuery)
+    );
+  }
+
+  searchTracksInPlaylist(playlistName: string, query: string): Metadata[] {
+    if (!playlistName || !playlistName.trim()) {
+      return [];
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    const trackPaths = playlist.getTrackPaths();
+    const tracks = trackPaths
+      .map((path: string) => this.musicStore.getTrack(path))
+      .filter((track: Metadata | undefined): track is Metadata => track !== undefined);
+    if (!query || !query.trim()) {
+      return tracks;
+    }
+    const lowerQuery = query.toLowerCase().trim();
+    return tracks.filter(track =>
+      track.title.toLowerCase().includes(lowerQuery) ||
+      track.artist.toLowerCase().includes(lowerQuery) ||
+      track.album.toLowerCase().includes(lowerQuery) ||
+      track.genre.toLowerCase().includes(lowerQuery)
     );
   }
 

@@ -3,22 +3,17 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Playlist = void 0;
 class Playlist {
     name;
-    trackPaths = new Set();
-    musicLibrary;
-    constructor(name, musicLibrary) {
+    trackPaths;
+    constructor(name) {
         if (!name || !name.trim()) {
             throw new Error('Playlist name is required');
         }
         this.name = name.trim();
-        this.musicLibrary = musicLibrary;
+        this.trackPaths = new Set();
     }
     addTrack(filePath) {
         if (!filePath || !filePath.trim()) {
             throw new Error('File path is required');
-        }
-        const track = this.musicLibrary['findTrackByPath'](filePath);
-        if (!track) {
-            throw new Error(`Track with path "${filePath}" not found in library`);
         }
         if (this.trackPaths.has(filePath)) {
             throw new Error(`Track "${filePath}" already in playlist`);
@@ -31,10 +26,8 @@ class Playlist {
         }
         this.trackPaths.delete(filePath);
     }
-    get tracks() {
-        return Array.from(this.trackPaths)
-            .map(path => this.musicLibrary['findTrackByPath'](path))
-            .filter((track) => track !== undefined);
+    getTrackPaths() {
+        return Array.from(this.trackPaths);
     }
     get size() {
         return this.trackPaths.size;
@@ -58,7 +51,7 @@ class Playlist {
         return {
             name: this.name,
             size: this.size,
-            tracks: this.tracks.map(track => track.toJSON())
+            tracks: Array.from(this.trackPaths)
         };
     }
 }
