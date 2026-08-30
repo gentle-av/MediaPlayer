@@ -1,9 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.Playlist = void 0;
-class Playlist {
-    name;
-    trackPaths;
+export class Playlist {
     constructor(name) {
         if (!name || !name.trim()) {
             throw new Error('Playlist name is required');
@@ -55,4 +50,4 @@ class Playlist {
         };
     }
 }
-exports.Playlist = Playlist;
+//# sourceMappingURL=Playlist.js.map

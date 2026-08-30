@@ -1,12 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.VideoApiClient = void 0;
-const VideoLibrary_1 = require("../entities/video/VideoLibrary");
-const Config_js_1 = require("../config/Config.js");
-class VideoApiClient {
-    baseUrl;
+import { VideoLibrary } from "../entities/video/VideoLibrary.js";
+import { Config } from "../config/Config.js";
+export class VideoApiClient {
     constructor() {
-        this.baseUrl = Config_js_1.Config.getConfig().baseUrl;
+        this.baseUrl = Config.getConfig().baseUrl;
     }
     async listVideos(path = '/mnt/video') {
         try {
@@ -21,11 +17,11 @@ class VideoApiClient {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            return VideoLibrary_1.VideoLibrary.fromJson(data);
+            return VideoLibrary.fromJson(data);
         }
         catch (error) {
             console.error('Error loading video library:', error);
-            return new VideoLibrary_1.VideoLibrary({
+            return new VideoLibrary({
                 items: [],
                 path: path,
                 success: false
@@ -33,4 +29,4 @@ class VideoApiClient {
         }
     }
 }
-exports.VideoApiClient = VideoApiClient;
+//# sourceMappingURL=VideoApiClient.js.map

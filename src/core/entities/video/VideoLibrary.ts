@@ -1,4 +1,4 @@
-import { VideoItem } from './VideoItem';
+import { VideoItem } from "./VideoItem.js";
 
 export class VideoLibrary {
   items: VideoItem[];

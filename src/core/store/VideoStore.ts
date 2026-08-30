@@ -1,6 +1,6 @@
-import { VideoItem } from '../entities/video/VideoItem';
-import { VideoApiClient } from '../api/VideoApiClient';
-import { VideoLibrary } from '../entities/video/VideoLibrary';
+import { VideoItem } from "../entities/video/VideoItem.js";
+import { VideoApiClient } from "../api/VideoApiClient.js";
+import { VideoLibrary } from "../entities/video/VideoLibrary.js";
 
 export class VideoStore {
   private client: VideoApiClient;

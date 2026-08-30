@@ -1,14 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.VideoStore = void 0;
-const VideoApiClient_1 = require("../api/VideoApiClient");
-class VideoStore {
-    client;
-    currentLibrary = null;
-    currentPath = '/mnt/video';
-    listeners = [];
+import { VideoApiClient } from "../api/VideoApiClient.js";
+export class VideoStore {
     constructor() {
-        this.client = new VideoApiClient_1.VideoApiClient();
+        this.currentLibrary = null;
+        this.currentPath = '/mnt/video';
+        this.listeners = [];
+        this.client = new VideoApiClient();
     }
     subscribe(listener) {
         this.listeners.push(listener);
@@ -66,4 +62,4 @@ class VideoStore {
         this.notifyListeners();
     }
 }
-exports.VideoStore = VideoStore;
+//# sourceMappingURL=VideoStore.js.map

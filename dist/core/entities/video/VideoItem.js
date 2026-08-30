@@ -1,13 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.VideoItem = void 0;
-class VideoItem {
-    icon;
-    isDirectory;
-    isVideo;
-    name;
-    path;
-    size;
+export class VideoItem {
     constructor(data) {
         this.icon = data.icon;
         this.isDirectory = data.isDirectory;
@@ -37,4 +28,4 @@ class VideoItem {
         };
     }
 }
-exports.VideoItem = VideoItem;
+//# sourceMappingURL=VideoItem.js.map

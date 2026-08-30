@@ -1,6 +1,6 @@
-import { Metadata } from "../entities/music/Metadata";
-import { MusicStore } from "./MusicStore";
-import { Playlist } from "../entities/music/Playlist";
+import { Metadata } from "../entities/music/Metadata.js";
+import { MusicStore } from "./MusicStore.js";
+import { Playlist } from "../entities/music/Playlist.js";
 
 export class PlaylistStore {
   private musicStore: MusicStore;

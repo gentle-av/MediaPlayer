@@ -1,5 +1,5 @@
-import { VideoLibrary } from '../entities/video/VideoLibrary';
-import { Config } from '../config/Config.js';
+import { VideoLibrary } from "../entities/video/VideoLibrary.js";
+import { Config } from "../config/Config.js";
 
 export class VideoApiClient {
   private baseUrl: string;

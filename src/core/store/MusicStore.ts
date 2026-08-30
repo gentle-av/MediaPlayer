@@ -1,13 +1,16 @@
-import { Metadata } from "../entities/music/Metadata";
-import { MusicLibrary } from "../entities/music/MusicLibrary";
+import { Metadata } from "../entities/music/Metadata.js";
+import { MusicLibrary } from "../entities/music/MusicLibrary.js";
+import { MusicApiClient } from "../api/MusicApiClient.js";
 
 export class MusicStore {
   private library: MusicLibrary;
   private listeners: (() => void)[];
+  private apiClient: MusicApiClient;
 
   constructor() {
     this.library = new MusicLibrary();
     this.listeners = [];
+    this.apiClient = new MusicApiClient();
   }
 
   subscribe(listener: () => void): () => void {
@@ -48,6 +51,40 @@ export class MusicStore {
       track.album.toLowerCase().includes(lowerQuery) ||
       track.genre.toLowerCase().includes(lowerQuery)
     );
+  }
+
+  async loadTracksFromServer(): Promise<void> {
+    const tracks = await this.apiClient.getAllTracks();
+    this.library.clear();
+    tracks.forEach(track => {
+      try {
+        this.library.addTrack(track);
+      } catch (error) {
+        console.warn(`Could not add track: ${track.title}`, error);
+      }
+    });
+    this.notifyListeners();
+  }
+
+  async searchByArtist(artist: string): Promise<Metadata[]> {
+    return await this.apiClient.getTracksByArtist(artist);
+  }
+
+  async searchByAlbum(album: string, artist?: string): Promise<Metadata[]> {
+    return await this.apiClient.getTracksByAlbum(album, artist);
+  }
+
+  async getArtists(): Promise<string[]> {
+    return await this.apiClient.getArtists();
+  }
+
+  async getAlbums(artist?: string): Promise<Array<{album: string, artist: string, year: number}>> {
+    return await this.apiClient.getAlbums(artist);
+  }
+
+  async forceRescan(directory?: string): Promise<void> {
+    await this.apiClient.forceRescan(directory);
+    await this.loadTracksFromServer();
   }
 
   toJSON(): any {

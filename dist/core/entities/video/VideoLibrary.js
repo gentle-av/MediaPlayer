@@ -1,18 +1,12 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.VideoLibrary = void 0;
-const VideoItem_1 = require("./VideoItem");
-class VideoLibrary {
-    items;
-    path;
-    success;
+import { VideoItem } from "./VideoItem.js";
+export class VideoLibrary {
     constructor(data) {
         this.items = data.items;
         this.path = data.path;
         this.success = data.success;
     }
     static fromJson(json) {
-        const items = (json.items || []).map((item) => VideoItem_1.VideoItem.fromJson(item));
+        const items = (json.items || []).map((item) => VideoItem.fromJson(item));
         return new VideoLibrary({
             items: items,
             path: json.path,
@@ -33,4 +27,4 @@ class VideoLibrary {
         return this.items.filter((item) => item.isVideo);
     }
 }
-exports.VideoLibrary = VideoLibrary;
+//# sourceMappingURL=VideoLibrary.js.map

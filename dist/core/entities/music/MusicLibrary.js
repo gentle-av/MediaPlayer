@@ -1,8 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.MusicLibrary = void 0;
-class MusicLibrary {
-    library = new Array();
+export class MusicLibrary {
+    constructor() {
+        this.library = new Array();
+    }
     addTrack(track) {
         if (!track) {
             throw new Error('Track cannot be null or undefined');
@@ -47,4 +46,4 @@ class MusicLibrary {
         };
     }
 }
-exports.MusicLibrary = MusicLibrary;
+//# sourceMappingURL=MusicLibrary.js.map

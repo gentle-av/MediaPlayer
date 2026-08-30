@@ -1,14 +1,10 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.BaseApiClient = void 0;
-const Config_1 = require("../config/Config");
-class BaseApiClient {
-    endpoint;
+import { Config } from "../config/Config.js";
+export class BaseApiClient {
     constructor(endpoint) {
         this.endpoint = endpoint;
     }
     async getAll() {
-        const response = await fetch(`${Config_1.Config.getConfig().baseUrl}/${this.endpoint}`);
+        const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}`);
         const data = await response.json();
         return {
             data,
@@ -16,7 +12,7 @@ class BaseApiClient {
         };
     }
     async getById(id) {
-        const response = await fetch(`${Config_1.Config.getConfig().baseUrl}/${this.endpoint}/${id}`);
+        const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}/${id}`);
         const data = await response.json();
         return {
             data,
@@ -24,7 +20,7 @@ class BaseApiClient {
         };
     }
     async create(entity) {
-        const response = await fetch(`${Config_1.Config.getConfig().baseUrl}/${this.endpoint}`, {
+        const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -38,7 +34,7 @@ class BaseApiClient {
         };
     }
     async update(id, entity) {
-        const response = await fetch(`${Config_1.Config.getConfig().baseUrl}/${this.endpoint}/${id}`, {
+        const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}/${id}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -52,7 +48,7 @@ class BaseApiClient {
         };
     }
     async delete(id) {
-        const response = await fetch(`${Config_1.Config.getConfig().baseUrl}/${this.endpoint}/${id}`, {
+        const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}/${id}`, {
             method: 'DELETE',
         });
         const data = await response.json();
@@ -62,4 +58,4 @@ class BaseApiClient {
         };
     }
 }
-exports.BaseApiClient = BaseApiClient;
+//# sourceMappingURL=BaseApiClient.js.map

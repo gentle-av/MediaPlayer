@@ -1,11 +1,5 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.PlaylistStore = void 0;
-const Playlist_1 = require("../entities/music/Playlist");
-class PlaylistStore {
-    musicStore;
-    playlists;
-    listeners;
+import { Playlist } from "../entities/music/Playlist.js";
+export class PlaylistStore {
     constructor(musicStore) {
         this.musicStore = musicStore;
         this.playlists = new Map();
@@ -28,7 +22,7 @@ class PlaylistStore {
         if (this.playlists.has(trimmedName)) {
             throw new Error(`Playlist "${trimmedName}" already exists`);
         }
-        const playlist = new Playlist_1.Playlist(trimmedName);
+        const playlist = new Playlist(trimmedName);
         this.playlists.set(trimmedName, playlist);
         this.notifyListeners();
     }
@@ -238,4 +232,4 @@ class PlaylistStore {
         };
     }
 }
-exports.PlaylistStore = PlaylistStore;
+//# sourceMappingURL=PlaylistStore.js.map
