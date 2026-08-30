@@ -1,24 +1,24 @@
 import { Metadata } from "./Metadata";
-import { Library } from "./Library";
+import { MusicLibrary } from "./MusicLibrary";
 
 export class Playlist {
   private name: string;
   private trackPaths: Set<string> = new Set();
-  private library: Library;
+  private musicLibrary: MusicLibrary;
 
-  constructor(name: string, library: Library) {
+  constructor(name: string, musicLibrary: MusicLibrary) {
     if (!name || !name.trim()) {
       throw new Error('Playlist name is required');
     }
     this.name = name.trim();
-    this.library = library;
+    this.musicLibrary = musicLibrary;
   }
 
   addTrack(filePath: string): void {
     if (!filePath || !filePath.trim()) {
       throw new Error('File path is required');
     }
-    const track = this.library['findTrackByPath'](filePath);
+    const track = this.musicLibrary['findTrackByPath'](filePath);
     if (!track) {
       throw new Error(`Track with path "${filePath}" not found in library`);
     }
@@ -28,7 +28,6 @@ export class Playlist {
     this.trackPaths.add(filePath);
   }
 
-  // Удалить трек из плейлиста
   removeTrack(filePath: string): void {
     if (!this.trackPaths.has(filePath)) {
       throw new Error(`Track "${filePath}" not found in playlist`);
@@ -38,7 +37,7 @@ export class Playlist {
 
   get tracks(): Metadata[] {
     return Array.from(this.trackPaths)
-      .map(path => this.library['findTrackByPath'](path))
+      .map(path => this.musicLibrary['findTrackByPath'](path))
       .filter((track): track is Metadata => track !== undefined);
   }
 

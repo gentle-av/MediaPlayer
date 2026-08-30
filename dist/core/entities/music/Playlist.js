@@ -4,19 +4,19 @@ exports.Playlist = void 0;
 class Playlist {
     name;
     trackPaths = new Set();
-    library;
-    constructor(name, library) {
+    musicLibrary;
+    constructor(name, musicLibrary) {
         if (!name || !name.trim()) {
             throw new Error('Playlist name is required');
         }
         this.name = name.trim();
-        this.library = library;
+        this.musicLibrary = musicLibrary;
     }
     addTrack(filePath) {
         if (!filePath || !filePath.trim()) {
             throw new Error('File path is required');
         }
-        const track = this.library['findTrackByPath'](filePath);
+        const track = this.musicLibrary['findTrackByPath'](filePath);
         if (!track) {
             throw new Error(`Track with path "${filePath}" not found in library`);
         }
@@ -25,7 +25,6 @@ class Playlist {
         }
         this.trackPaths.add(filePath);
     }
-    // Удалить трек из плейлиста
     removeTrack(filePath) {
         if (!this.trackPaths.has(filePath)) {
             throw new Error(`Track "${filePath}" not found in playlist`);
@@ -34,7 +33,7 @@ class Playlist {
     }
     get tracks() {
         return Array.from(this.trackPaths)
-            .map(path => this.library['findTrackByPath'](path))
+            .map(path => this.musicLibrary['findTrackByPath'](path))
             .filter((track) => track !== undefined);
     }
     get size() {
