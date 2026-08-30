@@ -17,7 +17,6 @@ export class VideoLibrary {
 
   static fromJson(json: any): VideoLibrary {
     const items = (json.items || []).map((item: any) => VideoItem.fromJson(item));
-
     return new VideoLibrary({
       items: items,
       path: json.path,
