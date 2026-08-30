@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Library = void 0;
-class Library {
+exports.MusicLibrary = void 0;
+class MusicLibrary {
     library = new Array();
     addTrack(track) {
         if (!track) {
@@ -24,7 +24,7 @@ class Library {
     }
     removeTrackByIndex(index) {
         if (index < 0 || index >= this.library.length) {
-            throw new Error(`Index ${index} is out of bounds. Library size: ${this.library.length}`);
+            throw new Error(`Index ${index} is out of bounds. Music library size: ${this.library.length}`);
         }
         this.library.splice(index, 1);
     }
@@ -47,4 +47,4 @@ class Library {
         };
     }
 }
-exports.Library = Library;
+exports.MusicLibrary = MusicLibrary;

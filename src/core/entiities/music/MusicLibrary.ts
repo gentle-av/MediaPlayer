@@ -1,6 +1,6 @@
 import { Metadata } from "./Metadata"
 
-export class Library {
+export class MusicLibrary {
   private library: Array<Metadata> = new Array<Metadata>();
 
   addTrack(track: Metadata): void {
@@ -26,7 +26,7 @@ export class Library {
 
   removeTrackByIndex(index: number): void {
     if (index < 0 || index >= this.library.length) {
-      throw new Error(`Index ${index} is out of bounds. Library size: ${this.library.length}`);
+      throw new Error(`Index ${index} is out of bounds. Music library size: ${this.library.length}`);
     }
     this.library.splice(index, 1);
   }
