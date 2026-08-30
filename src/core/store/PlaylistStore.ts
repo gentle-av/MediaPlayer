@@ -2,12 +2,14 @@ import { Metadata } from "../entities/music/Metadata";
 import { MusicLibrary } from "../entities/music/MusicLibrary";
 import { Playlist } from "../entities/music/Playlist";
 
-export class MusicStore {
-  private library: MusicLibrary;
+export class PlaylistStore {
+  private musicLibrary: MusicLibrary;
+  private playlists: Map<string, Playlist>;
   private listeners: (() => void)[];
 
-  constructor() {
-    this.library = new MusicLibrary();
+  constructor(musicLibrary: MusicLibrary) {
+    this.musicLibrary = musicLibrary;
+    this.playlists = new Map<string, Playlist>();
     this.listeners = [];
   }
 
@@ -22,58 +24,176 @@ export class MusicStore {
     this.listeners.forEach(listener => listener());
   }
 
-  addTrack(track: Metadata): void {
-    this.library.addTrack(track);
+  createPlaylist(name: string): void {
+    if (!name || !name.trim()) {
+      throw new Error('Playlist name is required');
+    }
+    const trimmedName = name.trim();
+    if (this.playlists.has(trimmedName)) {
+      throw new Error(`Playlist "${trimmedName}" already exists`);
+    }
+    const playlist = new Playlist(trimmedName, this.musicLibrary);
+    this.playlists.set(trimmedName, playlist);
     this.notifyListeners();
   }
 
-  removeTrack(filePath: string): void {
-    this.library.removeTrack(filePath);
+  deletePlaylist(name: string): void {
+    if (!name || !name.trim()) {
+      throw new Error('Playlist name is required');
+    }
+    const trimmedName = name.trim();
+    if (!this.playlists.has(trimmedName)) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    this.playlists.delete(trimmedName);
     this.notifyListeners();
   }
 
-  removeTrackByIndex(index: number): void {
-    this.library.removeTrackByIndex(index);
+  getPlaylist(name: string): Playlist | undefined {
+    if (!name || !name.trim()) {
+      return undefined;
+    }
+    return this.playlists.get(name.trim());
+  }
+
+  getAllPlaylists(): Playlist[] {
+    return Array.from(this.playlists.values());
+  }
+
+  getPlaylistNames(): string[] {
+    return Array.from(this.playlists.keys());
+  }
+
+  addTrackToPlaylist(playlistName: string, filePath: string): void {
+    if (!playlistName || !playlistName.trim()) {
+      throw new Error('Playlist name is required');
+    }
+    if (!filePath || !filePath.trim()) {
+      throw new Error('File path is required');
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    playlist.addTrack(filePath);
     this.notifyListeners();
   }
 
-  getTrack(filePath: string): Metadata | undefined {
-    return this.library.allTracks.find(track => track.filePath === filePath);
-  }
-
-  getTrackByIndex(index: number): Metadata | undefined {
-    return this.library.allTracks[index];
-  }
-
-  getAllTracks(): Metadata[] {
-    return this.library.allTracks;
-  }
-
-  getLibrarySize(): number {
-    return this.library.size;
-  }
-
-  clearLibrary(): void {
-    this.library.clear();
+  removeTrackFromPlaylist(playlistName: string, filePath: string): void {
+    if (!playlistName || !playlistName.trim()) {
+      throw new Error('Playlist name is required');
+    }
+    if (!filePath || !filePath.trim()) {
+      throw new Error('File path is required');
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    playlist.removeTrack(filePath);
     this.notifyListeners();
   }
 
-  searchTracks(query: string): Metadata[] {
+  getPlaylistTracks(playlistName: string): Metadata[] {
+    if (!playlistName || !playlistName.trim()) {
+      return [];
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    return playlist.tracks;
+  }
+
+  getPlaylistSize(playlistName: string): number {
+    if (!playlistName || !playlistName.trim()) {
+      return 0;
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    return playlist.size;
+  }
+
+  renamePlaylist(oldName: string, newName: string): void {
+    if (!oldName || !oldName.trim()) {
+      throw new Error('Current playlist name is required');
+    }
+    if (!newName || !newName.trim()) {
+      throw new Error('New playlist name is required');
+    }
+    const trimmedOldName = oldName.trim();
+    const trimmedNewName = newName.trim();
+    if (!this.playlists.has(trimmedOldName)) {
+      throw new Error(`Playlist "${trimmedOldName}" not found`);
+    }
+    if (this.playlists.has(trimmedNewName)) {
+      throw new Error(`Playlist "${trimmedNewName}" already exists`);
+    }
+    const playlist = this.playlists.get(trimmedOldName)!;
+    playlist.rename(trimmedNewName);
+    this.playlists.delete(trimmedOldName);
+    this.playlists.set(trimmedNewName, playlist);
+    this.notifyListeners();
+  }
+
+  clearPlaylist(playlistName: string): void {
+    if (!playlistName || !playlistName.trim()) {
+      throw new Error('Playlist name is required');
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      throw new Error(`Playlist "${trimmedName}" not found`);
+    }
+    playlist.clear();
+    this.notifyListeners();
+  }
+
+  playlistHasTrack(playlistName: string, filePath: string): boolean {
+    if (!playlistName || !playlistName.trim()) {
+      return false;
+    }
+    if (!filePath || !filePath.trim()) {
+      return false;
+    }
+    const trimmedName = playlistName.trim();
+    const playlist = this.playlists.get(trimmedName);
+    if (!playlist) {
+      return false;
+    }
+    return playlist.hasTrack(filePath);
+  }
+
+  searchPlaylists(query: string): Playlist[] {
     if (!query || !query.trim()) {
-      return this.library.allTracks;
+      return this.getAllPlaylists();
     }
     const lowerQuery = query.toLowerCase().trim();
-    return this.library.allTracks.filter(track =>
-      track.title.toLowerCase().includes(lowerQuery) ||
-      track.artist.toLowerCase().includes(lowerQuery) ||
-      track.album.toLowerCase().includes(lowerQuery) ||
-      track.genre.toLowerCase().includes(lowerQuery)
+    return this.getAllPlaylists().filter(playlist =>
+      playlist.playlistName.toLowerCase().includes(lowerQuery)
     );
+  }
+
+  getPlaylistStatistics(): { totalPlaylists: number; totalTracks: number } {
+    let totalTracks = 0;
+    this.playlists.forEach(playlist => {
+      totalTracks += playlist.size;
+    });
+    return {
+      totalPlaylists: this.playlists.size,
+      totalTracks: totalTracks
+    };
   }
 
   toJSON(): any {
     return {
-      library: this.library.toJSON()
+      playlists: Array.from(this.playlists.values()).map(playlist => playlist.toJSON())
     };
   }
 }
