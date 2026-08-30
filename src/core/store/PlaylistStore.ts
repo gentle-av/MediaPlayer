@@ -1,5 +1,6 @@
 import { Metadata } from "../entities/music/Metadata";
 import { MusicLibrary } from "../entities/music/MusicLibrary";
+import { Playlist } from "../entities/music/Playlist";
 
 export class MusicStore {
   private library: MusicLibrary;
@@ -21,6 +22,21 @@ export class MusicStore {
     this.listeners.forEach(listener => listener());
   }
 
+  addTrack(track: Metadata): void {
+    this.library.addTrack(track);
+    this.notifyListeners();
+  }
+
+  removeTrack(filePath: string): void {
+    this.library.removeTrack(filePath);
+    this.notifyListeners();
+  }
+
+  removeTrackByIndex(index: number): void {
+    this.library.removeTrackByIndex(index);
+    this.notifyListeners();
+  }
+
   getTrack(filePath: string): Metadata | undefined {
     return this.library.allTracks.find(track => track.filePath === filePath);
   }
@@ -35,6 +51,11 @@ export class MusicStore {
 
   getLibrarySize(): number {
     return this.library.size;
+  }
+
+  clearLibrary(): void {
+    this.library.clear();
+    this.notifyListeners();
   }
 
   searchTracks(query: string): Metadata[] {
@@ -52,7 +73,7 @@ export class MusicStore {
 
   toJSON(): any {
     return {
-      library: this.library.toJSON(),
+      library: this.library.toJSON()
     };
   }
 }
