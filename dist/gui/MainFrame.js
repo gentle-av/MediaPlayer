@@ -1,3 +1,8 @@
+import { Header } from './Header.js';
+import { Sidebar } from './Sidebar.js';
+import { Player } from './Player.js';
+import { ContentManager } from './ContentManager.js';
+import { Settings } from './Settings.js';
 export class MainFrame {
     constructor() {
         this.activeTab = 'video';
@@ -5,70 +10,66 @@ export class MainFrame {
         if (!this.container) {
             throw new Error('Element with id "main" not found');
         }
+        this.header = new Header();
+        this.sidebar = new Sidebar(this.onTabChange.bind(this));
+        this.player = new Player();
+        this.contentManager = new ContentManager();
+        this.settings = new Settings();
         this.render();
     }
     render() {
         this.container.innerHTML = '';
-        const layout = document.createElement('div');
-        layout.className = 'main-frame';
-        const tabsPanel = this.createTabs();
-        layout.appendChild(tabsPanel);
-        const menuPanel = this.createMenu();
-        layout.appendChild(menuPanel);
-        const contentPanel = this.createContent();
-        layout.appendChild(contentPanel);
-        const footerPanel = this.createFooter();
-        layout.appendChild(footerPanel);
-        this.container.appendChild(layout);
+        const app = document.createElement('div');
+        app.className = 'app';
+        app.appendChild(this.sidebar.render());
+        app.appendChild(this.createOverlay());
+        app.appendChild(this.createMainContent());
+        app.appendChild(this.createMenuToggle());
+        this.container.appendChild(app);
+        const defaultBtn = app.querySelector('[data-tab="video"]');
+        if (defaultBtn)
+            defaultBtn.classList.add('active');
+        this.updateContent('video');
     }
-    createTabs() {
-        const tabs = document.createElement('div');
-        tabs.className = 'tabs-panel';
-        const videoTab = document.createElement('button');
-        videoTab.textContent = 'Видео';
-        videoTab.dataset.tab = 'video';
-        const audioTab = document.createElement('button');
-        audioTab.textContent = 'Аудио';
-        audioTab.dataset.tab = 'audio';
-        videoTab.addEventListener('click', () => {
-            this.activeTab = 'video';
-            this.updateContent('video');
-        });
-        audioTab.addEventListener('click', () => {
-            this.activeTab = 'audio';
-            this.updateContent('audio');
-        });
-        tabs.appendChild(videoTab);
-        tabs.appendChild(audioTab);
-        return tabs;
+    createMainContent() {
+        const mainContent = document.createElement('div');
+        mainContent.className = 'main-content';
+        mainContent.appendChild(this.header.render());
+        const scrollable = document.createElement('div');
+        scrollable.className = 'scrollable-content';
+        mainContent.appendChild(scrollable);
+        mainContent.appendChild(this.player.render());
+        return mainContent;
     }
-    createMenu() {
-        const menu = document.createElement('div');
-        menu.className = 'menu-panel';
-        const items = ['Плейлист', 'Избранное', 'История', 'Настройки'];
-        items.forEach(text => {
-            const item = document.createElement('div');
-            item.textContent = text;
-            menu.appendChild(item);
-        });
-        return menu;
+    createOverlay() {
+        const overlay = document.createElement('div');
+        overlay.className = 'sidebar-overlay';
+        return overlay;
     }
-    createContent() {
-        const content = document.createElement('div');
-        content.className = 'content-area';
-        content.textContent = 'Контент для Видео';
-        return content;
+    createMenuToggle() {
+        const menuToggle = document.createElement('button');
+        menuToggle.className = 'menu-toggle';
+        const menuIcon = document.createElement('i');
+        menuIcon.className = 'fas fa-bars';
+        menuToggle.appendChild(menuIcon);
+        return menuToggle;
     }
-    createFooter() {
-        const footer = document.createElement('div');
-        footer.className = 'footer-player';
-        footer.textContent = 'Область плеера';
-        return footer;
+    onTabChange(tab) {
+        this.updateContent(tab);
     }
     updateContent(tab) {
-        const contentArea = this.container.querySelector('.content-area');
-        if (contentArea) {
-            contentArea.textContent = tab === 'video' ? 'Контент для Видео' : 'Контент для Аудио';
+        const scrollable = this.container.querySelector('.scrollable-content');
+        if (!scrollable)
+            return;
+        scrollable.innerHTML = '';
+        if (tab === 'video') {
+            scrollable.appendChild(this.contentManager.getVideoContent());
+        }
+        else if (tab === 'audio') {
+            scrollable.appendChild(this.contentManager.getAudioContent());
+        }
+        else if (tab === 'settings') {
+            scrollable.appendChild(this.settings.render());
         }
     }
 }
