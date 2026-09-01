@@ -1,16 +1,15 @@
 export class Header {
+    constructor() {
+        this.pageTitleElement = null;
+        this.titleIconElement = null;
+    }
     render() {
         const header = document.createElement('header');
         header.className = 'app-header';
         const titleSection = document.createElement('div');
         titleSection.className = 'header-title-section';
-        const pageTitle = document.createElement('h1');
-        pageTitle.className = 'page-title';
-        const titleIcon = document.createElement('i');
-        titleIcon.className = 'fas fa-play';
-        pageTitle.appendChild(titleIcon);
-        pageTitle.appendChild(document.createTextNode(' Вася'));
-        titleSection.appendChild(pageTitle);
+        this.pageTitleElement = this.createPageTitle();
+        titleSection.appendChild(this.pageTitleElement);
         header.appendChild(titleSection);
         const controlsSection = document.createElement('div');
         controlsSection.className = 'header-controls-section';
@@ -19,6 +18,35 @@ export class Header {
         controlsSection.appendChild(this.createRefreshButton());
         header.appendChild(controlsSection);
         return header;
+    }
+    createPageTitle() {
+        const pageTitle = document.createElement('h1');
+        pageTitle.className = 'page-title';
+        this.titleIconElement = document.createElement('i');
+        this.titleIconElement.className = 'fas fa-play';
+        pageTitle.appendChild(this.titleIconElement);
+        pageTitle.appendChild(document.createTextNode(' Вася'));
+        return pageTitle;
+    }
+    setTitleIcon(iconClass) {
+        if (this.titleIconElement) {
+            this.titleIconElement.className = '';
+            this.titleIconElement.className = `fas ${iconClass}`;
+        }
+    }
+    setTitleText(text) {
+        if (this.pageTitleElement) {
+            const icon = this.pageTitleElement.querySelector('i');
+            this.pageTitleElement.innerHTML = '';
+            if (icon) {
+                this.pageTitleElement.appendChild(icon);
+            }
+            this.pageTitleElement.appendChild(document.createTextNode(` ${text}`));
+        }
+    }
+    setTitle(iconClass, text) {
+        this.setTitleIcon(iconClass);
+        this.setTitleText(text);
     }
     createSearch() {
         const searchWrapper = document.createElement('div');
