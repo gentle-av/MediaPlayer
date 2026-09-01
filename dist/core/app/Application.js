@@ -10,6 +10,17 @@ export class Application {
         this.videoStore = new VideoStore();
         this.mainFrame = new MainFrame();
         this.initialize();
+        this.render();
+    }
+    render() {
+        if (this.mainContainer) {
+            this.mainContainer.innerHTML = '';
+            const appElement = this.mainFrame.render();
+            this.mainContainer.appendChild(appElement);
+        }
+        else {
+            console.error('Main container not found');
+        }
     }
     async initialize() {
         try {
