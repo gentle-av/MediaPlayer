@@ -21,6 +21,9 @@ export class Sidebar {
         navItems.forEach(item => {
             const btn = document.createElement('button');
             btn.className = 'sidebar-btn';
+            if (item.tab === 'video') {
+                btn.classList.add('active');
+            }
             if (item.tab) {
                 btn.dataset.tab = item.tab;
                 btn.addEventListener('click', () => {

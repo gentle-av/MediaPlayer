@@ -11,6 +11,7 @@ export class MainFrame {
   private player: Player;
   private settings: Settings;
   private currentTab: 'video' | 'audio' | 'settings' = 'video';
+  private contentArea: HTMLElement | null = null;
 
   constructor() {
     this.header = new Header();
@@ -31,6 +32,25 @@ export class MainFrame {
     };
     const config = tabConfig[tab];
     this.header.setTitle(config.icon, config.text);
+    this.updateContent(tab);
+  }
+
+  private updateContent(tab: 'video' | 'audio' | 'settings'): void {
+    if (!this.contentArea) return;
+    this.contentArea.innerHTML = '';
+    let contentElement: HTMLElement;
+    switch (tab) {
+      case 'video':
+        contentElement = this.contentManager.getVideoContent();
+        break;
+      case 'audio':
+        contentElement = this.contentManager.getAudioContent();
+        break;
+      case 'settings':
+        contentElement = this.settings.render();
+        break;
+    }
+    this.contentArea.appendChild(contentElement);
   }
 
   render(): HTMLElement {
@@ -42,13 +62,10 @@ export class MainFrame {
     mainContent.className = 'main-content';
     const sidebarElement = this.sidebar.render();
     mainContent.appendChild(sidebarElement);
-    const contentArea = document.createElement('div');
-    contentArea.className = 'content-area';
-    const videoContent = this.contentManager.getVideoContent();
-    contentArea.appendChild(videoContent);
-    const settingsContent = this.settings.render();
-    contentArea.appendChild(settingsContent);
-    mainContent.appendChild(contentArea);
+    this.contentArea = document.createElement('div');
+    this.contentArea.className = 'content-area';
+    mainContent.appendChild(this.contentArea);
+    this.updateContent(this.currentTab);
     app.appendChild(mainContent);
     const playerElement = this.player.render();
     app.appendChild(playerElement);

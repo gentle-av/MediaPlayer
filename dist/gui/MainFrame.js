@@ -6,6 +6,7 @@ import { Settings } from './Settings.js';
 export class MainFrame {
     constructor() {
         this.currentTab = 'video';
+        this.contentArea = null;
         this.header = new Header();
         this.contentManager = new ContentManager();
         this.player = new Player();
@@ -23,6 +24,25 @@ export class MainFrame {
         };
         const config = tabConfig[tab];
         this.header.setTitle(config.icon, config.text);
+        this.updateContent(tab);
+    }
+    updateContent(tab) {
+        if (!this.contentArea)
+            return;
+        this.contentArea.innerHTML = '';
+        let contentElement;
+        switch (tab) {
+            case 'video':
+                contentElement = this.contentManager.getVideoContent();
+                break;
+            case 'audio':
+                contentElement = this.contentManager.getAudioContent();
+                break;
+            case 'settings':
+                contentElement = this.settings.render();
+                break;
+        }
+        this.contentArea.appendChild(contentElement);
     }
     render() {
         const app = document.createElement('div');
@@ -33,13 +53,10 @@ export class MainFrame {
         mainContent.className = 'main-content';
         const sidebarElement = this.sidebar.render();
         mainContent.appendChild(sidebarElement);
-        const contentArea = document.createElement('div');
-        contentArea.className = 'content-area';
-        const videoContent = this.contentManager.getVideoContent();
-        contentArea.appendChild(videoContent);
-        const settingsContent = this.settings.render();
-        contentArea.appendChild(settingsContent);
-        mainContent.appendChild(contentArea);
+        this.contentArea = document.createElement('div');
+        this.contentArea.className = 'content-area';
+        mainContent.appendChild(this.contentArea);
+        this.updateContent(this.currentTab);
         app.appendChild(mainContent);
         const playerElement = this.player.render();
         app.appendChild(playerElement);
