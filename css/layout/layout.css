@@ -11,7 +11,7 @@
 
 .main-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   flex: 1;
   overflow: hidden;
   width: 100%;
@@ -23,4 +23,13 @@
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
+}
+
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  min-height: 0;
+  background: var(--bg0);
 }
