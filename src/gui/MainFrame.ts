@@ -15,14 +15,17 @@ export class MainFrame {
   private settings: Settings;
   private currentTab: 'video' | 'audio' | 'settings' = 'video';
   private contentArea: HTMLElement | null = null;
+  private musicStore: MusicStore;
+  private videoStore: VideoStore;
+  private playlistStore: PlaylistStore;
 
-  constructor(
-    private musicStore: MusicStore,
-    private videoStore: VideoStore,
-    private playlistStore: PlaylistStore)
+  constructor()
   {
+    this.musicStore = new MusicStore();
+    this.videoStore = new VideoStore();
+    this.playlistStore = new PlaylistStore(this.musicStore);
     this.header = new Header();
-    this.contentManager = new ContentManager(musicStore, videoStore, playlistStore);
+    this.contentManager = new ContentManager(this.musicStore, this.videoStore, this.playlistStore);
     this.player = new Player();
     this.settings = new Settings();
     this.sidebar = new Sidebar((tab: 'video' | 'audio' | 'settings') => {
@@ -94,5 +97,26 @@ export class MainFrame {
     console.log('playerElement styles:', window.getComputedStyle(playerElement));
     console.log('=====================');
     return app;
+  }
+
+  async initialize(): Promise<void> {
+    try {
+      await this.musicStore.loadTracksFromServer();
+      console.log(`✅ Loaded ${this.musicStore.getLibrarySize()} tracks from server`);
+    } catch (error) {
+      console.error('Failed to load tracks:', error);
+    }
+  }
+
+  getMusicStore(): MusicStore {
+    return this.musicStore;
+  }
+
+  getPlaylistStore(): PlaylistStore {
+    return this.playlistStore;
+  }
+
+  getVideoStore(): VideoStore {
+    return this.videoStore;
   }
 }

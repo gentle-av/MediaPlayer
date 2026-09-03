@@ -3,15 +3,18 @@ import { Sidebar } from './Sidebar.js';
 import { ContentManager } from './ContentManager.js';
 import { Player } from './Player.js';
 import { Settings } from './Settings.js';
+import { MusicStore } from "../core/store/MusicStore.js";
+import { VideoStore } from "../core/store/VideoStore.js";
+import { PlaylistStore } from "../core/store/PlaylistStore.js";
 export class MainFrame {
-    constructor(musicStore, videoStore, playlistStore) {
-        this.musicStore = musicStore;
-        this.videoStore = videoStore;
-        this.playlistStore = playlistStore;
+    constructor() {
         this.currentTab = 'video';
         this.contentArea = null;
+        this.musicStore = new MusicStore();
+        this.videoStore = new VideoStore();
+        this.playlistStore = new PlaylistStore(this.musicStore);
         this.header = new Header();
-        this.contentManager = new ContentManager(musicStore, videoStore, playlistStore);
+        this.contentManager = new ContentManager(this.musicStore, this.videoStore, this.playlistStore);
         this.player = new Player();
         this.settings = new Settings();
         this.sidebar = new Sidebar((tab) => {
@@ -81,6 +84,24 @@ export class MainFrame {
         console.log('playerElement styles:', window.getComputedStyle(playerElement));
         console.log('=====================');
         return app;
+    }
+    async initialize() {
+        try {
+            await this.musicStore.loadTracksFromServer();
+            console.log(`✅ Loaded ${this.musicStore.getLibrarySize()} tracks from server`);
+        }
+        catch (error) {
+            console.error('Failed to load tracks:', error);
+        }
+    }
+    getMusicStore() {
+        return this.musicStore;
+    }
+    getPlaylistStore() {
+        return this.playlistStore;
+    }
+    getVideoStore() {
+        return this.videoStore;
     }
 }
 //# sourceMappingURL=MainFrame.js.map
