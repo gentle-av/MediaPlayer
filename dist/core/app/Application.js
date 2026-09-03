@@ -8,7 +8,7 @@ export class Application {
         this.musicStore = new MusicStore();
         this.playlistStore = new PlaylistStore(this.musicStore);
         this.videoStore = new VideoStore();
-        this.mainFrame = new MainFrame();
+        this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.playlistStore);
         this.initialize();
         this.render();
     }

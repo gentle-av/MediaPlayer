@@ -1,17 +1,8 @@
 import { Application } from "./core/app/Application.js";
 
-const application = new Application();
-
-(window as any).app = application;
-(window as any).Application = Application;
-
 import { Metadata } from "./core/entities/music/Metadata.js";
-import { MusicStore } from "./core/store/MusicStore.js";
-import { PlaylistStore } from "./core/store/PlaylistStore.js";
 
-(window as any).Metadata = Metadata;
-(window as any).MusicStore = MusicStore;
-(window as any).PlaylistStore = PlaylistStore;
+const application = new Application();
 
 console.log('✅ Application initialized! Use "app" in console.');
 console.log('📝 Commands:');

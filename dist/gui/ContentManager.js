@@ -1,4 +1,9 @@
 export class ContentManager {
+    constructor(musicStore, videoStore, playlistStore) {
+        this.musicStore = musicStore;
+        this.videoStore = videoStore;
+        this.playlistStore = playlistStore;
+    }
     createContent(label, icon) {
         const container = document.createElement('div');
         Object.assign(container.style, {
@@ -25,10 +30,7 @@ export class ContentManager {
         return this.createContent('Контент для Аудио', '🎵');
     }
     getSettingsContent() {
-        const settingsGrid = document.createElement('div');
-        settingsGrid.className = 'content-grid';
-        settingsGrid.textContent = '⚙️ Контент для Настроек';
-        return settingsGrid;
+        return this.createContent('Контент для Настройки', '⚙');
     }
 }
 //# sourceMappingURL=ContentManager.js.map

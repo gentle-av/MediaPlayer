@@ -1,4 +1,14 @@
+import { MusicStore } from "../core/store/MusicStore.js";
+import { VideoStore } from "../core/store/VideoStore.js";
+import { PlaylistStore } from "../core/store/PlaylistStore.js";
+
 export class ContentManager {
+
+  constructor(
+    private musicStore: MusicStore,
+    private videoStore: VideoStore,
+    private playlistStore: PlaylistStore) {}
+
   private createContent(label: string, icon: string): HTMLElement {
     const container = document.createElement('div');
     Object.assign(container.style, {
@@ -28,9 +38,6 @@ export class ContentManager {
   }
 
   getSettingsContent(): HTMLElement {
-    const settingsGrid = document.createElement('div');
-    settingsGrid.className = 'content-grid';
-    settingsGrid.textContent = '⚙️ Контент для Настроек';
-    return settingsGrid;
+    return this.createContent('Контент для Настройки', '⚙')
   }
 }

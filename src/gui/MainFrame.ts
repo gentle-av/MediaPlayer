@@ -3,6 +3,9 @@ import { Sidebar } from './Sidebar.js';
 import { ContentManager } from './ContentManager.js';
 import { Player } from './Player.js';
 import { Settings } from './Settings.js';
+import { MusicStore } from "../core/store/MusicStore.js";
+import { VideoStore } from "../core/store/VideoStore.js";
+import { PlaylistStore } from "../core/store/PlaylistStore.js";
 
 export class MainFrame {
   private header: Header;
@@ -13,9 +16,13 @@ export class MainFrame {
   private currentTab: 'video' | 'audio' | 'settings' = 'video';
   private contentArea: HTMLElement | null = null;
 
-  constructor() {
+  constructor(
+    private musicStore: MusicStore,
+    private videoStore: VideoStore,
+    private playlistStore: PlaylistStore)
+  {
     this.header = new Header();
-    this.contentManager = new ContentManager();
+    this.contentManager = new ContentManager(musicStore, videoStore, playlistStore);
     this.player = new Player();
     this.settings = new Settings();
     this.sidebar = new Sidebar((tab: 'video' | 'audio' | 'settings') => {
@@ -47,7 +54,7 @@ export class MainFrame {
         contentElement = this.contentManager.getAudioContent();
         break;
       case 'settings':
-        contentElement = this.settings.render();
+        contentElement = this.contentManager.getSettingsContent();
         break;
     }
     this.contentArea.appendChild(contentElement);

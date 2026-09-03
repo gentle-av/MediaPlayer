@@ -4,11 +4,14 @@ import { ContentManager } from './ContentManager.js';
 import { Player } from './Player.js';
 import { Settings } from './Settings.js';
 export class MainFrame {
-    constructor() {
+    constructor(musicStore, videoStore, playlistStore) {
+        this.musicStore = musicStore;
+        this.videoStore = videoStore;
+        this.playlistStore = playlistStore;
         this.currentTab = 'video';
         this.contentArea = null;
         this.header = new Header();
-        this.contentManager = new ContentManager();
+        this.contentManager = new ContentManager(musicStore, videoStore, playlistStore);
         this.player = new Player();
         this.settings = new Settings();
         this.sidebar = new Sidebar((tab) => {
@@ -39,7 +42,7 @@ export class MainFrame {
                 contentElement = this.contentManager.getAudioContent();
                 break;
             case 'settings':
-                contentElement = this.settings.render();
+                contentElement = this.contentManager.getSettingsContent();
                 break;
         }
         this.contentArea.appendChild(contentElement);
