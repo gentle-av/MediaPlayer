@@ -58,6 +58,8 @@ export class MainFrame {
     app.className = 'app-container';
     const headerElement = this.header.render();
     app.appendChild(headerElement);
+    const bodyWrapper = document.createElement('div');
+    bodyWrapper.className = 'body-wrapper';
     const mainContent = document.createElement('div');
     mainContent.className = 'main-content';
     const sidebarElement = this.sidebar.render();
@@ -65,10 +67,25 @@ export class MainFrame {
     this.contentArea = document.createElement('div');
     this.contentArea.className = 'content-area';
     mainContent.appendChild(this.contentArea);
-    this.updateContent(this.currentTab);
-    app.appendChild(mainContent);
+    bodyWrapper.appendChild(mainContent);
     const playerElement = this.player.render();
-    app.appendChild(playerElement);
+    playerElement.classList.add('visible');
+    bodyWrapper.appendChild(playerElement);
+    app.appendChild(bodyWrapper);
+    this.updateContent(this.currentTab);
+    console.log('=== DOM STRUCTURE ===');
+    console.log('app:', app);
+    console.log('app children:', app.children);
+    console.log('bodyWrapper:', bodyWrapper);
+    console.log('bodyWrapper children:', bodyWrapper.children);
+    console.log('mainContent:', mainContent);
+    console.log('mainContent children:', mainContent.children);
+    console.log('sidebarElement:', sidebarElement);
+    console.log('sidebarElement styles:', window.getComputedStyle(sidebarElement));
+    console.log('contentArea:', this.contentArea);
+    console.log('playerElement:', playerElement);
+    console.log('playerElement styles:', window.getComputedStyle(playerElement));
+    console.log('=====================');
     return app;
   }
 }

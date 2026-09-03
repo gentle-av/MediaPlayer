@@ -665,3 +665,52 @@
     padding-right: max(20px, env(safe-area-inset-right));
   }
 }
+
+/* Добавьте или исправьте в layout.css */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.body-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px;
+  min-height: 0;
+  background: var(--bg0);
+}
+
+.universal-bottom-player {
+  flex-shrink: 0;
+  display: none;
+  width: 100%;
+  background: var(--bg1);
+  border-top: 1px solid var(--bg3);
+  padding: 12px 20px;
+  box-sizing: border-box;
+  min-height: 80px;
+}
+
+.universal-bottom-player.visible {
+  display: flex;
+  flex-direction: column;
+}

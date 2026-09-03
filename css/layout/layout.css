@@ -1,12 +1,16 @@
-.app {
+.app-container {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   height: 100vh;
   overflow: hidden;
 }
 
-.sidebar {
-  flex-shrink: 0;
+.body-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+  min-height: 0;
 }
 
 .main-content {
@@ -14,14 +18,6 @@
   flex-direction: row;
   flex: 1;
   overflow: hidden;
-  width: 100%;
-  min-height: 0;
-}
-
-.scrollable-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
   min-height: 0;
 }
 

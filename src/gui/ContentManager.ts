@@ -1,21 +1,4 @@
-import { Player } from './Player.js';
-
 export class ContentManager {
-  private player: Player;
-  private playerElement: HTMLElement | null = null;
-
-  constructor() {
-    this.player = new Player();
-  }
-
-  private getPlayer(): HTMLElement {
-    if (!this.playerElement) {
-      this.playerElement = this.player.render();
-      this.playerElement.classList.remove('visible');
-    }
-    return this.playerElement;
-  }
-
   private createContent(label: string, icon: string): HTMLElement {
     const container = document.createElement('div');
     Object.assign(container.style, {
@@ -33,9 +16,6 @@ export class ContentManager {
       padding: '20px'
     });
     container.appendChild(grid);
-    const player = this.getPlayer();
-    player.classList.add('visible');
-    container.appendChild(player);
     return container;
   }
 
@@ -48,9 +28,6 @@ export class ContentManager {
   }
 
   getSettingsContent(): HTMLElement {
-    if (this.playerElement) {
-      this.playerElement.classList.remove('visible');
-    }
     const settingsGrid = document.createElement('div');
     settingsGrid.className = 'content-grid';
     settingsGrid.textContent = '⚙️ Контент для Настроек';
