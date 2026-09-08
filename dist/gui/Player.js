@@ -1,7 +1,17 @@
 export class Player {
+    constructor() {
+        this.playerElement = null;
+    }
+    setVisibility(isVisible) {
+        if (this.playerElement) {
+            this.playerElement.style.display = isVisible ? 'block' : 'none';
+        }
+    }
     render() {
         const player = document.createElement('div');
         player.className = 'universal-bottom-player';
+        player.style.display = 'none';
+        this.playerElement = player;
         const playerContent = document.createElement('div');
         playerContent.className = 'universal-bottom-player-content';
         const playerInfo = document.createElement('div');

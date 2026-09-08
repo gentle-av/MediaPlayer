@@ -1,7 +1,17 @@
 export class Player {
+  private playerElement: HTMLElement | null = null;
+
+  public setVisibility(isVisible: boolean): void {
+    if (this.playerElement) {
+      this.playerElement.style.display = isVisible ? 'block' : 'none';
+    }
+  }
+
   render(): HTMLElement {
     const player = document.createElement('div');
     player.className = 'universal-bottom-player';
+    player.style.display = 'none';
+    this.playerElement = player;
     const playerContent = document.createElement('div');
     playerContent.className = 'universal-bottom-player-content';
     const playerInfo = document.createElement('div');
@@ -69,4 +79,3 @@ export class Player {
     return player;
   }
 }
-
