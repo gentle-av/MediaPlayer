@@ -3,9 +3,9 @@ import { Sidebar } from './Sidebar.js';
 import { ContentManager } from './ContentManager.js';
 import { Player } from './Player.js';
 import { Settings } from './Settings.js';
-import { MusicStore } from "../core/store/MusicStore.js";
-import { VideoStore } from "../core/store/VideoStore.js";
-import { PlaylistStore } from "../core/store/PlaylistStore.js";
+import { MusicStore } from '../core/store/MusicStore.js';
+import { VideoStore } from '../core/store/VideoStore.js';
+import { PlaylistStore } from '../core/store/PlaylistStore.js';
 
 export class MainFrame {
   private header: Header;
@@ -19,8 +19,7 @@ export class MainFrame {
   private videoStore: VideoStore;
   private playlistStore: PlaylistStore;
 
-  constructor()
-  {
+  constructor() {
     this.musicStore = new MusicStore();
     this.videoStore = new VideoStore();
     this.playlistStore = new PlaylistStore(this.musicStore);
@@ -33,7 +32,7 @@ export class MainFrame {
     });
   }
 
-  private switchTab(tab: 'video' | 'audio' | 'settings'): void {
+  private async switchTab(tab: 'video' | 'audio' | 'settings'): Promise<void> {
     this.currentTab = tab;
     const tabConfig = {
       video: { icon: 'fa-film', text: 'Видео' },
@@ -42,25 +41,34 @@ export class MainFrame {
     };
     const config = tabConfig[tab];
     this.header.setTitle(config.icon, config.text);
-    this.updateContent(tab);
+    await this.updateContent(tab);
   }
 
-  private updateContent(tab: 'video' | 'audio' | 'settings'): void {
+  private async updateContent(tab: 'video' | 'audio' | 'settings'): Promise<void> {
     if (!this.contentArea) return;
     this.contentArea.innerHTML = '';
-    let contentElement: HTMLElement;
+    let contentElement: HTMLElement | null = null;
     switch (tab) {
       case 'video':
-        contentElement = this.contentManager.getVideoContent();
+        contentElement = await this.contentManager.getVideoContent(this.contentArea);
         break;
       case 'audio':
-        contentElement = this.contentManager.getAudioContent();
+        contentElement = this.createPlaceholderContent('audio', '🎵 Аудио');
         break;
       case 'settings':
-        contentElement = this.contentManager.getSettingsContent();
+        contentElement = this.createPlaceholderContent('settings', '⚙️ Настройки');
         break;
     }
-    this.contentArea.appendChild(contentElement);
+    if (contentElement) {
+      this.contentArea.appendChild(contentElement);
+    }
+  }
+
+  private createPlaceholderContent(type: string, text: string): HTMLElement {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'content-grid';
+    placeholder.textContent = text;
+    return placeholder;
   }
 
   render(): HTMLElement {

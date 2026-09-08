@@ -3,9 +3,9 @@ import { Sidebar } from './Sidebar.js';
 import { ContentManager } from './ContentManager.js';
 import { Player } from './Player.js';
 import { Settings } from './Settings.js';
-import { MusicStore } from "../core/store/MusicStore.js";
-import { VideoStore } from "../core/store/VideoStore.js";
-import { PlaylistStore } from "../core/store/PlaylistStore.js";
+import { MusicStore } from '../core/store/MusicStore.js';
+import { VideoStore } from '../core/store/VideoStore.js';
+import { PlaylistStore } from '../core/store/PlaylistStore.js';
 export class MainFrame {
     constructor() {
         this.currentTab = 'video';
@@ -21,7 +21,7 @@ export class MainFrame {
             this.switchTab(tab);
         });
     }
-    switchTab(tab) {
+    async switchTab(tab) {
         this.currentTab = tab;
         const tabConfig = {
             video: { icon: 'fa-film', text: 'Видео' },
@@ -30,25 +30,33 @@ export class MainFrame {
         };
         const config = tabConfig[tab];
         this.header.setTitle(config.icon, config.text);
-        this.updateContent(tab);
+        await this.updateContent(tab);
     }
-    updateContent(tab) {
+    async updateContent(tab) {
         if (!this.contentArea)
             return;
         this.contentArea.innerHTML = '';
-        let contentElement;
+        let contentElement = null;
         switch (tab) {
             case 'video':
-                contentElement = this.contentManager.getVideoContent();
+                contentElement = await this.contentManager.getVideoContent(this.contentArea);
                 break;
             case 'audio':
-                contentElement = this.contentManager.getAudioContent();
+                contentElement = this.createPlaceholderContent('audio', '🎵 Аудио');
                 break;
             case 'settings':
-                contentElement = this.contentManager.getSettingsContent();
+                contentElement = this.createPlaceholderContent('settings', '⚙️ Настройки');
                 break;
         }
-        this.contentArea.appendChild(contentElement);
+        if (contentElement) {
+            this.contentArea.appendChild(contentElement);
+        }
+    }
+    createPlaceholderContent(type, text) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'content-grid';
+        placeholder.textContent = text;
+        return placeholder;
     }
     render() {
         const app = document.createElement('div');

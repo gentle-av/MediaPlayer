@@ -1,8 +1,9 @@
-import { Application } from "./core/app/Application.js";
+import { Application } from './core/app/Application.js';
 
-import { Metadata } from "./core/entities/music/Metadata.js";
+import { Metadata } from './core/entities/music/Metadata.js';
 
 const application = new Application();
+(window as any).app = application;
 
 console.log('✅ Application initialized! Use "app" in console.');
 console.log('📝 Commands:');
