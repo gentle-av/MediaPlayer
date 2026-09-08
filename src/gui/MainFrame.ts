@@ -46,21 +46,21 @@ export class MainFrame {
 
   private async updateContent(tab: 'video' | 'audio' | 'settings'): Promise<void> {
     if (!this.contentArea) return;
-    this.contentArea.innerHTML = '';
     let contentElement: HTMLElement | null = null;
     switch (tab) {
       case 'video':
-        contentElement = await this.contentManager.getVideoContent(this.contentArea);
+        await this.contentManager.getVideoContent(this.contentArea);
         break;
       case 'audio':
+        this.contentArea.innerHTML = '';
         contentElement = this.createPlaceholderContent('audio', '🎵 Аудио');
+        this.contentArea.appendChild(contentElement);
         break;
       case 'settings':
+        this.contentArea.innerHTML = '';
         contentElement = this.createPlaceholderContent('settings', '⚙️ Настройки');
+        this.contentArea.appendChild(contentElement);
         break;
-    }
-    if (contentElement) {
-      this.contentArea.appendChild(contentElement);
     }
   }
 

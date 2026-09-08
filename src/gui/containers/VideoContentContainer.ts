@@ -48,7 +48,7 @@ export class VideoContentContainer {
           history.pushState({ path: this.videoStore.getCurrentPath() }, '');
           await this.render(targetElement);
         } else if (item.isVideo) {
-          console.log('▶️ Воспроизведение видео:', item.path);
+          await this.videoStore.openVideo(item);
         }
       });
       gridElement.appendChild(videoCardElement);

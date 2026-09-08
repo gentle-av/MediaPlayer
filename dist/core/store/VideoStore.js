@@ -1,4 +1,4 @@
-import { VideoApiClient } from "../api/VideoApiClient.js";
+import { VideoApiClient } from '../api/VideoApiClient.js';
 export class VideoStore {
     constructor() {
         this.currentLibrary = null;
@@ -9,11 +9,11 @@ export class VideoStore {
     subscribe(listener) {
         this.listeners.push(listener);
         return () => {
-            this.listeners = this.listeners.filter(l => l !== listener);
+            this.listeners = this.listeners.filter((l) => l !== listener);
         };
     }
     notifyListeners() {
-        this.listeners.forEach(listener => listener());
+        this.listeners.forEach((listener) => listener());
     }
     async loadLibrary(path) {
         if (path) {
@@ -44,7 +44,7 @@ export class VideoStore {
         return {
             total: this.currentLibrary.items.length,
             folders: this.currentLibrary.getFolders().length,
-            videos: this.currentLibrary.getVideos().length
+            videos: this.currentLibrary.getVideos().length,
         };
     }
     async navigateToFolder(item) {
@@ -55,11 +55,16 @@ export class VideoStore {
     search(term) {
         if (!this.currentLibrary)
             return [];
-        return this.currentLibrary.items.filter(item => item.name.toLowerCase().includes(term.toLowerCase()));
+        return this.currentLibrary.items.filter((item) => item.name.toLowerCase().includes(term.toLowerCase()));
     }
     clear() {
         this.currentLibrary = null;
         this.notifyListeners();
+    }
+    async openVideo(item) {
+        if (item.isVideo) {
+            await this.client.openVideo(item.path);
+        }
     }
 }
 //# sourceMappingURL=VideoStore.js.map

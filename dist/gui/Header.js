@@ -25,7 +25,7 @@ export class Header {
         this.titleIconElement = document.createElement('i');
         this.titleIconElement.className = 'fas fa-play';
         pageTitle.appendChild(this.titleIconElement);
-        pageTitle.appendChild(document.createTextNode(' Вася'));
+        pageTitle.appendChild(document.createTextNode(' Video'));
         return pageTitle;
     }
     setTitleIcon(iconClass) {

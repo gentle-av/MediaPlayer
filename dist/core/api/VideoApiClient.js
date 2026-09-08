@@ -1,5 +1,5 @@
-import { VideoLibrary } from "../entities/video/VideoLibrary.js";
-import { Config } from "../config/Config.js";
+import { VideoLibrary } from '../entities/video/VideoLibrary.js';
+import { Config } from '../config/Config.js';
 export class VideoApiClient {
     constructor() {
         this.baseUrl = Config.getConfig().baseUrl;
@@ -24,8 +24,28 @@ export class VideoApiClient {
             return new VideoLibrary({
                 items: [],
                 path: path,
-                success: false
+                success: false,
             });
+        }
+    }
+    async openVideo(path) {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/video/open`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ path }),
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            return data.success;
+        }
+        catch (error) {
+            console.error('Error opening video:', error);
+            return false;
         }
     }
 }

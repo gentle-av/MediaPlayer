@@ -1,6 +1,6 @@
-import { VideoItem } from "../entities/video/VideoItem.js";
-import { VideoApiClient } from "../api/VideoApiClient.js";
-import { VideoLibrary } from "../entities/video/VideoLibrary.js";
+import { VideoItem } from '../entities/video/VideoItem.js';
+import { VideoApiClient } from '../api/VideoApiClient.js';
+import { VideoLibrary } from '../entities/video/VideoLibrary.js';
 
 export class VideoStore {
   private client: VideoApiClient;
@@ -15,12 +15,12 @@ export class VideoStore {
   subscribe(listener: () => void): () => void {
     this.listeners.push(listener);
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 
   async loadLibrary(path?: string): Promise<void> {
@@ -59,7 +59,7 @@ export class VideoStore {
     return {
       total: this.currentLibrary.items.length,
       folders: this.currentLibrary.getFolders().length,
-      videos: this.currentLibrary.getVideos().length
+      videos: this.currentLibrary.getVideos().length,
     };
   }
 
@@ -71,13 +71,17 @@ export class VideoStore {
 
   search(term: string): VideoItem[] {
     if (!this.currentLibrary) return [];
-    return this.currentLibrary.items.filter(item =>
-      item.name.toLowerCase().includes(term.toLowerCase())
-    );
+    return this.currentLibrary.items.filter((item) => item.name.toLowerCase().includes(term.toLowerCase()));
   }
 
   clear(): void {
     this.currentLibrary = null;
     this.notifyListeners();
+  }
+
+  async openVideo(item: VideoItem): Promise<void> {
+    if (item.isVideo) {
+      await this.client.openVideo(item.path);
+    }
   }
 }
