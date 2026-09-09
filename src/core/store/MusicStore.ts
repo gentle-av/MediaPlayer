@@ -34,6 +34,10 @@ export class MusicStore {
     return this.currentTrack;
   }
 
+  public getTrackIndex(activeTrack: Metadata): number {
+    return this.library.allTracks.findIndex((track) => track.filePath === activeTrack.filePath);
+  }
+
   getTrack(filePath: string): Metadata | undefined {
     return this.library.allTracks.find((track) => track.filePath === filePath);
   }
