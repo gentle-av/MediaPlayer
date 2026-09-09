@@ -66,7 +66,7 @@ export class PlaybackManager {
   public async togglePlay(): Promise<void> {
     if (this.currentType === 'music') {
       if (this.isAudioPaused) {
-        (this.player as any).audioEngine.play().catch((error: Error) => console.error(error));
+        (this.player as any).audioEngine.play().catch((playbackError: Error) => console.error(playbackError));
         this.isAudioPaused = false;
         this.player.setPlayState(true);
       } else {
@@ -83,8 +83,44 @@ export class PlaybackManager {
         });
         const playbackStatus = await toggleResponse.json();
         this.player.setPlayState(playbackStatus.isPlaying);
-      } catch (error) {
-        console.error(error);
+      } catch (networkError) {
+        console.error(networkError);
+      }
+    }
+  }
+
+  public playNextTrack(): void {
+    if (this.currentType !== 'music') {
+      return;
+    }
+    const activeTrack = this.musicStore.getCurrentTrack();
+    if (!activeTrack) {
+      return;
+    }
+    const currentTrackIndex = this.musicStore.getTrackIndex(activeTrack);
+    const nextTrackIndex = currentTrackIndex + 1;
+    if (nextTrackIndex < this.musicStore.getLibrarySize()) {
+      const nextTrack = this.musicStore.getTrackByIndex(nextTrackIndex);
+      if (nextTrack) {
+        this.playMusic(nextTrack);
+      }
+    }
+  }
+
+  public playPreviousTrack(): void {
+    if (this.currentType !== 'music') {
+      return;
+    }
+    const activeTrack = this.musicStore.getCurrentTrack();
+    if (!activeTrack) {
+      return;
+    }
+    const currentTrackIndex = this.musicStore.getTrackIndex(activeTrack);
+    const previousTrackIndex = currentTrackIndex - 1;
+    if (previousTrackIndex >= 0) {
+      const previousTrack = this.musicStore.getTrackByIndex(previousTrackIndex);
+      if (previousTrack) {
+        this.playMusic(previousTrack);
       }
     }
   }
@@ -100,17 +136,17 @@ export class PlaybackManager {
         if (remoteStatus.currentTime !== undefined && remoteStatus.duration !== undefined) {
           this.player.updateProgress(remoteStatus.currentTime, remoteStatus.duration);
         }
-        if (remoteStatus.ended || !remoteStatus.isPlaying) {
+        if (remoteStatus.ended || remoteStatus.isPlaying === false) {
           this.stopCurrentPlayback();
         }
-      } catch (error) {
-        console.error(error);
+      } catch (pollingError) {
+        console.error(pollingError);
       }
     }, 1000);
   }
 
   private handleMusicFinished(): void {
-    this.stopCurrentPlayback();
+    this.playNextTrack();
   }
 
   public stopCurrentPlayback(): void {
