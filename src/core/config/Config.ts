@@ -1,7 +1,8 @@
 export class Config {
   static getConfig() {
+    const currentHost = window.location.hostname;
     return {
-      baseUrl: "http://localhost:9093"
-    }
+      baseUrl: `http://${currentHost}:9093`,
+    };
   }
 }

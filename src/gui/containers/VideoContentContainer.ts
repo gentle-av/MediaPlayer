@@ -5,6 +5,7 @@ import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 export class VideoContentContainer {
   private readonly videoStore: VideoStore;
   private readonly playbackManager: PlaybackManager;
+  private static isPopstateBound = false;
 
   constructor(videoStore: VideoStore, playbackManager: PlaybackManager) {
     this.videoStore = videoStore;
@@ -15,18 +16,17 @@ export class VideoContentContainer {
     if (!targetElement) {
       return null;
     }
-    if (!this.videoStore.hasOwnProperty('_popstateInitialized')) {
-      (this.videoStore as any)._popstateInitialized = true;
+    if (!VideoContentContainer.isPopstateBound) {
+      VideoContentContainer.isPopstateBound = true;
       window.addEventListener('popstate', async (event) => {
-        if (event.state && event.state.path) {
-          await this.videoStore.loadLibrary(event.state.path);
-          await this.render(targetElement);
-        }
+        const targetPath = event.state && event.state.path ? event.state.path : '/mnt/video';
+        await this.videoStore.loadLibrary(targetPath);
+        await this.render(targetElement);
       });
     }
-    if (this.videoStore.getItems().length === 0) {
-      await this.videoStore.loadLibrary();
-      history.replaceState({ path: this.videoStore.getCurrentPath() }, '');
+    if (this.videoStore.getItems().length === 0 && this.videoStore.getCurrentPath() === '/mnt/video') {
+      await this.videoStore.loadLibrary('/mnt/video');
+      history.replaceState({ path: '/mnt/video' }, '');
     }
     targetElement.innerHTML = '';
     const allItems = this.videoStore.getItems();
@@ -45,7 +45,8 @@ export class VideoContentContainer {
     });
     allItems.forEach((item) => {
       const videoCardElement = this.createVideoCardElement(item);
-      videoCardElement.addEventListener('click', async () => {
+      videoCardElement.addEventListener('click', async (e) => {
+        e.preventDefault();
         if (item.isDirectory) {
           await this.videoStore.navigateToFolder(item);
           history.pushState({ path: this.videoStore.getCurrentPath() }, '');
