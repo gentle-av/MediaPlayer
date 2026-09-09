@@ -130,13 +130,13 @@
     grid-template-columns: 1fr;
     gap: 12px;
     padding: 12px;
-    padding-bottom: 20px;
+    padding-bottom: 90px;
     overflow-y: auto;
   }
 
   .settings-content {
     padding: 12px;
-    padding-bottom: 20px;
+    padding-bottom: 90px;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
     width: 100%;
@@ -144,7 +144,7 @@
   }
 
   #pageVideo .content-grid {
-    padding-bottom: 20px;
+    padding-bottom: 90px;
   }
 
   .item-card {
@@ -243,13 +243,15 @@
     padding: 2px 5px;
   }
 
-  .audio-player-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: var(--bg1);
-    z-index: 100;
+  .universal-bottom-player {
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
+    background: var(--bg1) !important;
+    z-index: 10050 !important;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5) !important;
   }
 
   .explorer-header {
@@ -266,7 +268,7 @@
   }
 
   .breadcrumb .breadcrumb-text {
-    max-width: 150px;
+    max-width: 120px;
   }
 
   .breadcrumb-root {
