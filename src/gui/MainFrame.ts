@@ -83,6 +83,13 @@ export class MainFrame {
         this.playbackManager.togglePlay();
       });
     }
+
+    const stopButtonElement = renderedAppElement.querySelector('.universal-bottom-player-stop');
+    if (stopButtonElement) {
+      stopButtonElement.addEventListener('click', () => {
+        this.playbackManager.stop();
+      });
+    }
   }
 
   render(): HTMLElement {

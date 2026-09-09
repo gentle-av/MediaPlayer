@@ -140,6 +140,12 @@ export class Player {
     this.playButtonIcon.className = 'fas fa-play';
     standardPlayButton.appendChild(this.playButtonIcon);
     controlButtonsContainer.appendChild(standardPlayButton);
+    const stopButton = document.createElement('button');
+    stopButton.className = 'universal-bottom-player-btn universal-bottom-player-stop';
+    const stopButtonIcon = document.createElement('i');
+    stopButtonIcon.className = 'fas fa-stop';
+    stopButton.appendChild(stopButtonIcon);
+    controlButtonsContainer.appendChild(stopButton);
     const skipForwardButton = document.createElement('button');
     skipForwardButton.className = 'universal-bottom-player-btn';
     const forwardButtonIcon = document.createElement('i');

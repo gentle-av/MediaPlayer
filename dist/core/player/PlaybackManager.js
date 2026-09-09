@@ -65,13 +65,29 @@ export class PlaybackManager {
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ path: this.currentVideoPath }),
                 });
-                const playbackStatus = await toggleResponse.json();
-                this.player.setPlayState(playbackStatus.isPlaying);
+                if (toggleResponse.ok) {
+                    const playbackStatus = await toggleResponse.json();
+                    this.player.setPlayState(playbackStatus.isPlaying);
+                }
             }
             catch (networkError) {
                 console.error(networkError);
             }
         }
+    }
+    async stop() {
+        if (this.currentType === 'video') {
+            try {
+                await fetch(`${Config.getConfig().baseUrl}/api/video/close`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                });
+            }
+            catch (networkError) {
+                console.error(networkError);
+            }
+        }
+        this.stopCurrentPlayback();
     }
     playNextTrack() {
         if (this.currentType !== 'music') {
