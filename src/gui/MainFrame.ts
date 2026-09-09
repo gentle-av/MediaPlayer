@@ -6,6 +6,7 @@ import { Settings } from './Settings.js';
 import { MusicStore } from '../core/store/MusicStore.js';
 import { VideoStore } from '../core/store/VideoStore.js';
 import { PlaylistStore } from '../core/store/PlaylistStore.js';
+import { PlaybackManager } from '../core/player/PlaybackManager.js';
 
 export class MainFrame {
   private header: Header;
@@ -18,6 +19,7 @@ export class MainFrame {
   private musicStore: MusicStore;
   private videoStore: VideoStore;
   private playlistStore: PlaylistStore;
+  private playbackManager: PlaybackManager;
 
   constructor() {
     this.musicStore = new MusicStore();
@@ -27,92 +29,92 @@ export class MainFrame {
     this.contentManager = new ContentManager(this.musicStore, this.videoStore, this.playlistStore);
     this.player = new Player();
     this.settings = new Settings();
-    this.sidebar = new Sidebar((tab: 'video' | 'audio' | 'settings') => {
-      this.switchTab(tab);
+    this.playbackManager = new PlaybackManager(this.player, this.musicStore, this.videoStore);
+    this.sidebar = new Sidebar((selectedTab: 'video' | 'audio' | 'settings') => {
+      this.switchTab(selectedTab);
     });
   }
 
-  private async switchTab(tab: 'video' | 'audio' | 'settings'): Promise<void> {
-    this.currentTab = tab;
-    const tabConfig = {
+  private async switchTab(targetTab: 'video' | 'audio' | 'settings'): Promise<void> {
+    this.currentTab = targetTab;
+    const tabConfigurations = {
       video: { icon: 'fa-film', text: 'Видео' },
       audio: { icon: 'fa-music', text: 'Аудио' },
       settings: { icon: 'fa-cog', text: 'Настройки' },
     };
-    const config = tabConfig[tab];
-    this.header.setTitle(config.icon, config.text);
-    await this.updateContent(tab);
+    const activeConfiguration = tabConfigurations[targetTab];
+    this.header.setTitle(activeConfiguration.icon, activeConfiguration.text);
+    await this.updateContent(targetTab);
   }
 
-  private async updateContent(tab: 'video' | 'audio' | 'settings'): Promise<void> {
-    if (!this.contentArea) return;
-    let contentElement: HTMLElement | null = null;
-    switch (tab) {
+  private async updateContent(activeTab: 'video' | 'audio' | 'settings'): Promise<void> {
+    if (!this.contentArea) {
+      return;
+    }
+    let tabPlaceholderElement: HTMLElement | null = null;
+    switch (activeTab) {
       case 'video':
         await this.contentManager.getVideoContent(this.contentArea);
         break;
       case 'audio':
         this.contentArea.innerHTML = '';
-        contentElement = this.createPlaceholderContent('audio', '🎵 Аудио');
-        this.contentArea.appendChild(contentElement);
+        tabPlaceholderElement = this.createPlaceholderContent('audio', '🎵 Аудио');
+        this.contentArea.appendChild(tabPlaceholderElement);
         break;
       case 'settings':
         this.contentArea.innerHTML = '';
-        contentElement = this.createPlaceholderContent('settings', '⚙️ Настройки');
-        this.contentArea.appendChild(contentElement);
+        tabPlaceholderElement = this.createPlaceholderContent('settings', '⚙️ Настройки');
+        this.contentArea.appendChild(tabPlaceholderElement);
         break;
     }
   }
 
-  private createPlaceholderContent(type: string, text: string): HTMLElement {
-    const placeholder = document.createElement('div');
-    placeholder.className = 'content-grid';
-    placeholder.textContent = text;
-    return placeholder;
+  private createPlaceholderContent(contentType: string, placeholderText: string): HTMLElement {
+    const fallbackContainerElement = document.createElement('div');
+    fallbackContainerElement.className = 'content-grid';
+    fallbackContainerElement.textContent = placeholderText;
+    return fallbackContainerElement;
+  }
+
+  private bindPlayerControls(renderedAppElement: HTMLElement): void {
+    const playPauseButtonElement = renderedAppElement.querySelector('.universal-bottom-player-play');
+    if (playPauseButtonElement) {
+      playPauseButtonElement.addEventListener('click', () => {
+        this.playbackManager.togglePlay();
+      });
+    }
   }
 
   render(): HTMLElement {
-    const app = document.createElement('div');
-    app.className = 'app-container';
-    const headerElement = this.header.render();
-    app.appendChild(headerElement);
-    const bodyWrapper = document.createElement('div');
-    bodyWrapper.className = 'body-wrapper';
-    const mainContent = document.createElement('div');
-    mainContent.className = 'main-content';
-    const sidebarElement = this.sidebar.render();
-    mainContent.appendChild(sidebarElement);
+    const applicationContainerElement = document.createElement('div');
+    applicationContainerElement.className = 'app-container';
+    const renderedHeaderElement = this.header.render();
+    applicationContainerElement.appendChild(renderedHeaderElement);
+    const bodyWrapperElement = document.createElement('div');
+    bodyWrapperElement.className = 'body-wrapper';
+    const mainContentLayoutElement = document.createElement('div');
+    mainContentLayoutElement.className = 'main-content';
+    const renderedSidebarElement = this.sidebar.render();
+    mainContentLayoutElement.appendChild(renderedSidebarElement);
     this.contentArea = document.createElement('div');
     this.contentArea.className = 'content-area';
-    mainContent.appendChild(this.contentArea);
-    bodyWrapper.appendChild(mainContent);
-    const playerElement = this.player.render();
-    playerElement.classList.add('visible');
-    bodyWrapper.appendChild(playerElement);
-    app.appendChild(bodyWrapper);
+    mainContentLayoutElement.appendChild(this.contentArea);
+    bodyWrapperElement.appendChild(mainContentLayoutElement);
+    const renderedPlayerElement = this.player.render();
+    renderedPlayerElement.classList.add('visible');
+    bodyWrapperElement.appendChild(renderedPlayerElement);
+    applicationContainerElement.appendChild(bodyWrapperElement);
     this.updateContent(this.currentTab);
-    console.log('=== DOM STRUCTURE ===');
-    console.log('app:', app);
-    console.log('app children:', app.children);
-    console.log('bodyWrapper:', bodyWrapper);
-    console.log('bodyWrapper children:', bodyWrapper.children);
-    console.log('mainContent:', mainContent);
-    console.log('mainContent children:', mainContent.children);
-    console.log('sidebarElement:', sidebarElement);
-    console.log('sidebarElement styles:', window.getComputedStyle(sidebarElement));
-    console.log('contentArea:', this.contentArea);
-    console.log('playerElement:', playerElement);
-    console.log('playerElement styles:', window.getComputedStyle(playerElement));
-    console.log('=====================');
-    return app;
+    this.bindPlayerControls(applicationContainerElement);
+    return applicationContainerElement;
   }
 
   async initialize(): Promise<void> {
     try {
       await this.musicStore.loadTracksFromServer();
       console.log(`✅ Loaded ${this.musicStore.getLibrarySize()} tracks from server`);
-    } catch (error) {
-      console.error('Failed to load tracks:', error);
+    } catch (initializationError) {
+      console.error(initializationError);
     }
   }
 
@@ -126,5 +128,9 @@ export class MainFrame {
 
   getVideoStore(): VideoStore {
     return this.videoStore;
+  }
+
+  getPlaybackManager(): PlaybackManager {
+    return this.playbackManager;
   }
 }

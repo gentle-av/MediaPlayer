@@ -56,18 +56,32 @@ export class Metadata {
         if (!filePath || !filePath.trim()) {
             throw new Error('File path is required and cannot be empty');
         }
-        const hasValidExtension = Metadata.VALID_EXTENSIONS.some(ext => filePath.toLowerCase().endsWith(ext));
+        const hasValidExtension = Metadata.VALID_EXTENSIONS.some((ext) => filePath.toLowerCase().endsWith(ext));
         if (!hasValidExtension) {
             throw new Error(`File must have a valid audio extension: ${Metadata.VALID_EXTENSIONS.join(', ')}`);
         }
     }
-    get title() { return this._title; }
-    get artist() { return this._artist; }
-    get album() { return this._album; }
-    get duration() { return this._duration; }
-    get track() { return this._track; }
-    get year() { return this._year; }
-    get genre() { return this._genre; }
+    get title() {
+        return this._title;
+    }
+    get artist() {
+        return this._artist;
+    }
+    get album() {
+        return this._album;
+    }
+    get duration() {
+        return this._duration;
+    }
+    get track() {
+        return this._track;
+    }
+    get year() {
+        return this._year;
+    }
+    get genre() {
+        return this._genre;
+    }
     set title(title) {
         this._title = title;
     }
@@ -101,14 +115,10 @@ export class Metadata {
             track: this._track,
             year: this._year,
             genre: this._genre,
-            filePath: this.filePath
+            filePath: this.filePath,
         };
     }
 }
-Metadata.MAX_TITLE_LENGTH = 200;
-Metadata.MAX_ARTIST_LENGTH = 150;
-Metadata.MAX_ALBUM_LENGTH = 200;
-Metadata.MAX_GENRE_LENGTH = 100;
 Metadata.MAX_YEAR = new Date().getFullYear() + 1;
 Metadata.MAX_DURATION = 3600 * 10;
 Metadata.MAX_TRACK = 999;

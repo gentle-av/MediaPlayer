@@ -1,7 +1,8 @@
-import { MusicLibrary } from "../entities/music/MusicLibrary.js";
-import { MusicApiClient } from "../api/MusicApiClient.js";
+import { MusicLibrary } from '../entities/music/MusicLibrary.js';
+import { MusicApiClient } from '../api/MusicApiClient.js';
 export class MusicStore {
     constructor() {
+        this.currentTrack = null;
         this.library = new MusicLibrary();
         this.listeners = [];
         this.apiClient = new MusicApiClient();
@@ -9,14 +10,21 @@ export class MusicStore {
     subscribe(listener) {
         this.listeners.push(listener);
         return () => {
-            this.listeners = this.listeners.filter(l => l !== listener);
+            this.listeners = this.listeners.filter((l) => l !== listener);
         };
     }
     notifyListeners() {
-        this.listeners.forEach(listener => listener());
+        this.listeners.forEach((listener) => listener());
+    }
+    setCurrentTrack(activeTrack) {
+        this.currentTrack = activeTrack;
+        this.notifyListeners();
+    }
+    getCurrentTrack() {
+        return this.currentTrack;
     }
     getTrack(filePath) {
-        return this.library.allTracks.find(track => track.filePath === filePath);
+        return this.library.allTracks.find((track) => track.filePath === filePath);
     }
     getTrackByIndex(index) {
         return this.library.allTracks[index];
@@ -32,7 +40,7 @@ export class MusicStore {
             return this.library.allTracks;
         }
         const lowerQuery = query.toLowerCase().trim();
-        return this.library.allTracks.filter(track => track.title.toLowerCase().includes(lowerQuery) ||
+        return this.library.allTracks.filter((track) => track.title.toLowerCase().includes(lowerQuery) ||
             track.artist.toLowerCase().includes(lowerQuery) ||
             track.album.toLowerCase().includes(lowerQuery) ||
             track.genre.toLowerCase().includes(lowerQuery));
@@ -40,7 +48,7 @@ export class MusicStore {
     async loadTracksFromServer() {
         const tracks = await this.apiClient.getAllTracks();
         this.library.clear();
-        tracks.forEach(track => {
+        tracks.forEach((track) => {
             try {
                 this.library.addTrack(track);
             }
