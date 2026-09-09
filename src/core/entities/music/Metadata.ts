@@ -1,8 +1,4 @@
 export class Metadata {
-  private static readonly MAX_TITLE_LENGTH = 200;
-  private static readonly MAX_ARTIST_LENGTH = 150;
-  private static readonly MAX_ALBUM_LENGTH = 200;
-  private static readonly MAX_GENRE_LENGTH = 100;
   private static readonly MAX_YEAR = new Date().getFullYear() + 1;
   private static readonly MAX_DURATION = 3600 * 10;
   private static readonly MAX_TRACK = 999;
@@ -16,7 +12,7 @@ export class Metadata {
     private _track: number,
     private _year: number,
     private _genre: string,
-    public readonly filePath: string
+    public readonly filePath: string,
   ) {
     this.validate();
   }
@@ -71,21 +67,33 @@ export class Metadata {
     if (!filePath || !filePath.trim()) {
       throw new Error('File path is required and cannot be empty');
     }
-    const hasValidExtension = Metadata.VALID_EXTENSIONS.some(ext =>
-      filePath.toLowerCase().endsWith(ext)
-    );
+    const hasValidExtension = Metadata.VALID_EXTENSIONS.some((ext) => filePath.toLowerCase().endsWith(ext));
     if (!hasValidExtension) {
       throw new Error(`File must have a valid audio extension: ${Metadata.VALID_EXTENSIONS.join(', ')}`);
     }
   }
 
-  get title(): string { return this._title; }
-  get artist(): string { return this._artist; }
-  get album(): string { return this._album; }
-  get duration(): number { return this._duration; }
-  get track(): number { return this._track; }
-  get year(): number { return this._year; }
-  get genre(): string { return this._genre; }
+  get title(): string {
+    return this._title;
+  }
+  get artist(): string {
+    return this._artist;
+  }
+  get album(): string {
+    return this._album;
+  }
+  get duration(): number {
+    return this._duration;
+  }
+  get track(): number {
+    return this._track;
+  }
+  get year(): number {
+    return this._year;
+  }
+  get genre(): string {
+    return this._genre;
+  }
 
   set title(title: string) {
     this._title = title;
@@ -127,7 +135,7 @@ export class Metadata {
       track: this._track,
       year: this._year,
       genre: this._genre,
-      filePath: this.filePath
+      filePath: this.filePath,
     };
   }
 }
