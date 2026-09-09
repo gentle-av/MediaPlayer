@@ -23,6 +23,9 @@ export class MusicStore {
     getCurrentTrack() {
         return this.currentTrack;
     }
+    getTrackIndex(activeTrack) {
+        return this.library.allTracks.findIndex((track) => track.filePath === activeTrack.filePath);
+    }
     getTrack(filePath) {
         return this.library.allTracks.find((track) => track.filePath === filePath);
     }

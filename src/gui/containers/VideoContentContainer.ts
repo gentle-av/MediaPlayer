@@ -1,11 +1,14 @@
 import { VideoStore } from '../../core/store/VideoStore.js';
 import { VideoItem } from '../../core/entities/video/VideoItem.js';
+import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 
 export class VideoContentContainer {
   private readonly videoStore: VideoStore;
+  private readonly playbackManager: PlaybackManager;
 
-  constructor(videoStore: VideoStore) {
+  constructor(videoStore: VideoStore, playbackManager: PlaybackManager) {
     this.videoStore = videoStore;
+    this.playbackManager = playbackManager;
   }
 
   public async render(targetElement: HTMLElement | null): Promise<HTMLElement | null> {
@@ -48,7 +51,7 @@ export class VideoContentContainer {
           history.pushState({ path: this.videoStore.getCurrentPath() }, '');
           await this.render(targetElement);
         } else if (item.isVideo) {
-          await this.videoStore.openVideo(item);
+          await this.playbackManager.playVideo(item);
         }
       });
       gridElement.appendChild(videoCardElement);

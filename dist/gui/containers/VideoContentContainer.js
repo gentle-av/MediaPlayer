@@ -1,6 +1,7 @@
 export class VideoContentContainer {
-    constructor(videoStore) {
+    constructor(videoStore, playbackManager) {
         this.videoStore = videoStore;
+        this.playbackManager = playbackManager;
     }
     async render(targetElement) {
         if (!targetElement) {
@@ -43,7 +44,7 @@ export class VideoContentContainer {
                     await this.render(targetElement);
                 }
                 else if (item.isVideo) {
-                    await this.videoStore.openVideo(item);
+                    await this.playbackManager.playVideo(item);
                 }
             });
             gridElement.appendChild(videoCardElement);

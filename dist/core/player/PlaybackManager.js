@@ -48,7 +48,7 @@ export class PlaybackManager {
     async togglePlay() {
         if (this.currentType === 'music') {
             if (this.isAudioPaused) {
-                this.player.audioEngine.play().catch((error) => console.error(error));
+                this.player.audioEngine.play().catch((playbackError) => console.error(playbackError));
                 this.isAudioPaused = false;
                 this.player.setPlayState(true);
             }
@@ -68,8 +68,42 @@ export class PlaybackManager {
                 const playbackStatus = await toggleResponse.json();
                 this.player.setPlayState(playbackStatus.isPlaying);
             }
-            catch (error) {
-                console.error(error);
+            catch (networkError) {
+                console.error(networkError);
+            }
+        }
+    }
+    playNextTrack() {
+        if (this.currentType !== 'music') {
+            return;
+        }
+        const activeTrack = this.musicStore.getCurrentTrack();
+        if (!activeTrack) {
+            return;
+        }
+        const currentTrackIndex = this.musicStore.getTrackIndex(activeTrack);
+        const nextTrackIndex = currentTrackIndex + 1;
+        if (nextTrackIndex < this.musicStore.getLibrarySize()) {
+            const nextTrack = this.musicStore.getTrackByIndex(nextTrackIndex);
+            if (nextTrack) {
+                this.playMusic(nextTrack);
+            }
+        }
+    }
+    playPreviousTrack() {
+        if (this.currentType !== 'music') {
+            return;
+        }
+        const activeTrack = this.musicStore.getCurrentTrack();
+        if (!activeTrack) {
+            return;
+        }
+        const currentTrackIndex = this.musicStore.getTrackIndex(activeTrack);
+        const previousTrackIndex = currentTrackIndex - 1;
+        if (previousTrackIndex >= 0) {
+            const previousTrack = this.musicStore.getTrackByIndex(previousTrackIndex);
+            if (previousTrack) {
+                this.playMusic(previousTrack);
             }
         }
     }
@@ -84,17 +118,17 @@ export class PlaybackManager {
                 if (remoteStatus.currentTime !== undefined && remoteStatus.duration !== undefined) {
                     this.player.updateProgress(remoteStatus.currentTime, remoteStatus.duration);
                 }
-                if (remoteStatus.ended || !remoteStatus.isPlaying) {
+                if (remoteStatus.ended || remoteStatus.isPlaying === false) {
                     this.stopCurrentPlayback();
                 }
             }
-            catch (error) {
-                console.error(error);
+            catch (pollingError) {
+                console.error(pollingError);
             }
         }, 1000);
     }
     handleMusicFinished() {
-        this.stopCurrentPlayback();
+        this.playNextTrack();
     }
     stopCurrentPlayback() {
         if (this.pollingIntervalId) {

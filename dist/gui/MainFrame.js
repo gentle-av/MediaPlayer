@@ -14,11 +14,11 @@ export class MainFrame {
         this.musicStore = new MusicStore();
         this.videoStore = new VideoStore();
         this.playlistStore = new PlaylistStore(this.musicStore);
-        this.header = new Header();
-        this.contentManager = new ContentManager(this.musicStore, this.videoStore, this.playlistStore);
         this.player = new Player();
         this.settings = new Settings();
         this.playbackManager = new PlaybackManager(this.player, this.musicStore, this.videoStore);
+        this.contentManager = new ContentManager(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager);
+        this.header = new Header();
         this.sidebar = new Sidebar((selectedTab) => {
             this.switchTab(selectedTab);
         });
