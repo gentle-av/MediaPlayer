@@ -71,23 +71,40 @@ export class VideoContentContainer {
         });
         cardElement.addEventListener('mouseenter', () => (cardElement.style.background = 'var(--bg2)'));
         cardElement.addEventListener('mouseleave', () => (cardElement.style.background = 'transparent'));
-        const iconElement = document.createElement('i');
+        const iconContainer = document.createElement('div');
+        Object.assign(iconContainer.style, {
+            width: '48px',
+            height: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            flexShrink: '0',
+        });
         if (videoItem.isDirectory) {
-            iconElement.className = 'fas fa-folder';
-            iconElement.style.color = 'var(--orange)';
+            iconContainer.innerHTML = `
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        </svg>
+      `;
         }
         else if (videoItem.isVideo) {
-            iconElement.className = 'fas fa-file-video';
-            iconElement.style.color = '#e74c3c';
+            iconContainer.innerHTML = `
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M23 7l-7 5 7 5V7z"></path>
+          <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
+      `;
         }
         else {
-            iconElement.className = 'fas fa-file';
-            iconElement.style.color = 'var(--fg3)';
+            iconContainer.innerHTML = `
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--fg3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+      `;
         }
-        iconElement.style.fontSize = '48px';
-        iconElement.style.flexShrink = '0';
         const titleElement = this.createTitleElement(videoItem.name);
-        cardElement.append(iconElement, titleElement);
+        cardElement.append(iconContainer, titleElement);
         return cardElement;
     }
     createTitleElement(title) {
