@@ -43,7 +43,20 @@ export class Player {
 
   public setPlayState(isPlaying: boolean): void {
     if (this.playButtonIcon) {
-      this.playButtonIcon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+      if (isPlaying) {
+        this.playButtonIcon.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="6" y="4" width="4" height="16"></rect>
+            <rect x="14" y="4" width="4" height="16"></rect>
+          </svg>
+        `;
+      } else {
+        this.playButtonIcon.innerHTML = `
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="5 3 19 12 5 21 5 3"></polygon>
+          </svg>
+        `;
+      }
     }
   }
 
@@ -90,9 +103,13 @@ export class Player {
     metadataContainerElement.className = 'universal-bottom-player-info';
     const previewArtElement = document.createElement('div');
     previewArtElement.className = 'universal-bottom-player-preview';
-    const standardPreviewIcon = document.createElement('i');
-    standardPreviewIcon.className = 'fas fa-music';
-    previewArtElement.appendChild(standardPreviewIcon);
+    previewArtElement.innerHTML = `
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M9 18V5l12-2v13"></path>
+        <circle cx="6" cy="18" r="3"></circle>
+        <circle cx="18" cy="16" r="3"></circle>
+      </svg>
+    `;
     metadataContainerElement.appendChild(previewArtElement);
     const textualTrackInfoContainer = document.createElement('div');
     textualTrackInfoContainer.className = 'universal-bottom-player-track-info';
@@ -130,27 +147,38 @@ export class Player {
     controlButtonsContainer.className = 'universal-bottom-player-controls';
     const skipBackwardButton = document.createElement('button');
     skipBackwardButton.className = 'universal-bottom-player-btn';
-    const backwardButtonIcon = document.createElement('i');
-    backwardButtonIcon.className = 'fas fa-step-backward';
-    skipBackwardButton.appendChild(backwardButtonIcon);
+    skipBackwardButton.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="19 20 9 12 19 4 19 20"></polygon>
+        <line x1="5" y1="19" x2="5" y2="5"></line>
+      </svg>
+    `;
     controlButtonsContainer.appendChild(skipBackwardButton);
     const standardPlayButton = document.createElement('button');
     standardPlayButton.className = 'universal-bottom-player-btn universal-bottom-player-play';
-    this.playButtonIcon = document.createElement('i');
-    this.playButtonIcon.className = 'fas fa-play';
-    standardPlayButton.appendChild(this.playButtonIcon);
+    const playIconHolder = document.createElement('span');
+    playIconHolder.className = 'play-icon-holder';
+    playIconHolder.style.display = 'flex';
+    standardPlayButton.appendChild(playIconHolder);
+    this.playButtonIcon = playIconHolder;
+    this.setPlayState(false);
     controlButtonsContainer.appendChild(standardPlayButton);
     const stopButton = document.createElement('button');
     stopButton.className = 'universal-bottom-player-btn universal-bottom-player-stop';
-    const stopButtonIcon = document.createElement('i');
-    stopButtonIcon.className = 'fas fa-stop';
-    stopButton.appendChild(stopButtonIcon);
+    stopButton.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="4" width="16" height="16"></rect>
+      </svg>
+    `;
     controlButtonsContainer.appendChild(stopButton);
     const skipForwardButton = document.createElement('button');
     skipForwardButton.className = 'universal-bottom-player-btn';
-    const forwardButtonIcon = document.createElement('i');
-    forwardButtonIcon.className = 'fas fa-step-forward';
-    skipForwardButton.appendChild(forwardButtonIcon);
+    skipForwardButton.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polygon points="5 4 15 12 5 20 5 4"></polygon>
+        <line x1="19" y1="5" x2="19" y2="19"></line>
+      </svg>
+    `;
     controlButtonsContainer.appendChild(skipForwardButton);
     contentWrapperElement.appendChild(controlButtonsContainer);
     rootPlayerElement.appendChild(contentWrapperElement);
