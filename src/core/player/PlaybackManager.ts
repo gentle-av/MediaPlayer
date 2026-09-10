@@ -36,7 +36,7 @@ export class PlaybackManager {
     this.currentType = 'video';
     this.currentVideoPath = videoItem.path;
     this.player.setVisibility(true);
-    this.player.updateMediaInfo(videoItem.name, 'Видео-трансляция');
+    this.player.updateMediaInfo(videoItem.name, 'Видео-трансляция', videoItem.path);
     this.player.setPlayState(true);
     await this.videoStore.openVideo(videoItem);
     this.startVideoPolling(videoItem.path);

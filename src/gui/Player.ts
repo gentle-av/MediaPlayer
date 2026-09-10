@@ -1,3 +1,5 @@
+import { AudioTrackMenu } from './menu/AudioTrackMenu.js';
+
 export class Player {
   private playerElement: HTMLElement | null = null;
   private trackNameElement: HTMLElement | null = null;
@@ -6,7 +8,10 @@ export class Player {
   private timeTotalElement: HTMLElement | null = null;
   private progressFillElement: HTMLElement | null = null;
   private playButtonIcon: HTMLElement | null = null;
+  private audioStreamButton: HTMLButtonElement | null = null;
   private audioEngine: HTMLAudioElement;
+  private audioTrackMenu = new AudioTrackMenu();
+  private activeVideoPath = '';
 
   constructor() {
     this.audioEngine = new Audio();
@@ -18,12 +23,23 @@ export class Player {
     }
   }
 
-  public updateMediaInfo(mediaTitle: string, mediaArtist: string): void {
+  public updateMediaInfo(mediaTitle: string, mediaArtist: string, videoPath?: string): void {
     if (this.trackNameElement) {
       this.trackNameElement.textContent = mediaTitle;
     }
     if (this.trackArtistElement) {
       this.trackArtistElement.textContent = mediaArtist;
+    }
+    if (videoPath) {
+      this.activeVideoPath = videoPath;
+      if (this.audioStreamButton) {
+        this.audioStreamButton.style.setProperty('display', 'flex', 'important');
+      }
+    } else {
+      this.activeVideoPath = '';
+      if (this.audioStreamButton) {
+        this.audioStreamButton.style.setProperty('display', 'none', 'important');
+      }
     }
     this.updateProgress(0, 0);
   }
@@ -145,6 +161,28 @@ export class Player {
     contentWrapperElement.appendChild(timelineContainerElement);
     const controlButtonsContainer = document.createElement('div');
     controlButtonsContainer.className = 'universal-bottom-player-controls';
+    this.audioStreamButton = document.createElement('button');
+    this.audioStreamButton.className = 'universal-bottom-player-btn audio-stream-btn';
+    this.audioStreamButton.style.setProperty('display', 'none');
+    this.audioStreamButton.style.setProperty('background', 'var(--bg2)');
+    this.audioStreamButton.style.setProperty('border', '1px solid var(--bg3)');
+    this.audioStreamButton.style.setProperty('border-radius', '50%');
+    this.audioStreamButton.innerHTML = `
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+    `;
+    this.audioStreamButton.addEventListener('click', (clickEvent) => {
+      clickEvent.preventDefault();
+      clickEvent.stopPropagation();
+      if (this.activeVideoPath) {
+        this.audioTrackMenu.show(clickEvent, this.activeVideoPath);
+      }
+    });
+    controlButtonsContainer.appendChild(this.audioStreamButton);
     const skipBackwardButton = document.createElement('button');
     skipBackwardButton.className = 'universal-bottom-player-btn';
     skipBackwardButton.innerHTML = `
