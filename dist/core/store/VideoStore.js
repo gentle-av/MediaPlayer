@@ -4,6 +4,8 @@ export class VideoStore {
         this.currentLibrary = null;
         this.currentPath = '/mnt/video';
         this.listeners = [];
+        this.videoApiClient = new VideoApiClient();
+        this.activeDirectoryPath = '';
         this.client = new VideoApiClient();
     }
     subscribe(listener) {
@@ -65,6 +67,15 @@ export class VideoStore {
         if (item.isVideo) {
             await this.client.openVideo(item.path);
         }
+    }
+    async removeFileSystemItem(itemPath, isDirectoryItem) {
+        if (isDirectoryItem) {
+            await this.videoApiClient.deleteDirectory(itemPath);
+        }
+        else {
+            await this.videoApiClient.moveToTrash(itemPath);
+        }
+        await this.loadLibrary(this.currentPath);
     }
 }
 //# sourceMappingURL=VideoStore.js.map

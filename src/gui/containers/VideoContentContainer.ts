@@ -83,7 +83,8 @@ export class VideoContentContainer {
                 true,
               );
               if (confirmDelete) {
-                console.log(`Удаление объекта: ${item.path}`);
+                await this.videoStore.removeFileSystemItem(item.path, item.isDirectory);
+                await this.render(targetElement);
               }
             },
           },

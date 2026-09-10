@@ -71,7 +71,8 @@ export class VideoContentContainer {
                         action: async () => {
                             const confirmDelete = await this.confirmModal.show('Подтверждение удаления', `Вы уверены, что хотите удалить "${item.name}"?`, true);
                             if (confirmDelete) {
-                                console.log(`Удаление объекта: ${item.path}`);
+                                await this.videoStore.removeFileSystemItem(item.path, item.isDirectory);
+                                await this.render(targetElement);
                             }
                         },
                     },

@@ -51,4 +51,26 @@ export class VideoApiClient {
       return false;
     }
   }
+
+  public async moveToTrash(targetFilePath: string): Promise<boolean> {
+    const apiResponse = await fetch('/api/trash', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ path: targetFilePath }),
+    });
+    return apiResponse.ok;
+  }
+
+  public async deleteDirectory(targetDirectoryPath: string): Promise<boolean> {
+    const apiResponse = await fetch('/api/delete-directory', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ path: targetDirectoryPath }),
+    });
+    return apiResponse.ok;
+  }
 }

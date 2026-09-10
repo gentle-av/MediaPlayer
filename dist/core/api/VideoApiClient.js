@@ -48,5 +48,25 @@ export class VideoApiClient {
             return false;
         }
     }
+    async moveToTrash(targetFilePath) {
+        const apiResponse = await fetch('/api/trash', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ path: targetFilePath }),
+        });
+        return apiResponse.ok;
+    }
+    async deleteDirectory(targetDirectoryPath) {
+        const apiResponse = await fetch('/api/delete-directory', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ path: targetDirectoryPath }),
+        });
+        return apiResponse.ok;
+    }
 }
 //# sourceMappingURL=VideoApiClient.js.map

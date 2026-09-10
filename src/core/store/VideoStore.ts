@@ -7,6 +7,8 @@ export class VideoStore {
   private currentLibrary: VideoLibrary | null = null;
   private currentPath: string = '/mnt/video';
   private listeners: (() => void)[] = [];
+  private videoApiClient = new VideoApiClient();
+  private activeDirectoryPath = '';
 
   constructor() {
     this.client = new VideoApiClient();
@@ -27,7 +29,6 @@ export class VideoStore {
     if (path) {
       this.currentPath = path;
     }
-
     this.currentLibrary = await this.client.listVideos(this.currentPath);
     this.notifyListeners();
   }
@@ -83,5 +84,14 @@ export class VideoStore {
     if (item.isVideo) {
       await this.client.openVideo(item.path);
     }
+  }
+
+  public async removeFileSystemItem(itemPath: string, isDirectoryItem: boolean): Promise<void> {
+    if (isDirectoryItem) {
+      await this.videoApiClient.deleteDirectory(itemPath);
+    } else {
+      await this.videoApiClient.moveToTrash(itemPath);
+    }
+    await this.loadLibrary(this.currentPath);
   }
 }
