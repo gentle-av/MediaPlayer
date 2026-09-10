@@ -29,41 +29,48 @@ export class AudioTrackMenu {
             const statusResponse = await fetch(`${Config.getConfig().baseUrl}/api/video/status?path=${encodeURIComponent(currentVideoPath)}`);
             const playbackStatus = await statusResponse.json();
             const currentTrackIndex = playbackStatus.audioTrackIndex ?? -1;
-            const propertiesResponse = await fetch(`${Config.getConfig().baseUrl}/api/mpv/property/track-list`);
-            const trackListData = await propertiesResponse.json();
-            const audioTracks = (trackListData.data || []).filter((track) => track.type === 'audio');
-            if (audioTracks.length === 0) {
+            const tracksResponse = await fetch(`${Config.getConfig().baseUrl}/api/video/tracks`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ path: currentVideoPath }),
+            });
+            const trackListData = await tracksResponse.json();
+            if (!trackListData.success || !trackListData.tracks || trackListData.tracks.length === 0) {
                 const emptyElement = document.createElement('div');
                 emptyElement.className = 'audio-stream-item';
                 emptyElement.textContent = 'Дорожки не найдены';
                 listContainer.appendChild(emptyElement);
             }
-            audioTracks.forEach((track) => {
-                const itemElement = document.createElement('div');
-                itemElement.className = 'audio-stream-item';
-                if (track.id === currentTrackIndex) {
-                    itemElement.classList.add('selected');
-                }
-                const nameElement = document.createElement('span');
-                nameElement.className = 'audio-stream-name';
-                nameElement.textContent = track.title || track.lang || `Дорожка ${track.id}`;
-                itemElement.appendChild(nameElement);
-                if (track.codec) {
-                    const codecElement = document.createElement('span');
-                    codecElement.className = 'audio-stream-codec';
-                    codecElement.textContent = track.codec;
-                    itemElement.appendChild(codecElement);
-                }
-                itemElement.addEventListener('click', async () => {
-                    await fetch(`${Config.getConfig().baseUrl}/api/video/audio/track`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ streamIndex: track.id }),
+            else {
+                trackListData.tracks.forEach((track) => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'audio-stream-item';
+                    if (track.id === currentTrackIndex) {
+                        itemElement.classList.add('selected');
+                    }
+                    const nameElement = document.createElement('span');
+                    nameElement.className = 'audio-stream-name';
+                    nameElement.textContent = track.title || track.lang || `Дорожка ${track.id}`;
+                    itemElement.appendChild(nameElement);
+                    if (track.codec) {
+                        const codecElement = document.createElement('span');
+                        codecElement.className = 'audio-stream-codec';
+                        codecElement.textContent = track.codec;
+                        itemElement.appendChild(codecElement);
+                    }
+                    itemElement.addEventListener('click', async () => {
+                        await fetch(`${Config.getConfig().baseUrl}/api/video/audio/track`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ streamIndex: track.id }),
+                        });
+                        this.close();
                     });
-                    this.close();
+                    listContainer.appendChild(itemElement);
                 });
-                listContainer.appendChild(itemElement);
-            });
+            }
         }
         catch (networkError) {
             const errorElement = document.createElement('div');
