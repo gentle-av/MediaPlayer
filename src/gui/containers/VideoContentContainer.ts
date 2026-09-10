@@ -1,21 +1,25 @@
 import { VideoStore } from '../../core/store/VideoStore.js';
 import { VideoItem } from '../../core/entities/video/VideoItem.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
+import { ContextMenu } from '../menu//ContextMenu.js';
+import { ConfirmModal } from '../menu/ConfirmModal.js';
 
 export class VideoContentContainer {
   private readonly videoStore: VideoStore;
   private readonly playbackManager: PlaybackManager;
+  private readonly contextMenu: ContextMenu;
+  private readonly confirmModal: ConfirmModal;
   private static isPopstateBound = false;
 
   constructor(videoStore: VideoStore, playbackManager: PlaybackManager) {
     this.videoStore = videoStore;
     this.playbackManager = playbackManager;
+    this.contextMenu = new ContextMenu();
+    this.confirmModal = new ConfirmModal();
   }
 
   public async render(targetElement: HTMLElement | null): Promise<HTMLElement | null> {
-    if (!targetElement) {
-      return null;
-    }
+    if (!targetElement) return null;
     if (!VideoContentContainer.isPopstateBound) {
       VideoContentContainer.isPopstateBound = true;
       window.addEventListener('popstate', async (event) => {
@@ -54,6 +58,36 @@ export class VideoContentContainer {
         } else if (item.isVideo) {
           await this.playbackManager.playVideo(item);
         }
+      });
+      videoCardElement.addEventListener('contextmenu', (e) => {
+        this.contextMenu.show(e, [
+          {
+            label: item.isDirectory ? 'Открыть папку' : 'Воспроизвести',
+            action: async () => {
+              if (item.isDirectory) {
+                await this.videoStore.navigateToFolder(item);
+                history.pushState({ path: this.videoStore.getCurrentPath() }, '');
+                await this.render(targetElement);
+              } else if (item.isVideo) {
+                await this.playbackManager.playVideo(item);
+              }
+            },
+          },
+          {
+            label: 'Удалить',
+            isDanger: true,
+            action: async () => {
+              const confirmDelete = await this.confirmModal.show(
+                'Подтверждение удаления',
+                `Вы уверены, что хотите удалить "${item.name}"?`,
+                true,
+              );
+              if (confirmDelete) {
+                console.log(`Удаление объекта: ${item.path}`);
+              }
+            },
+          },
+        ]);
       });
       gridElement.appendChild(videoCardElement);
     });
@@ -132,6 +166,10 @@ export class VideoContentContainer {
       textOverflow: 'ellipsis',
       wordBreak: 'break-word',
       width: '100%',
+      userSelect: 'none',
+      webkitUserSelect: 'none',
+      mozUserSelect: 'none',
+      msUserSelect: 'none',
     });
     return captionElement;
   }
