@@ -15,7 +15,6 @@ export class Header {
         controlsSection.className = 'header-controls-section';
         controlsSection.appendChild(this.createSearch());
         controlsSection.appendChild(this.createPlaylistButton());
-        controlsSection.appendChild(this.createRefreshButton());
         header.appendChild(controlsSection);
         return header;
     }
@@ -85,15 +84,11 @@ export class Header {
         playlistBtn.appendChild(badge);
         return playlistBtn;
     }
-    createRefreshButton() {
-        const refreshBtn = document.createElement('button');
-        refreshBtn.id = 'headerRefreshBtn';
-        refreshBtn.className = 'header-btn';
-        const refreshIcon = document.createElement('i');
-        refreshIcon.className = 'fas fa-sync';
-        refreshBtn.appendChild(refreshIcon);
-        refreshBtn.appendChild(document.createTextNode(' Обновить'));
-        return refreshBtn;
+    togglePlaylistButtonVisibility(isVisible) {
+        const playlistBtn = document.getElementById('headerPlaylistBtn');
+        if (playlistBtn) {
+            playlistBtn.style.display = isVisible ? 'flex' : 'none';
+        }
     }
 }
 //# sourceMappingURL=Header.js.map

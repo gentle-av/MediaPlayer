@@ -44,6 +44,8 @@ export class MainFrame {
     };
     const activeConfiguration = tabConfigurations[targetTab];
     this.header.setTitle(activeConfiguration.icon, activeConfiguration.text);
+    const isAudioTab = targetTab === 'audio';
+    this.header.togglePlaylistButtonVisibility(isAudioTab);
     await this.updateContent(targetTab);
   }
 
@@ -112,6 +114,10 @@ export class MainFrame {
     applicationContainerElement.appendChild(bodyWrapperElement);
     this.updateContent(this.currentTab);
     this.bindPlayerControls(applicationContainerElement);
+    setTimeout(() => {
+      const isAudioTab = this.currentTab === 'audio';
+      this.header.togglePlaylistButtonVisibility(isAudioTab);
+    }, 0);
     return applicationContainerElement;
   }
 
