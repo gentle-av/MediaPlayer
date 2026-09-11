@@ -74,9 +74,12 @@ export class MainFrame {
         }
         break;
       case 'audio':
-        this.contentArea.innerHTML = '';
-        tabPlaceholderElement = this.createPlaceholderContent('audio', '🎵 Аудио');
-        this.contentArea.appendChild(tabPlaceholderElement);
+        if (this.activeSearchTerm) {
+          const filteredTracks = this.musicStore.searchTracks(this.activeSearchTerm);
+          await this.contentManager.renderMusicContent(this.contentArea, filteredTracks);
+        } else {
+          await this.contentManager.getMusicContent(this.contentArea);
+        }
         break;
       case 'settings':
         this.contentArea.innerHTML = '';
@@ -115,6 +118,11 @@ export class MainFrame {
         const filteredVideos = this.videoStore.search(searchTerm);
         if (this.contentArea) {
           await this.contentManager.renderVideoContent(this.contentArea, filteredVideos);
+        }
+      } else if (this.currentTab === 'audio') {
+        const filteredTracks = this.musicStore.searchTracks(searchTerm);
+        if (this.contentArea) {
+          await this.contentManager.renderMusicContent(this.contentArea, filteredTracks);
         }
       }
     }, containerElement);
