@@ -2,6 +2,36 @@ export class Header {
   private pageTitleElement: HTMLElement | null = null;
   private titleIconElement: HTMLElement | null = null;
 
+  private createSearch(): HTMLElement {
+    const searchWrapper = document.createElement('div');
+    searchWrapper.className = 'search-wrapper';
+    const searchBox = document.createElement('div');
+    searchBox.id = 'globalSearchBox';
+    searchBox.innerHTML = `
+      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--fg3); flex-shrink: 0;">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    `;
+    const searchInput = document.createElement('input');
+    searchInput.id = 'globalSearchInput';
+    searchInput.type = 'text';
+    searchInput.placeholder = 'Поиск...';
+    searchBox.appendChild(searchInput);
+    const clearButton = document.createElement('button');
+    clearButton.className = 'search-clear-btn';
+    clearButton.style.display = 'none';
+    clearButton.innerHTML = `
+      <svg width="14" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--fg3); display: block;">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    `;
+    searchBox.appendChild(clearButton);
+    searchWrapper.appendChild(searchBox);
+    return searchWrapper;
+  }
+
   render(): HTMLElement {
     const header = document.createElement('header');
     header.className = 'app-header';
@@ -51,30 +81,6 @@ export class Header {
     this.setTitleText(text);
   }
 
-  private createSearch(): HTMLElement {
-    const searchWrapper = document.createElement('div');
-    searchWrapper.className = 'search-wrapper';
-    const searchBox = document.createElement('div');
-    searchBox.id = 'globalSearchBox';
-    const searchIcon = document.createElement('i');
-    searchIcon.className = 'fas fa-search';
-    searchBox.appendChild(searchIcon);
-    const searchInput = document.createElement('input');
-    searchInput.id = 'globalSearchInput';
-    searchInput.type = 'text';
-    searchInput.placeholder = 'Поиск...';
-    searchBox.appendChild(searchInput);
-    const clearBtn = document.createElement('button');
-    clearBtn.className = 'search-clear-btn';
-    clearBtn.style.display = 'none';
-    const clearIcon = document.createElement('i');
-    clearIcon.className = 'fas fa-times';
-    clearBtn.appendChild(clearIcon);
-    searchBox.appendChild(clearBtn);
-    searchWrapper.appendChild(searchBox);
-    return searchWrapper;
-  }
-
   private createPlaylistButton(): HTMLElement {
     const playlistBtn = document.createElement('button');
     playlistBtn.id = 'headerPlaylistBtn';
@@ -94,6 +100,28 @@ export class Header {
     const playlistBtn = document.getElementById('headerPlaylistBtn');
     if (playlistBtn) {
       playlistBtn.style.display = isVisible ? 'flex' : 'none';
+    }
+  }
+
+  public bindSearch(onSearch: (searchTerm: string) => void, containerElement: HTMLElement): void {
+    const searchInput = containerElement.querySelector('#globalSearchInput') as HTMLInputElement;
+    const clearButton = containerElement.querySelector('#globalSearchBox .search-clear-btn') as HTMLElement;
+    if (!searchInput) {
+      return;
+    }
+    searchInput.addEventListener('input', (event) => {
+      const currentTerm = (event.target as HTMLInputElement).value;
+      if (clearButton) {
+        clearButton.style.setProperty('display', currentTerm.length > 0 ? 'flex' : 'none', 'important');
+      }
+      onSearch(currentTerm);
+    });
+    if (clearButton) {
+      clearButton.addEventListener('click', () => {
+        searchInput.value = '';
+        clearButton.style.setProperty('display', 'none', 'important');
+        onSearch('');
+      });
     }
   }
 }

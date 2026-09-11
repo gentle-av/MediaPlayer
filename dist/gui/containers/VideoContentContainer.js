@@ -7,7 +7,7 @@ export class VideoContentContainer {
         this.contextMenu = new ContextMenu();
         this.confirmModal = new ConfirmModal();
     }
-    async render(targetElement) {
+    async render(targetElement, items) {
         if (!targetElement)
             return null;
         if (!VideoContentContainer.isPopstateBound) {
@@ -23,7 +23,7 @@ export class VideoContentContainer {
             history.replaceState({ path: '/mnt/video' }, '');
         }
         targetElement.innerHTML = '';
-        const allItems = this.videoStore.getItems();
+        const allItems = items || this.videoStore.getItems();
         if (allItems.length === 0) {
             targetElement.innerHTML = '<div class="empty">📁 Папка пуста</div>';
             return null;

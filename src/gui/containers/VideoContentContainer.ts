@@ -18,7 +18,7 @@ export class VideoContentContainer {
     this.confirmModal = new ConfirmModal();
   }
 
-  public async render(targetElement: HTMLElement | null): Promise<HTMLElement | null> {
+  public async render(targetElement: HTMLElement | null, items?: VideoItem[]): Promise<HTMLElement | null> {
     if (!targetElement) return null;
     if (!VideoContentContainer.isPopstateBound) {
       VideoContentContainer.isPopstateBound = true;
@@ -33,7 +33,7 @@ export class VideoContentContainer {
       history.replaceState({ path: '/mnt/video' }, '');
     }
     targetElement.innerHTML = '';
-    const allItems = this.videoStore.getItems();
+    const allItems = items || this.videoStore.getItems();
     if (allItems.length === 0) {
       targetElement.innerHTML = '<div class="empty">📁 Папка пуста</div>';
       return null;

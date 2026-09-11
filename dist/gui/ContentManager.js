@@ -11,5 +11,9 @@ export class ContentManager {
         await this.videoContentContainer.render(contentArea);
         return contentArea;
     }
+    async renderVideoContent(contentArea, filteredItems) {
+        await this.videoContentContainer.render(contentArea, filteredItems);
+        return contentArea;
+    }
 }
 //# sourceMappingURL=ContentManager.js.map

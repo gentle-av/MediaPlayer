@@ -4,26 +4,40 @@
   align-items: center;
 }
 
+#globalSearchBox {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
 #globalSearchInput {
-  padding-right: 30px;
+  width: 100%;
+  padding-right: 36px;
+  background: none;
+  border: none;
+  outline: none;
 }
 
 .search-clear-btn {
   position: absolute;
-  right: 8px;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 105;
   background: none;
   border: none;
-  color: var(--fg3);
   cursor: pointer;
-  padding: 0;
-  width: 20px;
-  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  transition: all 0.2s;
-  z-index: 10;
+  width: 20px;
+  height: 20px;
+}
+
+.search-clear-btn i {
+  color: var(--fg3);
+  font-size: 0.9rem;
 }
 
 .search-clear-btn:hover {

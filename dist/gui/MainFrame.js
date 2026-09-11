@@ -11,6 +11,7 @@ export class MainFrame {
     constructor() {
         this.currentTab = 'video';
         this.contentArea = null;
+        this.activeSearchTerm = '';
         this.musicStore = new MusicStore();
         this.videoStore = new VideoStore();
         this.playlistStore = new PlaylistStore(this.musicStore);
@@ -25,6 +26,15 @@ export class MainFrame {
     }
     async switchTab(targetTab) {
         this.currentTab = targetTab;
+        this.activeSearchTerm = '';
+        const searchInput = document.getElementById('globalSearchInput');
+        const clearButton = document.querySelector('.search-clear-btn');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        if (clearButton) {
+            clearButton.style.display = 'none';
+        }
         const tabConfigurations = {
             video: { icon: 'fa-film', text: 'Видео' },
             audio: { icon: 'fa-music', text: 'Аудио' },
@@ -43,7 +53,13 @@ export class MainFrame {
         let tabPlaceholderElement = null;
         switch (activeTab) {
             case 'video':
-                await this.contentManager.getVideoContent(this.contentArea);
+                if (this.activeSearchTerm) {
+                    const filteredVideos = this.videoStore.search(this.activeSearchTerm);
+                    await this.contentManager.renderVideoContent(this.contentArea, filteredVideos);
+                }
+                else {
+                    await this.contentManager.getVideoContent(this.contentArea);
+                }
                 break;
             case 'audio':
                 this.contentArea.innerHTML = '';
@@ -77,6 +93,17 @@ export class MainFrame {
             });
         }
     }
+    bindHeaderEvents(containerElement) {
+        this.header.bindSearch(async (searchTerm) => {
+            this.activeSearchTerm = searchTerm;
+            if (this.currentTab === 'video') {
+                const filteredVideos = this.videoStore.search(searchTerm);
+                if (this.contentArea) {
+                    await this.contentManager.renderVideoContent(this.contentArea, filteredVideos);
+                }
+            }
+        }, containerElement);
+    }
     render() {
         const applicationContainerElement = document.createElement('div');
         applicationContainerElement.className = 'app-container';
@@ -102,6 +129,7 @@ export class MainFrame {
             const isAudioTab = this.currentTab === 'audio';
             this.header.togglePlaylistButtonVisibility(isAudioTab);
         }, 0);
+        this.bindHeaderEvents(applicationContainerElement);
         return applicationContainerElement;
     }
     async initialize() {
