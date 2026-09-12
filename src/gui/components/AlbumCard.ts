@@ -1,5 +1,6 @@
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { Metadata } from '../../core/entities/music/Metadata.js';
+import { MusicStore } from '../../core/store/MusicStore.js';
 
 export class AlbumCard {
   constructor(
@@ -7,6 +8,7 @@ export class AlbumCard {
     private readonly artistName: string,
     private readonly albumTracks: Metadata[],
     private readonly playbackManager: PlaybackManager,
+    private readonly musicStore: MusicStore,
   ) {}
 
   public render(): HTMLElement {
@@ -24,6 +26,32 @@ export class AlbumCard {
       </svg>
     `;
     artContainer.appendChild(placeholderIcon);
+    if (this.albumName && this.artistName) {
+      const imgElement = document.createElement('img');
+      imgElement.alt = this.albumName;
+      imgElement.style.display = 'none';
+      this.musicStore
+        .getAlbumArtBlob(this.albumName, this.artistName)
+        .then((blob: Blob | null) => {
+          if (blob && blob.size > 0) {
+            const objectUrl = URL.createObjectURL(blob);
+            imgElement.src = objectUrl;
+            placeholderIcon.style.display = 'none';
+            imgElement.style.display = 'block';
+            imgElement.onload = () => {
+              URL.revokeObjectURL(objectUrl);
+            };
+          } else {
+            placeholderIcon.style.display = 'flex';
+            imgElement.remove();
+          }
+        })
+        .catch(() => {
+          placeholderIcon.style.display = 'flex';
+          imgElement.remove();
+        });
+      artContainer.appendChild(imgElement);
+    }
     const infoContainer = document.createElement('div');
     infoContainer.className = 'album-card-info';
     const titleElement = document.createElement('div');

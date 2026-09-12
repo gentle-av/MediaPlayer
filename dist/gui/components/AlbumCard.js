@@ -1,9 +1,10 @@
 export class AlbumCard {
-    constructor(albumName, artistName, albumTracks, playbackManager) {
+    constructor(albumName, artistName, albumTracks, playbackManager, musicStore) {
         this.albumName = albumName;
         this.artistName = artistName;
         this.albumTracks = albumTracks;
         this.playbackManager = playbackManager;
+        this.musicStore = musicStore;
     }
     render() {
         const cardElement = document.createElement('div');
@@ -20,6 +21,33 @@ export class AlbumCard {
       </svg>
     `;
         artContainer.appendChild(placeholderIcon);
+        if (this.albumName && this.artistName) {
+            const imgElement = document.createElement('img');
+            imgElement.alt = this.albumName;
+            imgElement.style.display = 'none';
+            this.musicStore
+                .getAlbumArtBlob(this.albumName, this.artistName)
+                .then((blob) => {
+                if (blob && blob.size > 0) {
+                    const objectUrl = URL.createObjectURL(blob);
+                    imgElement.src = objectUrl;
+                    placeholderIcon.style.display = 'none';
+                    imgElement.style.display = 'block';
+                    imgElement.onload = () => {
+                        URL.revokeObjectURL(objectUrl);
+                    };
+                }
+                else {
+                    placeholderIcon.style.display = 'flex';
+                    imgElement.remove();
+                }
+            })
+                .catch(() => {
+                placeholderIcon.style.display = 'flex';
+                imgElement.remove();
+            });
+            artContainer.appendChild(imgElement);
+        }
         const infoContainer = document.createElement('div');
         infoContainer.className = 'album-card-info';
         const titleElement = document.createElement('div');

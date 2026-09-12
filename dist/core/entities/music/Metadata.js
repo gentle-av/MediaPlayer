@@ -10,6 +10,11 @@ export class Metadata {
         this.filePath = filePath;
         this.validate();
     }
+    get albumKey() {
+        const artist = this._artist.trim() || 'Unknown Artist';
+        const album = this._album.trim() || 'Unknown Album';
+        return `${artist}---|---${album}`.toLowerCase();
+    }
     validate() {
         this.validateDuration(this._duration);
         this.validateTrack(this._track);

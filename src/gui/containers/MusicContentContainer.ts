@@ -22,11 +22,11 @@ export class MusicContentContainer {
     const gridElement = document.createElement('div');
     gridElement.className = 'albums-grid';
     const groupedAlbums = this.groupTracksByAlbum(activeTracks);
-    groupedAlbums.forEach((albumTracks, albumKey) => {
+    groupedAlbums.forEach((albumTracks) => {
       const firstTrack = albumTracks[0];
       const currentAlbumName = firstTrack.album;
       const currentArtistName = firstTrack.artist;
-      const albumCard = new AlbumCard(currentAlbumName, currentArtistName, albumTracks, this.playbackManager);
+      const albumCard = new AlbumCard(currentAlbumName, currentArtistName, albumTracks, this.playbackManager, this.musicStore);
       gridElement.appendChild(albumCard.render());
     });
     targetElement.appendChild(gridElement);
@@ -36,7 +36,7 @@ export class MusicContentContainer {
   private groupTracksByAlbum(tracks: Metadata[]): Map<string, Metadata[]> {
     const map = new Map<string, Metadata[]>();
     tracks.forEach((track) => {
-      const key = `${track.artist}---|---${track.album}`.toLowerCase();
+      const key = track.albumKey;
       if (!map.has(key)) {
         map.set(key, []);
       }

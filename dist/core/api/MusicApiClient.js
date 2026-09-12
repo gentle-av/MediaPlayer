@@ -1,8 +1,30 @@
-import { Metadata } from "../entities/music/Metadata.js";
-import { Config } from "../config/Config.js";
+import { Metadata } from '../entities/music/Metadata.js';
+import { Config } from '../config/Config.js';
 export class MusicApiClient {
     constructor() {
         this.baseUrl = Config.getConfig().baseUrl;
+    }
+    async getAlbumArtBlob(album, artist) {
+        try {
+            const response = await fetch(`${this.baseUrl}/api/music/albumart/by-album`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    album: album,
+                    artist: artist,
+                }),
+            });
+            if (!response.ok) {
+                return null;
+            }
+            return await response.blob();
+        }
+        catch (error) {
+            console.error('Error fetching album art blob:', error);
+            return null;
+        }
     }
     async getAllTracks() {
         try {
@@ -23,20 +45,9 @@ export class MusicApiClient {
                 }
                 catch (error) {
                     console.warn('❌ Skipping track due to validation error:', file.path);
-                    if (error instanceof Error) {
-                        console.warn('  Error details:', error.message);
-                    }
-                    else {
-                        console.warn('  Error details:', String(error));
-                    }
                     problematicPaths.push(file.path);
                 }
             }
-            if (problematicPaths.length > 0) {
-                console.log(`⚠️ ${problematicPaths.length} problematic paths:`);
-                problematicPaths.forEach(path => console.log(`  - ${path}`));
-            }
-            console.log(`✅ Loaded ${tracks.length} tracks (${problematicPaths.length} skipped)`);
             return tracks;
         }
         catch (error) {
@@ -136,7 +147,7 @@ export class MusicApiClient {
             }
             return {
                 albums: data.albums || [],
-                pagination: data.pagination || {}
+                pagination: data.pagination || {},
             };
         }
         catch (error) {

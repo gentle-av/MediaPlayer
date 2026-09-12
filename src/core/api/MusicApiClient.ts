@@ -1,5 +1,5 @@
-import { Metadata } from "../entities/music/Metadata.js";
-import { Config } from "../config/Config.js";
+import { Metadata } from '../entities/music/Metadata.js';
+import { Config } from '../config/Config.js';
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -12,6 +12,28 @@ export class MusicApiClient {
 
   constructor() {
     this.baseUrl = Config.getConfig().baseUrl;
+  }
+
+  async getAlbumArtBlob(album: string, artist: string): Promise<Blob | null> {
+    try {
+      const response = await fetch(`${this.baseUrl}/api/music/albumart/by-album`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          album: album,
+          artist: artist,
+        }),
+      });
+      if (!response.ok) {
+        return null;
+      }
+      return await response.blob();
+    } catch (error) {
+      console.error('Error fetching album art blob:', error);
+      return null;
+    }
   }
 
   async getAllTracks(): Promise<Metadata[]> {
@@ -36,24 +58,14 @@ export class MusicApiClient {
             file.track || 0,
             file.year || 0,
             file.genre || 'Unknown',
-            file.path
+            file.path,
           );
           tracks.push(track);
         } catch (error) {
           console.warn('❌ Skipping track due to validation error:', file.path);
-          if (error instanceof Error) {
-            console.warn('  Error details:', error.message);
-          } else {
-            console.warn('  Error details:', String(error));
-          }
           problematicPaths.push(file.path);
         }
       }
-      if (problematicPaths.length > 0) {
-        console.log(`⚠️ ${problematicPaths.length} problematic paths:`);
-        problematicPaths.forEach(path => console.log(`  - ${path}`));
-      }
-      console.log(`✅ Loaded ${tracks.length} tracks (${problematicPaths.length} skipped)`);
       return tracks;
     } catch (error) {
       console.error('Error fetching tracks:', error);
@@ -63,9 +75,7 @@ export class MusicApiClient {
 
   async getTracksByArtist(artist: string): Promise<Metadata[]> {
     try {
-      const response = await fetch(
-        `${this.baseUrl}/api/music/tracks/artist/${encodeURIComponent(artist)}`
-      );
+      const response = await fetch(`${this.baseUrl}/api/music/tracks/artist/${encodeURIComponent(artist)}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
@@ -73,16 +83,19 @@ export class MusicApiClient {
       if (!data.success) {
         throw new Error(data.error || 'Failed to fetch tracks by artist');
       }
-      return data.tracks.map((track: any) => new Metadata(
-        track.title || 'Unknown',
-        track.artist || 'Unknown Artist',
-        track.album || 'Unknown Album',
-        track.duration || 0,
-        track.track || 0,
-        track.year || 0,
-        track.genre || 'Unknown',
-        track.path
-      ));
+      return data.tracks.map(
+        (track: any) =>
+          new Metadata(
+            track.title || 'Unknown',
+            track.artist || 'Unknown Artist',
+            track.album || 'Unknown Album',
+            track.duration || 0,
+            track.track || 0,
+            track.year || 0,
+            track.genre || 'Unknown',
+            track.path,
+          ),
+      );
     } catch (error) {
       console.error(`Error fetching tracks for artist ${artist}:`, error);
       throw error;
@@ -103,16 +116,19 @@ export class MusicApiClient {
       if (!data.success) {
         throw new Error(data.error || 'Failed to fetch tracks by album');
       }
-      return data.tracks.map((track: any) => new Metadata(
-        track.title || 'Unknown',
-        track.artist || 'Unknown Artist',
-        track.album || 'Unknown Album',
-        track.duration || 0,
-        track.track || 0,
-        track.year || 0,
-        track.genre || 'Unknown',
-        track.path
-      ));
+      return data.tracks.map(
+        (track: any) =>
+          new Metadata(
+            track.title || 'Unknown',
+            track.artist || 'Unknown Artist',
+            track.album || 'Unknown Album',
+            track.duration || 0,
+            track.track || 0,
+            track.year || 0,
+            track.genre || 'Unknown',
+            track.path,
+          ),
+      );
     } catch (error) {
       console.error(`Error fetching tracks for album ${album}:`, error);
       throw error;
@@ -136,7 +152,7 @@ export class MusicApiClient {
     }
   }
 
-  async getAlbums(artist?: string): Promise<Array<{album: string, artist: string, year: number}>> {
+  async getAlbums(artist?: string): Promise<Array<{ album: string; artist: string; year: number }>> {
     try {
       let url = `${this.baseUrl}/api/music/albums`;
       if (artist) {
@@ -160,9 +176,9 @@ export class MusicApiClient {
   async getAlbumsPaginated(
     page: number = 1,
     pageSize: number = 20,
-    artist?: string
+    artist?: string,
   ): Promise<{
-    albums: Array<{album: string, artist: string, year: number}>;
+    albums: Array<{ album: string; artist: string; year: number }>;
     pagination: {
       currentPage: number;
       pageSize: number;
@@ -187,7 +203,7 @@ export class MusicApiClient {
       }
       return {
         albums: data.albums || [],
-        pagination: data.pagination || {}
+        pagination: data.pagination || {},
       };
     } catch (error) {
       console.error('Error fetching albums with pagination:', error);

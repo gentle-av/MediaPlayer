@@ -17,6 +17,12 @@ export class Metadata {
     this.validate();
   }
 
+  get albumKey(): string {
+    const artist = this._artist.trim() || 'Unknown Artist';
+    const album = this._album.trim() || 'Unknown Album';
+    return `${artist}---|---${album}`.toLowerCase();
+  }
+
   private validate(): void {
     this.validateDuration(this._duration);
     this.validateTrack(this._track);
@@ -98,30 +104,24 @@ export class Metadata {
   set title(title: string) {
     this._title = title;
   }
-
   set artist(artist: string) {
     this._artist = artist;
   }
-
   set album(album: string) {
     this._album = album;
   }
-
   set duration(duration: number) {
     this.validateDuration(duration);
     this._duration = duration;
   }
-
   set track(track: number) {
     this.validateTrack(track);
     this._track = track;
   }
-
   set year(year: number) {
     this.validateYear(year);
     this._year = year;
   }
-
   set genre(genre: string) {
     this._genre = genre;
   }

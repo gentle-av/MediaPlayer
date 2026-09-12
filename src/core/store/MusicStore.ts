@@ -25,6 +25,10 @@ export class MusicStore {
     this.listeners.forEach((listener) => listener());
   }
 
+  public getAlbumArtBlob(album: string, artist: string): Promise<Blob | null> {
+    return this.apiClient.getAlbumArtBlob(album, artist);
+  }
+
   public setCurrentTrack(activeTrack: Metadata | null): void {
     this.currentTrack = activeTrack;
     this.notifyListeners();

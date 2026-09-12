@@ -16,6 +16,9 @@ export class MusicStore {
     notifyListeners() {
         this.listeners.forEach((listener) => listener());
     }
+    getAlbumArtBlob(album, artist) {
+        return this.apiClient.getAlbumArtBlob(album, artist);
+    }
     setCurrentTrack(activeTrack) {
         this.currentTrack = activeTrack;
         this.notifyListeners();
