@@ -39,7 +39,9 @@ export class MusicStore {
   }
 
   public getTrackIndex(activeTrack: Metadata): number {
-    return this.library.allTracks.findIndex((track) => track.filePath === activeTrack.filePath);
+    return this.library.allTracks.findIndex(
+      (track) => track.filePath === activeTrack.filePath,
+    );
   }
 
   getTrack(filePath: string): Metadata | undefined {
@@ -97,7 +99,9 @@ export class MusicStore {
     return await this.apiClient.getArtists();
   }
 
-  async getAlbums(artist?: string): Promise<Array<{ album: string; artist: string; year: number }>> {
+  async getAlbums(
+    artist?: string,
+  ): Promise<Array<{ album: string; artist: string; year: number }>> {
     return await this.apiClient.getAlbums(artist);
   }
 

@@ -58,7 +58,7 @@ export class Playlist {
     return {
       name: this.name,
       size: this.size,
-      tracks: Array.from(this.trackPaths)
+      tracks: Array.from(this.trackPaths),
     };
   }
 }

@@ -1,22 +1,20 @@
-import { VideoItem } from "./VideoItem.js";
+import { VideoItem } from './VideoItem.js';
 
 export class VideoLibrary {
   items: VideoItem[];
   path: string;
   success: boolean;
 
-  constructor(data: {
-    items: VideoItem[];
-    path: string;
-    success: boolean;
-  }) {
+  constructor(data: { items: VideoItem[]; path: string; success: boolean }) {
     this.items = data.items;
     this.path = data.path;
     this.success = data.success;
   }
 
   static fromJson(json: any): VideoLibrary {
-    const items = (json.items || []).map((item: any) => VideoItem.fromJson(item));
+    const items = (json.items || []).map((item: any) =>
+      VideoItem.fromJson(item),
+    );
     return new VideoLibrary({
       items: items,
       path: json.path,

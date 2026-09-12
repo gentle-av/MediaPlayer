@@ -25,8 +25,12 @@ export class AlbumModal {
     modalContent.className = 'modal-content';
     const header = this.createHeader();
     const body = this.createBody();
-    const controlsPanel = new AlbumControlsPanel(this.albumTracks, this.playbackManager, this.playlistStore, this.musicStore, () =>
-      this.close(),
+    const controlsPanel = new AlbumControlsPanel(
+      this.albumTracks,
+      this.playbackManager,
+      this.playlistStore,
+      this.musicStore,
+      () => this.close(),
     );
     const footer = controlsPanel.render();
     modalContent.append(header, body, footer);
@@ -141,7 +145,10 @@ export class AlbumModal {
     return bodyElement;
   }
 
-  private setupDragAndDropEvents(row: HTMLElement, container: HTMLElement): void {
+  private setupDragAndDropEvents(
+    row: HTMLElement,
+    container: HTMLElement,
+  ): void {
     row.addEventListener('dragstart', (e) => {
       this.draggedRow = row;
       row.classList.add('dragging');

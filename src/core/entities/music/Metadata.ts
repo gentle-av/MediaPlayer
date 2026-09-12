@@ -2,7 +2,15 @@ export class Metadata {
   private static readonly MAX_YEAR = new Date().getFullYear() + 1;
   private static readonly MAX_DURATION = 3600 * 10;
   private static readonly MAX_TRACK = 999;
-  private static readonly VALID_EXTENSIONS = ['.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg', '.wma'];
+  private static readonly VALID_EXTENSIONS = [
+    '.mp3',
+    '.flac',
+    '.wav',
+    '.m4a',
+    '.aac',
+    '.ogg',
+    '.wma',
+  ];
 
   constructor(
     private trackTitle: string,
@@ -97,7 +105,9 @@ export class Metadata {
       throw new Error('Duration cannot be negative');
     }
     if (duration > Metadata.MAX_DURATION) {
-      throw new Error(`Duration exceeds maximum of ${Metadata.MAX_DURATION} seconds`);
+      throw new Error(
+        `Duration exceeds maximum of ${Metadata.MAX_DURATION} seconds`,
+      );
     }
   }
 
@@ -132,9 +142,13 @@ export class Metadata {
     if (!filePath || !filePath.trim()) {
       throw new Error('File path is required and cannot be empty');
     }
-    const hasValidExtension = Metadata.VALID_EXTENSIONS.some((ext) => filePath.toLowerCase().endsWith(ext));
+    const hasValidExtension = Metadata.VALID_EXTENSIONS.some((ext) =>
+      filePath.toLowerCase().endsWith(ext),
+    );
     if (!hasValidExtension) {
-      throw new Error(`File must have a valid audio extension: ${Metadata.VALID_EXTENSIONS.join(', ')}`);
+      throw new Error(
+        `File must have a valid audio extension: ${Metadata.VALID_EXTENSIONS.join(', ')}`,
+      );
     }
   }
 

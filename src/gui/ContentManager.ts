@@ -17,8 +17,15 @@ export class ContentManager {
     private playlistStore: PlaylistStore,
     private playbackManager: PlaybackManager,
   ) {
-    this.videoContentContainer = new VideoContentContainer(this.videoStore, this.playbackManager);
-    this.musicContentContainer = new MusicContentContainer(this.musicStore, this.playlistStore, this.playbackManager);
+    this.videoContentContainer = new VideoContentContainer(
+      this.videoStore,
+      this.playbackManager,
+    );
+    this.musicContentContainer = new MusicContentContainer(
+      this.musicStore,
+      this.playlistStore,
+      this.playbackManager,
+    );
   }
 
   async getVideoContent(contentArea: HTMLElement): Promise<HTMLElement | null> {
@@ -26,7 +33,10 @@ export class ContentManager {
     return contentArea;
   }
 
-  async renderVideoContent(contentArea: HTMLElement, filteredItems?: VideoItem[]): Promise<HTMLElement | null> {
+  async renderVideoContent(
+    contentArea: HTMLElement,
+    filteredItems?: VideoItem[],
+  ): Promise<HTMLElement | null> {
     await this.videoContentContainer.render(contentArea, filteredItems);
     return contentArea;
   }
@@ -36,7 +46,10 @@ export class ContentManager {
     return contentArea;
   }
 
-  async renderMusicContent(contentArea: HTMLElement, filteredItems?: Metadata[]): Promise<HTMLElement | null> {
+  async renderMusicContent(
+    contentArea: HTMLElement,
+    filteredItems?: Metadata[],
+  ): Promise<HTMLElement | null> {
     await this.musicContentContainer.render(contentArea, filteredItems);
     return contentArea;
   }

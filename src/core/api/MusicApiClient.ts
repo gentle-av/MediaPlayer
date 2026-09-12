@@ -9,13 +9,16 @@ export class MusicApiClient {
 
   async getAlbumArtBlob(album: string, artist: string): Promise<Blob | null> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/music/albumart/by-album`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${this.baseUrl}/api/music/albumart/by-album`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ album, artist }),
         },
-        body: JSON.stringify({ album, artist }),
-      });
+      );
       if (!response.ok) {
         return null;
       }
@@ -63,7 +66,9 @@ export class MusicApiClient {
 
   async getTracksByArtist(artist: string): Promise<Metadata[]> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/music/tracks/artist/${encodeURIComponent(artist)}`);
+      const response = await fetch(
+        `${this.baseUrl}/api/music/tracks/artist/${encodeURIComponent(artist)}`,
+      );
       if (!response.ok) {
         throw new Error(`HTTP error status ${response.status}`);
       }
@@ -140,7 +145,9 @@ export class MusicApiClient {
     }
   }
 
-  async getAlbums(artist?: string): Promise<Array<{ album: string; artist: string; year: number }>> {
+  async getAlbums(
+    artist?: string,
+  ): Promise<Array<{ album: string; artist: string; year: number }>> {
     try {
       let url = `${this.baseUrl}/api/music/albums`;
       if (artist) {
@@ -226,12 +233,15 @@ export class MusicApiClient {
 
   async validatePlaylists(): Promise<void> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/music/validate-playlists`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await fetch(
+        `${this.baseUrl}/api/music/validate-playlists`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
         },
-      });
+      );
       if (!response.ok) {
         throw new Error(`HTTP error status ${response.status}`);
       }

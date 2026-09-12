@@ -19,11 +19,13 @@ export class AlbumControlsPanel {
     footerElement.className = 'modal-album-actions album-modal-custom-footer';
     const playBtn = document.createElement('button');
     playBtn.className = 'modal-play-btn';
-    playBtn.innerHTML = '<i class="fas fa-play"></i> <span>Воспроизвести</span>';
+    playBtn.innerHTML =
+      '<i class="fas fa-play"></i> <span>Воспроизвести</span>';
     playBtn.addEventListener('click', () => {
       if (this.albumTracks.length > 0) {
         const names = this.playlistStore.getPlaylistNames();
-        const activePlaylistName = names && names.length > 0 ? names[0] : 'Избранное';
+        const activePlaylistName =
+          names && names.length > 0 ? names[0] : 'Избранное';
         if (!this.playlistStore.getPlaylist(activePlaylistName)) {
           this.playlistStore.createPlaylist(activePlaylistName);
         } else {
@@ -33,49 +35,76 @@ export class AlbumControlsPanel {
         this.playlistStore.addTracksToPlaylist(activePlaylistName, filePaths);
         this.onCloseParent();
         this.playbackManager.playMusic(this.albumTracks[0]);
-        const currentTracks = this.playlistStore.getPlaylistTracks(activePlaylistName);
-        const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+        const currentTracks =
+          this.playlistStore.getPlaylistTracks(activePlaylistName);
+        const modal = new PlaylistModal(
+          currentTracks,
+          this.playbackManager,
+          this.playlistStore,
+        );
         modal.open();
       }
     });
     const addBtn = document.createElement('button');
     addBtn.className = 'modal-add-btn';
-    addBtn.innerHTML = '<i class="fas fa-plus"></i> <span>Добавить в плейлист</span>';
+    addBtn.innerHTML =
+      '<i class="fas fa-plus"></i> <span>Добавить в плейлист</span>';
     addBtn.addEventListener('click', () => {
       if (this.albumTracks.length > 0) {
         const names = this.playlistStore.getPlaylistNames();
-        const activePlaylistName = names && names.length > 0 ? names[0] : 'Избранное';
+        const activePlaylistName =
+          names && names.length > 0 ? names[0] : 'Избранное';
         if (!this.playlistStore.getPlaylist(activePlaylistName)) {
           this.playlistStore.createPlaylist(activePlaylistName);
         }
         const filePathsToPush: string[] = [];
         for (const track of this.albumTracks) {
-          if (!this.playlistStore.playlistHasTrack(activePlaylistName, track.filePath)) {
+          if (
+            !this.playlistStore.playlistHasTrack(
+              activePlaylistName,
+              track.filePath,
+            )
+          ) {
             filePathsToPush.push(track.filePath);
           }
         }
         if (filePathsToPush.length > 0) {
-          this.playlistStore.addTracksToPlaylist(activePlaylistName, filePathsToPush);
+          this.playlistStore.addTracksToPlaylist(
+            activePlaylistName,
+            filePathsToPush,
+          );
         }
         this.onCloseParent();
-        const currentTracks = this.playlistStore.getPlaylistTracks(activePlaylistName);
-        const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+        const currentTracks =
+          this.playlistStore.getPlaylistTracks(activePlaylistName);
+        const modal = new PlaylistModal(
+          currentTracks,
+          this.playbackManager,
+          this.playlistStore,
+        );
         modal.open();
       }
     });
     const editBtn = document.createElement('button');
     editBtn.className = 'modal-edit-album-btn';
-    editBtn.innerHTML = '<i class="fas fa-edit"></i> <span>Редактировать</span>';
+    editBtn.innerHTML =
+      '<i class="fas fa-edit"></i> <span>Редактировать</span>';
     editBtn.addEventListener('click', () => {
       if (this.albumTracks.length > 0) {
         const firstTrack = this.albumTracks[0];
-        const tagEditor = new AlbumTagEditorModal(firstTrack.album, firstTrack.artist, this.albumTracks, this.musicStore);
+        const tagEditor = new AlbumTagEditorModal(
+          firstTrack.album,
+          firstTrack.artist,
+          this.albumTracks,
+          this.musicStore,
+        );
         tagEditor.open();
       }
     });
     const deleteBtn = document.createElement('button');
     deleteBtn.className = 'modal-delete-album-btn';
-    deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> <span>Удалить</span>';
+    deleteBtn.innerHTML =
+      '<i class="fas fa-trash-alt"></i> <span>Удалить</span>';
     deleteBtn.style.setProperty('background', 'var(--red)', 'important');
     deleteBtn.style.setProperty('color', 'var(--bg0)', 'important');
     deleteBtn.addEventListener('click', () => {

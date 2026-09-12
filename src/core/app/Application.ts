@@ -20,8 +20,18 @@ export class Application {
     this.videoStore = new VideoStore();
     this.playlistStore = new PlaylistStore(this.musicStore);
     this.player = new Player();
-    this.playbackManager = new PlaybackManager(this.player, this.musicStore, this.videoStore);
-    this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager, this.player);
+    this.playbackManager = new PlaybackManager(
+      this.player,
+      this.musicStore,
+      this.videoStore,
+    );
+    this.mainFrame = new MainFrame(
+      this.musicStore,
+      this.videoStore,
+      this.playlistStore,
+      this.playbackManager,
+      this.player,
+    );
     this.initialize();
     this.render();
   }

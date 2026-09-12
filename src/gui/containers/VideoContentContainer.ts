@@ -18,17 +18,24 @@ export class VideoContentContainer {
     this.confirmModal = new ConfirmModal();
   }
 
-  public async render(targetElement: HTMLElement | null, items?: VideoItem[]): Promise<HTMLElement | null> {
+  public async render(
+    targetElement: HTMLElement | null,
+    items?: VideoItem[],
+  ): Promise<HTMLElement | null> {
     if (!targetElement) return null;
     if (!VideoContentContainer.isPopstateBound) {
       VideoContentContainer.isPopstateBound = true;
       window.addEventListener('popstate', async (event) => {
-        const targetPath = event.state && event.state.path ? event.state.path : '/mnt/video';
+        const targetPath =
+          event.state && event.state.path ? event.state.path : '/mnt/video';
         await this.videoStore.loadLibrary(targetPath);
         await this.render(targetElement);
       });
     }
-    if (this.videoStore.getItems().length === 0 && this.videoStore.getCurrentPath() === '/mnt/video') {
+    if (
+      this.videoStore.getItems().length === 0 &&
+      this.videoStore.getCurrentPath() === '/mnt/video'
+    ) {
       await this.videoStore.loadLibrary('/mnt/video');
       history.replaceState({ path: '/mnt/video' }, '');
     }
@@ -66,7 +73,10 @@ export class VideoContentContainer {
             action: async () => {
               if (item.isDirectory) {
                 await this.videoStore.navigateToFolder(item);
-                history.pushState({ path: this.videoStore.getCurrentPath() }, '');
+                history.pushState(
+                  { path: this.videoStore.getCurrentPath() },
+                  '',
+                );
                 await this.render(targetElement);
               } else if (item.isVideo) {
                 await this.playbackManager.playVideo(item);
@@ -83,7 +93,10 @@ export class VideoContentContainer {
                 true,
               );
               if (confirmDelete) {
-                await this.videoStore.removeFileSystemItem(item.path, item.isDirectory);
+                await this.videoStore.removeFileSystemItem(
+                  item.path,
+                  item.isDirectory,
+                );
                 await this.render(targetElement);
               }
             },
@@ -113,8 +126,14 @@ export class VideoContentContainer {
       boxSizing: 'border-box',
       overflow: 'hidden',
     });
-    cardElement.addEventListener('mouseenter', () => (cardElement.style.background = 'var(--bg2)'));
-    cardElement.addEventListener('mouseleave', () => (cardElement.style.background = 'transparent'));
+    cardElement.addEventListener(
+      'mouseenter',
+      () => (cardElement.style.background = 'var(--bg2)'),
+    );
+    cardElement.addEventListener(
+      'mouseleave',
+      () => (cardElement.style.background = 'transparent'),
+    );
     const iconContainer = document.createElement('div');
     Object.assign(iconContainer.style, {
       width: '48px',

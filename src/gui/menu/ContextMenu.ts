@@ -33,7 +33,9 @@ export class ContextMenu {
     });
     items.forEach((item) => {
       const itemElement = document.createElement('div');
-      itemElement.className = item.isDanger ? 'context-menu-item danger' : 'context-menu-item';
+      itemElement.className = item.isDanger
+        ? 'context-menu-item danger'
+        : 'context-menu-item';
       itemElement.textContent = item.label;
       Object.assign(itemElement.style, {
         padding: '10px 16px',
@@ -43,7 +45,9 @@ export class ContextMenu {
         transition: 'all 0.15s ease',
       });
       itemElement.addEventListener('mouseenter', () => {
-        itemElement.style.background = item.isDanger ? 'rgba(251, 73, 52, 0.15)' : 'var(--bg2)';
+        itemElement.style.background = item.isDanger
+          ? 'rgba(251, 73, 52, 0.15)'
+          : 'var(--bg2)';
       });
       itemElement.addEventListener('mouseleave', () => {
         itemElement.style.background = 'transparent';
@@ -62,8 +66,14 @@ export class ContextMenu {
   private positionMenu(x: number, y: number): void {
     if (!this.element) return;
     const rect = this.element.getBoundingClientRect();
-    const adjustedX = x + rect.width > window.innerWidth ? window.innerWidth - rect.width - 8 : x;
-    const adjustedY = y + rect.height > window.innerHeight ? window.innerHeight - rect.height - 8 : y;
+    const adjustedX =
+      x + rect.width > window.innerWidth
+        ? window.innerWidth - rect.width - 8
+        : x;
+    const adjustedY =
+      y + rect.height > window.innerHeight
+        ? window.innerHeight - rect.height - 8
+        : y;
     this.element.style.left = `${Math.max(0, adjustedX)}px`;
     this.element.style.top = `${Math.max(0, adjustedY)}px`;
   }

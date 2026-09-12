@@ -12,7 +12,9 @@ export class BaseApiClient<T> {
     this.endpoint = endpoint;
   }
   async getAll(): Promise<ApiResponse<T[]>> {
-    const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}`);
+    const response = await fetch(
+      `${Config.getConfig().baseUrl}/${this.endpoint}`,
+    );
     const data = await response.json();
     return {
       data,
@@ -20,7 +22,9 @@ export class BaseApiClient<T> {
     };
   }
   async getById(id: string | number): Promise<ApiResponse<T>> {
-    const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}/${id}`);
+    const response = await fetch(
+      `${Config.getConfig().baseUrl}/${this.endpoint}/${id}`,
+    );
     const data = await response.json();
     return {
       data,
@@ -28,37 +32,51 @@ export class BaseApiClient<T> {
     };
   }
   async create(entity: Omit<T, 'id'>): Promise<ApiResponse<T>> {
-    const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
+    const response = await fetch(
+      `${Config.getConfig().baseUrl}/${this.endpoint}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(entity),
       },
-      body: JSON.stringify(entity),
-    });
+    );
     const data = await response.json();
     return {
       data,
       status: response.status,
     };
   }
-  async update(id: string | number, entity: Partial<T>): Promise<ApiResponse<T>> {
-    const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}/${id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
+  async update(
+    id: string | number,
+    entity: Partial<T>,
+  ): Promise<ApiResponse<T>> {
+    const response = await fetch(
+      `${Config.getConfig().baseUrl}/${this.endpoint}/${id}`,
+      {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(entity),
       },
-      body: JSON.stringify(entity),
-    });
+    );
     const data = await response.json();
     return {
       data,
       status: response.status,
     };
   }
-  async delete(id: string | number): Promise<ApiResponse<{ success: boolean }>> {
-    const response = await fetch(`${Config.getConfig().baseUrl}/${this.endpoint}/${id}`, {
-      method: 'DELETE',
-    });
+  async delete(
+    id: string | number,
+  ): Promise<ApiResponse<{ success: boolean }>> {
+    const response = await fetch(
+      `${Config.getConfig().baseUrl}/${this.endpoint}/${id}`,
+      {
+        method: 'DELETE',
+      },
+    );
     const data = await response.json();
     return {
       data,

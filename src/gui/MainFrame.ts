@@ -25,11 +25,22 @@ export class MainFrame {
     private player: Player,
   ) {
     this.settings = new Settings();
-    this.contentManager = new ContentManager(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager);
-    this.header = new Header(this.musicStore, this.playlistStore, this.playbackManager);
-    this.sidebar = new Sidebar((selectedTab: 'video' | 'audio' | 'settings') => {
-      this.switchTab(selectedTab);
-    });
+    this.contentManager = new ContentManager(
+      this.musicStore,
+      this.videoStore,
+      this.playlistStore,
+      this.playbackManager,
+    );
+    this.header = new Header(
+      this.musicStore,
+      this.playlistStore,
+      this.playbackManager,
+    );
+    this.sidebar = new Sidebar(
+      (selectedTab: 'video' | 'audio' | 'settings') => {
+        this.switchTab(selectedTab);
+      },
+    );
   }
 
   public render(): HTMLElement {
@@ -69,11 +80,17 @@ export class MainFrame {
     }
   }
 
-  private async switchTab(targetTab: 'video' | 'audio' | 'settings'): Promise<void> {
+  private async switchTab(
+    targetTab: 'video' | 'audio' | 'settings',
+  ): Promise<void> {
     this.currentTab = targetTab;
     this.activeSearchTerm = '';
-    const searchInput = document.getElementById('globalSearchInput') as HTMLInputElement;
-    const clearButton = document.querySelector('.search-clear-btn') as HTMLElement;
+    const searchInput = document.getElementById(
+      'globalSearchInput',
+    ) as HTMLInputElement;
+    const clearButton = document.querySelector(
+      '.search-clear-btn',
+    ) as HTMLElement;
     if (searchInput) {
       searchInput.value = '';
     }
@@ -92,7 +109,9 @@ export class MainFrame {
     await this.updateContent(targetTab);
   }
 
-  private async updateContent(activeTab: 'video' | 'audio' | 'settings'): Promise<void> {
+  private async updateContent(
+    activeTab: 'video' | 'audio' | 'settings',
+  ): Promise<void> {
     if (!this.contentArea) {
       return;
     }
@@ -101,28 +120,42 @@ export class MainFrame {
       case 'video':
         if (this.activeSearchTerm) {
           const filteredVideos = this.videoStore.search(this.activeSearchTerm);
-          await this.contentManager.renderVideoContent(this.contentArea, filteredVideos);
+          await this.contentManager.renderVideoContent(
+            this.contentArea,
+            filteredVideos,
+          );
         } else {
           await this.contentManager.getVideoContent(this.contentArea);
         }
         break;
       case 'audio':
         if (this.activeSearchTerm) {
-          const filteredTracks = this.musicStore.searchTracks(this.activeSearchTerm);
-          await this.contentManager.renderMusicContent(this.contentArea, filteredTracks);
+          const filteredTracks = this.musicStore.searchTracks(
+            this.activeSearchTerm,
+          );
+          await this.contentManager.renderMusicContent(
+            this.contentArea,
+            filteredTracks,
+          );
         } else {
           await this.contentManager.getMusicContent(this.contentArea);
         }
         break;
       case 'settings':
         this.contentArea.innerHTML = '';
-        tabPlaceholderElement = this.createPlaceholderContent('settings', '⚙️ Настройки');
+        tabPlaceholderElement = this.createPlaceholderContent(
+          'settings',
+          '⚙️ Настройки',
+        );
         this.contentArea.appendChild(tabPlaceholderElement);
         break;
     }
   }
 
-  private createPlaceholderContent(contentType: string, placeholderText: string): HTMLElement {
+  private createPlaceholderContent(
+    contentType: string,
+    placeholderText: string,
+  ): HTMLElement {
     const fallbackContainerElement = document.createElement('div');
     fallbackContainerElement.className = 'content-grid';
     fallbackContainerElement.textContent = placeholderText;
@@ -130,13 +163,17 @@ export class MainFrame {
   }
 
   private bindPlayerControls(renderedAppElement: HTMLElement): void {
-    const playPauseButtonElement = renderedAppElement.querySelector('.universal-bottom-player-play');
+    const playPauseButtonElement = renderedAppElement.querySelector(
+      '.universal-bottom-player-play',
+    );
     if (playPauseButtonElement) {
       playPauseButtonElement.addEventListener('click', () => {
         this.playbackManager.togglePlay();
       });
     }
-    const stopButtonElement = renderedAppElement.querySelector('.universal-bottom-player-stop');
+    const stopButtonElement = renderedAppElement.querySelector(
+      '.universal-bottom-player-stop',
+    );
     if (stopButtonElement) {
       stopButtonElement.addEventListener('click', () => {
         this.playbackManager.stop();
@@ -150,12 +187,18 @@ export class MainFrame {
       if (this.currentTab === 'video') {
         const filteredVideos = this.videoStore.search(searchTerm);
         if (this.contentArea) {
-          await this.contentManager.renderVideoContent(this.contentArea, filteredVideos);
+          await this.contentManager.renderVideoContent(
+            this.contentArea,
+            filteredVideos,
+          );
         }
       } else if (this.currentTab === 'audio') {
         const filteredTracks = this.musicStore.searchTracks(searchTerm);
         if (this.contentArea) {
-          await this.contentManager.renderMusicContent(this.contentArea, filteredTracks);
+          await this.contentManager.renderMusicContent(
+            this.contentArea,
+            filteredTracks,
+          );
         }
       }
     }, containerElement);

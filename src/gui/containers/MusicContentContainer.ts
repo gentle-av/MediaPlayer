@@ -11,14 +11,18 @@ export class MusicContentContainer {
     private readonly playbackManager: PlaybackManager,
   ) {}
 
-  public async render(targetElement: HTMLElement | null, items?: Metadata[]): Promise<HTMLElement | null> {
+  public async render(
+    targetElement: HTMLElement | null,
+    items?: Metadata[],
+  ): Promise<HTMLElement | null> {
     if (!targetElement) {
       return null;
     }
     targetElement.innerHTML = '';
     const activeTracks = items || this.musicStore.getAllTracks();
     if (activeTracks.length === 0) {
-      targetElement.innerHTML = '<div class="empty">🎵 Альбомы не найдены</div>';
+      targetElement.innerHTML =
+        '<div class="empty">🎵 Альбомы не найдены</div>';
       return null;
     }
     const gridElement = document.createElement('div');

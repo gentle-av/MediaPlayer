@@ -1,4 +1,4 @@
-import { Metadata } from "./Metadata.js"
+import { Metadata } from './Metadata.js';
 
 export class MusicLibrary {
   private library: Array<Metadata> = new Array<Metadata>();
@@ -8,7 +8,9 @@ export class MusicLibrary {
       throw new Error('Track cannot be null or undefined');
     }
     if (this.findTrackByPath(track.filePath)) {
-      throw new Error(`Track with path "${track.filePath}" already exists in library`);
+      throw new Error(
+        `Track with path "${track.filePath}" already exists in library`,
+      );
     }
     this.library.push(track);
   }
@@ -17,7 +19,9 @@ export class MusicLibrary {
     if (!filePath || !filePath.trim()) {
       throw new Error('File path is required');
     }
-    const index = this.library.findIndex(track => track.filePath === filePath);
+    const index = this.library.findIndex(
+      (track) => track.filePath === filePath,
+    );
     if (index === -1) {
       throw new Error(`Track with path "${filePath}" not found in library`);
     }
@@ -26,13 +30,15 @@ export class MusicLibrary {
 
   removeTrackByIndex(index: number): void {
     if (index < 0 || index >= this.library.length) {
-      throw new Error(`Index ${index} is out of bounds. Music library size: ${this.library.length}`);
+      throw new Error(
+        `Index ${index} is out of bounds. Music library size: ${this.library.length}`,
+      );
     }
     this.library.splice(index, 1);
   }
 
   private findTrackByPath(filePath: string): Metadata | undefined {
-    return this.library.find(track => track.filePath === filePath);
+    return this.library.find((track) => track.filePath === filePath);
   }
 
   get size(): number {
@@ -50,7 +56,7 @@ export class MusicLibrary {
   toJSON() {
     return {
       size: this.library.length,
-      tracks: this.library.map(track => track.toJSON())
+      tracks: this.library.map((track) => track.toJSON()),
     };
   }
 }

@@ -72,7 +72,9 @@ export class VideoStore {
 
   search(term: string): VideoItem[] {
     if (!this.currentLibrary) return [];
-    return this.currentLibrary.items.filter((item) => item.name.toLowerCase().includes(term.toLowerCase()));
+    return this.currentLibrary.items.filter((item) =>
+      item.name.toLowerCase().includes(term.toLowerCase()),
+    );
   }
 
   clear(): void {
@@ -86,7 +88,10 @@ export class VideoStore {
     }
   }
 
-  public async removeFileSystemItem(itemPath: string, isDirectoryItem: boolean): Promise<void> {
+  public async removeFileSystemItem(
+    itemPath: string,
+    isDirectoryItem: boolean,
+  ): Promise<void> {
     if (isDirectoryItem) {
       await this.videoApiClient.deleteDirectory(itemPath);
     } else {

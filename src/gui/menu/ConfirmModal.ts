@@ -1,7 +1,11 @@
 export class ConfirmModal {
   private container: HTMLElement | null = null;
 
-  public show(title: string, message: string, isDanger: boolean = false): Promise<boolean> {
+  public show(
+    title: string,
+    message: string,
+    isDanger: boolean = false,
+  ): Promise<boolean> {
     return new Promise((resolve) => {
       this.container = document.createElement('div');
       this.container.className = 'confirm-modal';

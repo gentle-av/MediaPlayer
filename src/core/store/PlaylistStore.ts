@@ -1,6 +1,6 @@
-import { Metadata } from "../entities/music/Metadata.js";
-import { MusicStore } from "./MusicStore.js";
-import { Playlist } from "../entities/music/Playlist.js";
+import { Metadata } from '../entities/music/Metadata.js';
+import { MusicStore } from './MusicStore.js';
+import { Playlist } from '../entities/music/Playlist.js';
 
 export class PlaylistStore {
   private musicStore: MusicStore;
@@ -16,12 +16,12 @@ export class PlaylistStore {
   subscribe(listener: () => void): () => void {
     this.listeners.push(listener);
     return () => {
-      this.listeners = this.listeners.filter(l => l !== listener);
+      this.listeners = this.listeners.filter((l) => l !== listener);
     };
   }
 
   private notifyListeners(): void {
-    this.listeners.forEach(listener => listener());
+    this.listeners.forEach((listener) => listener());
   }
 
   createPlaylist(name: string): void {
@@ -73,7 +73,9 @@ export class PlaylistStore {
     }
     const track = this.musicStore.getTrack(filePath);
     if (!track) {
-      throw new Error(`Track with path "${filePath}" not found in music library`);
+      throw new Error(
+        `Track with path "${filePath}" not found in music library`,
+      );
     }
     const trimmedName = playlistName.trim();
     const playlist = this.playlists.get(trimmedName);
@@ -99,7 +101,9 @@ export class PlaylistStore {
     for (const filePath of filePaths) {
       const track = this.musicStore.getTrack(filePath);
       if (!track) {
-        throw new Error(`Track with path "${filePath}" not found in music library`);
+        throw new Error(
+          `Track with path "${filePath}" not found in music library`,
+        );
       }
       playlist.addTrack(filePath);
     }
@@ -134,7 +138,9 @@ export class PlaylistStore {
     const trackPaths = playlist.getTrackPaths();
     return trackPaths
       .map((path: string) => this.musicStore.getTrack(path))
-      .filter((track: Metadata | undefined): track is Metadata => track !== undefined);
+      .filter(
+        (track: Metadata | undefined): track is Metadata => track !== undefined,
+      );
   }
 
   getPlaylistTrackPaths(playlistName: string): string[] {
@@ -216,8 +222,8 @@ export class PlaylistStore {
       return this.getAllPlaylists();
     }
     const lowerQuery = query.toLowerCase().trim();
-    return this.getAllPlaylists().filter(playlist =>
-      playlist.playlistName.toLowerCase().includes(lowerQuery)
+    return this.getAllPlaylists().filter((playlist) =>
+      playlist.playlistName.toLowerCase().includes(lowerQuery),
     );
   }
 
@@ -233,33 +239,38 @@ export class PlaylistStore {
     const trackPaths = playlist.getTrackPaths();
     const tracks = trackPaths
       .map((path: string) => this.musicStore.getTrack(path))
-      .filter((track: Metadata | undefined): track is Metadata => track !== undefined);
+      .filter(
+        (track: Metadata | undefined): track is Metadata => track !== undefined,
+      );
     if (!query || !query.trim()) {
       return tracks;
     }
     const lowerQuery = query.toLowerCase().trim();
-    return tracks.filter(track =>
-      track.title.toLowerCase().includes(lowerQuery) ||
-      track.artist.toLowerCase().includes(lowerQuery) ||
-      track.album.toLowerCase().includes(lowerQuery) ||
-      track.genre.toLowerCase().includes(lowerQuery)
+    return tracks.filter(
+      (track) =>
+        track.title.toLowerCase().includes(lowerQuery) ||
+        track.artist.toLowerCase().includes(lowerQuery) ||
+        track.album.toLowerCase().includes(lowerQuery) ||
+        track.genre.toLowerCase().includes(lowerQuery),
     );
   }
 
   getPlaylistStatistics(): { totalPlaylists: number; totalTracks: number } {
     let totalTracks = 0;
-    this.playlists.forEach(playlist => {
+    this.playlists.forEach((playlist) => {
       totalTracks += playlist.size;
     });
     return {
       totalPlaylists: this.playlists.size,
-      totalTracks: totalTracks
+      totalTracks: totalTracks,
     };
   }
 
   toJSON(): any {
     return {
-      playlists: Array.from(this.playlists.values()).map(playlist => playlist.toJSON())
+      playlists: Array.from(this.playlists.values()).map((playlist) =>
+        playlist.toJSON(),
+      ),
     };
   }
 }

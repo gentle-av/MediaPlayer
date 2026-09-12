@@ -59,16 +59,27 @@ export class Header {
     }
   }
 
-  public bindSearch(onSearch: (searchTerm: string) => void, containerElement: HTMLElement): void {
-    const searchInput = containerElement.querySelector('#globalSearchInput') as HTMLInputElement;
-    const clearButton = containerElement.querySelector('#globalSearchBox .search-clear-btn') as HTMLElement;
+  public bindSearch(
+    onSearch: (searchTerm: string) => void,
+    containerElement: HTMLElement,
+  ): void {
+    const searchInput = containerElement.querySelector(
+      '#globalSearchInput',
+    ) as HTMLInputElement;
+    const clearButton = containerElement.querySelector(
+      '#globalSearchBox .search-clear-btn',
+    ) as HTMLElement;
     if (!searchInput) {
       return;
     }
     searchInput.addEventListener('input', (event) => {
       const currentTerm = (event.target as HTMLInputElement).value;
       if (clearButton) {
-        clearButton.style.setProperty('display', currentTerm.length > 0 ? 'flex' : 'none', 'important');
+        clearButton.style.setProperty(
+          'display',
+          currentTerm.length > 0 ? 'flex' : 'none',
+          'important',
+        );
       }
       onSearch(currentTerm);
     });
@@ -135,7 +146,11 @@ export class Header {
     playlistBtn.appendChild(badge);
     playlistBtn.addEventListener('click', () => {
       const currentTracks = this.musicStore.getAllTracks();
-      const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+      const modal = new PlaylistModal(
+        currentTracks,
+        this.playbackManager,
+        this.playlistStore,
+      );
       modal.open();
     });
     return playlistBtn;
