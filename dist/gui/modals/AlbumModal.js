@@ -17,7 +17,7 @@ export class AlbumModal {
         modalContent.className = 'modal-content';
         const header = this.createHeader();
         const body = this.createBody();
-        const controlsPanel = new AlbumControlsPanel(this.albumTracks, this.playbackManager, () => this.close());
+        const controlsPanel = new AlbumControlsPanel(this.albumTracks, this.playbackManager, this.musicStore, () => this.close());
         const footer = controlsPanel.render();
         modalContent.append(header, body, footer);
         this.modalElement.appendChild(modalContent);

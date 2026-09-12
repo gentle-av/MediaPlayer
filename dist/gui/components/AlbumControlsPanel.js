@@ -1,7 +1,9 @@
+import { AlbumTagEditorModal } from '../modals/AlbumTagEditorModal.js';
 export class AlbumControlsPanel {
-    constructor(albumTracks, playbackManager, onCloseParent) {
+    constructor(albumTracks, playbackManager, musicStore, onCloseParent) {
         this.albumTracks = albumTracks;
         this.playbackManager = playbackManager;
+        this.musicStore = musicStore;
         this.onCloseParent = onCloseParent;
     }
     render() {
@@ -25,7 +27,11 @@ export class AlbumControlsPanel {
         editBtn.className = 'modal-edit-album-btn';
         editBtn.innerHTML = '<i class="fas fa-edit"></i> <span>Редактировать</span>';
         editBtn.addEventListener('click', () => {
-            console.log('Открытие редактора тегов для альбома');
+            if (this.albumTracks.length > 0) {
+                const firstTrack = this.albumTracks[0];
+                const tagEditor = new AlbumTagEditorModal(firstTrack.album, firstTrack.artist, this.albumTracks, this.musicStore);
+                tagEditor.open();
+            }
         });
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'modal-delete-album-btn';
