@@ -22,15 +22,6 @@ export class PlaybackManager {
     this.initSubscriptions();
   }
 
-  private initSubscriptions(): void {
-    this.unsubscribeMusic = this.musicStore.subscribe(() => {
-      const activeTrack = this.musicStore.getCurrentTrack();
-      if (activeTrack && this.currentType !== 'music') {
-        this.playMusic(activeTrack);
-      }
-    });
-  }
-
   public async playVideo(videoItem: VideoItem): Promise<void> {
     this.stopCurrentPlayback();
     this.currentType = 'video';
@@ -56,7 +47,7 @@ export class PlaybackManager {
       body: JSON.stringify({ path: track.filePath }),
     })
       .then((response) => {
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error status ${response.status}`);
         return response.json();
       })
       .then((data) => {
@@ -66,7 +57,7 @@ export class PlaybackManager {
         }
       })
       .catch((error) => {
-        console.error('Ошибка запуска воспроизведения на сервере:', error);
+        console.error(error);
       });
     if (this.musicStore.getCurrentTrack() !== track) {
       this.musicStore.setCurrentTrack(track);
@@ -76,7 +67,7 @@ export class PlaybackManager {
   public async togglePlay(): Promise<void> {
     if (this.currentType === 'music') {
       if (this.isAudioPaused) {
-        (this.player as any).audioEngine.play().catch((playbackError: Error) => console.error(playbackError));
+        (this.player as any).audioEngine.play().catch((error: Error) => console.error(error));
         this.isAudioPaused = false;
         this.player.setPlayState(true);
       } else {
@@ -86,17 +77,17 @@ export class PlaybackManager {
       }
     } else if (this.currentType === 'video') {
       try {
-        const toggleResponse = await fetch(`${Config.getConfig().baseUrl}/api/video/toggle-play`, {
+        const response = await fetch(`${Config.getConfig().baseUrl}/api/video/toggle-play`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ path: this.currentVideoPath }),
         });
-        if (toggleResponse.ok) {
-          const playbackStatus = await toggleResponse.json();
-          this.player.setPlayState(playbackStatus.isPlaying);
+        if (response.ok) {
+          const status = await response.json();
+          this.player.setPlayState(status.isPlaying);
         }
-      } catch (networkError) {
-        console.error(networkError);
+      } catch (error) {
+        console.error(error);
       }
     }
   }
@@ -108,8 +99,8 @@ export class PlaybackManager {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
         });
-      } catch (networkError) {
-        console.error(networkError);
+      } catch (error) {
+        console.error(error);
       }
     }
     this.stopCurrentPlayback();
@@ -119,14 +110,13 @@ export class PlaybackManager {
     if (this.currentType !== 'music') {
       return;
     }
-    const activeTrack = this.musicStore.getCurrentTrack();
-    if (!activeTrack) {
+    const track = this.musicStore.getCurrentTrack();
+    if (!track) {
       return;
     }
-    const currentTrackIndex = this.musicStore.getTrackIndex(activeTrack);
-    const nextTrackIndex = currentTrackIndex + 1;
-    if (nextTrackIndex < this.musicStore.getLibrarySize()) {
-      const nextTrack = this.musicStore.getTrackByIndex(nextTrackIndex);
+    const nextIndex = this.musicStore.getTrackIndex(track) + 1;
+    if (nextIndex < this.musicStore.getLibrarySize()) {
+      const nextTrack = this.musicStore.getTrackByIndex(nextIndex);
       if (nextTrack) {
         this.playMusic(nextTrack);
       }
@@ -137,42 +127,17 @@ export class PlaybackManager {
     if (this.currentType !== 'music') {
       return;
     }
-    const activeTrack = this.musicStore.getCurrentTrack();
-    if (!activeTrack) {
+    const track = this.musicStore.getCurrentTrack();
+    if (!track) {
       return;
     }
-    const currentTrackIndex = this.musicStore.getTrackIndex(activeTrack);
-    const previousTrackIndex = currentTrackIndex - 1;
-    if (previousTrackIndex >= 0) {
-      const previousTrack = this.musicStore.getTrackByIndex(previousTrackIndex);
+    const previousIndex = this.musicStore.getTrackIndex(track) - 1;
+    if (previousIndex >= 0) {
+      const previousTrack = this.musicStore.getTrackByIndex(previousIndex);
       if (previousTrack) {
         this.playMusic(previousTrack);
       }
     }
-  }
-
-  private startVideoPolling(videoPath: string): void {
-    if (this.pollingIntervalId) {
-      clearInterval(this.pollingIntervalId);
-    }
-    this.pollingIntervalId = window.setInterval(async () => {
-      try {
-        const statusResponse = await fetch(`${Config.getConfig().baseUrl}/api/video/status?path=${encodeURIComponent(videoPath)}`);
-        const remoteStatus = await statusResponse.json();
-        if (remoteStatus.currentTime !== undefined && remoteStatus.duration !== undefined) {
-          this.player.updateProgress(remoteStatus.currentTime, remoteStatus.duration);
-        }
-        if (remoteStatus.ended || remoteStatus.isPlaying === false) {
-          this.stopCurrentPlayback();
-        }
-      } catch (pollingError) {
-        console.error(pollingError);
-      }
-    }, 1000);
-  }
-
-  private handleMusicFinished(): void {
-    this.playNextTrack();
   }
 
   public stopCurrentPlayback(): void {
@@ -195,5 +160,34 @@ export class PlaybackManager {
       this.unsubscribeMusic();
     }
     this.stopCurrentPlayback();
+  }
+
+  private initSubscriptions(): void {
+    this.unsubscribeMusic = this.musicStore.subscribe(() => {
+      const track = this.musicStore.getCurrentTrack();
+      if (track && this.currentType !== 'music') {
+        this.playMusic(track);
+      }
+    });
+  }
+
+  private startVideoPolling(videoPath: string): void {
+    if (this.pollingIntervalId) {
+      clearInterval(this.pollingIntervalId);
+    }
+    this.pollingIntervalId = window.setInterval(async () => {
+      try {
+        const response = await fetch(`${Config.getConfig().baseUrl}/api/video/status?path=${encodeURIComponent(videoPath)}`);
+        const status = await response.json();
+        if (status.currentTime !== undefined && status.duration !== undefined) {
+          this.player.updateProgress(status.currentTime, status.duration);
+        }
+        if (status.ended || status.isPlaying === false) {
+          this.stopCurrentPlayback();
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }, 1000);
   }
 }
