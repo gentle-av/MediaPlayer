@@ -1,4 +1,4 @@
-import { Config } from "../config/Config.js";
+import { Config } from '../config/Config.js';
 export class BaseApiClient {
     constructor(endpoint) {
         this.endpoint = endpoint;
@@ -8,7 +8,7 @@ export class BaseApiClient {
         const data = await response.json();
         return {
             data,
-            status: response.status
+            status: response.status,
         };
     }
     async getById(id) {
@@ -16,7 +16,7 @@ export class BaseApiClient {
         const data = await response.json();
         return {
             data,
-            status: response.status
+            status: response.status,
         };
     }
     async create(entity) {
@@ -30,7 +30,7 @@ export class BaseApiClient {
         const data = await response.json();
         return {
             data,
-            status: response.status
+            status: response.status,
         };
     }
     async update(id, entity) {
@@ -44,7 +44,7 @@ export class BaseApiClient {
         const data = await response.json();
         return {
             data,
-            status: response.status
+            status: response.status,
         };
     }
     async delete(id) {
@@ -54,7 +54,7 @@ export class BaseApiClient {
         const data = await response.json();
         return {
             data,
-            status: response.status
+            status: response.status,
         };
     }
 }

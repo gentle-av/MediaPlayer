@@ -1,15 +1,8 @@
-import { Metadata } from '../entities/music/Metadata.js';
 import { Config } from '../config/Config.js';
-
-export interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
+import { Metadata } from '../entities/music/Metadata.js';
 
 export class MusicApiClient {
   private baseUrl: string;
-
   constructor() {
     this.baseUrl = Config.getConfig().baseUrl;
   }
@@ -21,17 +14,14 @@ export class MusicApiClient {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          album: album,
-          artist: artist,
-        }),
+        body: JSON.stringify({ album, artist }),
       });
       if (!response.ok) {
         return null;
       }
       return await response.blob();
     } catch (error) {
-      console.error('Error fetching album art blob:', error);
+      console.error(error);
       return null;
     }
   }
@@ -40,14 +30,13 @@ export class MusicApiClient {
     try {
       const response = await fetch(`${this.baseUrl}/api/music/list`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status ${response.status}`);
       }
       const data = await response.json();
       if (!data.success) {
         throw new Error(data.error || 'Failed to fetch tracks');
       }
       const tracks: Metadata[] = [];
-      const problematicPaths: string[] = [];
       for (const file of data.files) {
         try {
           const track = new Metadata(
@@ -62,13 +51,12 @@ export class MusicApiClient {
           );
           tracks.push(track);
         } catch (error) {
-          console.warn('❌ Skipping track due to validation error:', file.path);
-          problematicPaths.push(file.path);
+          console.warn(error);
         }
       }
       return tracks;
     } catch (error) {
-      console.error('Error fetching tracks:', error);
+      console.error(error);
       throw error;
     }
   }
@@ -77,7 +65,7 @@ export class MusicApiClient {
     try {
       const response = await fetch(`${this.baseUrl}/api/music/tracks/artist/${encodeURIComponent(artist)}`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status ${response.status}`);
       }
       const data = await response.json();
       if (!data.success) {
@@ -97,7 +85,7 @@ export class MusicApiClient {
           ),
       );
     } catch (error) {
-      console.error(`Error fetching tracks for artist ${artist}:`, error);
+      console.error(error);
       throw error;
     }
   }
@@ -110,7 +98,7 @@ export class MusicApiClient {
       }
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status ${response.status}`);
       }
       const data = await response.json();
       if (!data.success) {
@@ -130,7 +118,7 @@ export class MusicApiClient {
           ),
       );
     } catch (error) {
-      console.error(`Error fetching tracks for album ${album}:`, error);
+      console.error(error);
       throw error;
     }
   }
@@ -139,7 +127,7 @@ export class MusicApiClient {
     try {
       const response = await fetch(`${this.baseUrl}/api/music/artists`);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status ${response.status}`);
       }
       const data = await response.json();
       if (!data.success) {
@@ -147,7 +135,7 @@ export class MusicApiClient {
       }
       return data.artists || [];
     } catch (error) {
-      console.error('Error fetching artists:', error);
+      console.error(error);
       throw error;
     }
   }
@@ -160,7 +148,7 @@ export class MusicApiClient {
       }
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status ${response.status}`);
       }
       const data = await response.json();
       if (!data.success) {
@@ -168,7 +156,7 @@ export class MusicApiClient {
       }
       return data.albums || [];
     } catch (error) {
-      console.error('Error fetching albums:', error);
+      console.error(error);
       throw error;
     }
   }
@@ -195,7 +183,7 @@ export class MusicApiClient {
       }
       const response = await fetch(url);
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status ${response.status}`);
       }
       const data = await response.json();
       if (!data.success) {
@@ -206,7 +194,7 @@ export class MusicApiClient {
         pagination: data.pagination || {},
       };
     } catch (error) {
-      console.error('Error fetching albums with pagination:', error);
+      console.error(error);
       throw error;
     }
   }
@@ -224,14 +212,14 @@ export class MusicApiClient {
         },
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status ${response.status}`);
       }
       const data = await response.json();
       if (!data.success) {
         throw new Error(data.error || 'Failed to rescan');
       }
     } catch (error) {
-      console.error('Error during rescan:', error);
+      console.error(error);
       throw error;
     }
   }
@@ -245,14 +233,14 @@ export class MusicApiClient {
         },
       });
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        throw new Error(`HTTP error status ${response.status}`);
       }
       const data = await response.json();
       if (!data.success) {
         throw new Error(data.error || 'Failed to validate playlists');
       }
     } catch (error) {
-      console.error('Error validating playlists:', error);
+      console.error(error);
       throw error;
     }
   }
