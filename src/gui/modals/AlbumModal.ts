@@ -1,6 +1,7 @@
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
+import { PlaylistStore } from '../../core/store/PlaylistStore.js';
 import { AlbumControlsPanel } from '../components/AlbumControlsPanel.js';
 
 export class AlbumModal {
@@ -13,6 +14,7 @@ export class AlbumModal {
     private readonly albumTracks: Metadata[],
     private readonly playbackManager: PlaybackManager,
     private readonly musicStore: MusicStore,
+    private readonly playlistStore: PlaylistStore,
   ) {}
 
   public open(): void {
@@ -23,7 +25,9 @@ export class AlbumModal {
     modalContent.className = 'modal-content';
     const header = this.createHeader();
     const body = this.createBody();
-    const controlsPanel = new AlbumControlsPanel(this.albumTracks, this.playbackManager, this.musicStore, () => this.close());
+    const controlsPanel = new AlbumControlsPanel(this.albumTracks, this.playbackManager, this.playlistStore, this.musicStore, () =>
+      this.close(),
+    );
     const footer = controlsPanel.render();
     modalContent.append(header, body, footer);
     this.modalElement.appendChild(modalContent);

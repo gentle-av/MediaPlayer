@@ -1,14 +1,85 @@
 import { PlaylistModal } from './modals/PlaylistModal.js';
-
-declare global {
-  interface Window {
-    app: any;
-  }
-}
+import { MusicStore } from '../core/store/MusicStore.js';
+import { PlaylistStore } from '../core/store/PlaylistStore.js';
+import { PlaybackManager } from '../core/player/PlaybackManager.js';
 
 export class Header {
   private pageTitleElement: HTMLElement | null = null;
   private titleIconElement: HTMLElement | null = null;
+
+  constructor(
+    private musicStore: MusicStore,
+    private playlistStore: PlaylistStore,
+    private playbackManager: PlaybackManager,
+  ) {}
+
+  public render(): HTMLElement {
+    const header = document.createElement('header');
+    header.className = 'app-header';
+    const titleSection = document.createElement('div');
+    titleSection.className = 'header-title-section';
+    this.pageTitleElement = this.createPageTitle();
+    titleSection.appendChild(this.pageTitleElement);
+    header.appendChild(titleSection);
+    const controlsSection = document.createElement('div');
+    controlsSection.className = 'header-controls-section';
+    controlsSection.appendChild(this.createSearch());
+    controlsSection.appendChild(this.createPlaylistButton());
+    header.appendChild(controlsSection);
+    return header;
+  }
+
+  public setTitleIcon(iconClass: string): void {
+    if (this.titleIconElement) {
+      this.titleIconElement.className = '';
+      this.titleIconElement.className = `fas ${iconClass}`;
+    }
+  }
+
+  public setTitleText(text: string): void {
+    if (this.pageTitleElement) {
+      const icon = this.pageTitleElement.querySelector('i');
+      this.pageTitleElement.innerHTML = '';
+      if (icon) {
+        this.pageTitleElement.appendChild(icon);
+      }
+      this.pageTitleElement.appendChild(document.createTextNode(` ${text}`));
+    }
+  }
+
+  public setTitle(iconClass: string, text: string): void {
+    this.setTitleIcon(iconClass);
+    this.setTitleText(text);
+  }
+
+  public togglePlaylistButtonVisibility(isVisible: boolean): void {
+    const playlistBtn = document.getElementById('headerPlaylistBtn');
+    if (playlistBtn) {
+      playlistBtn.style.display = isVisible ? 'flex' : 'none';
+    }
+  }
+
+  public bindSearch(onSearch: (searchTerm: string) => void, containerElement: HTMLElement): void {
+    const searchInput = containerElement.querySelector('#globalSearchInput') as HTMLInputElement;
+    const clearButton = containerElement.querySelector('#globalSearchBox .search-clear-btn') as HTMLElement;
+    if (!searchInput) {
+      return;
+    }
+    searchInput.addEventListener('input', (event) => {
+      const currentTerm = (event.target as HTMLInputElement).value;
+      if (clearButton) {
+        clearButton.style.setProperty('display', currentTerm.length > 0 ? 'flex' : 'none', 'important');
+      }
+      onSearch(currentTerm);
+    });
+    if (clearButton) {
+      clearButton.addEventListener('click', () => {
+        searchInput.value = '';
+        clearButton.style.setProperty('display', 'none', 'important');
+        onSearch('');
+      });
+    }
+  }
 
   private createSearch(): HTMLElement {
     const searchWrapper = document.createElement('div');
@@ -40,22 +111,6 @@ export class Header {
     return searchWrapper;
   }
 
-  render(): HTMLElement {
-    const header = document.createElement('header');
-    header.className = 'app-header';
-    const titleSection = document.createElement('div');
-    titleSection.className = 'header-title-section';
-    this.pageTitleElement = this.createPageTitle();
-    titleSection.appendChild(this.pageTitleElement);
-    header.appendChild(titleSection);
-    const controlsSection = document.createElement('div');
-    controlsSection.className = 'header-controls-section';
-    controlsSection.appendChild(this.createSearch());
-    controlsSection.appendChild(this.createPlaylistButton());
-    header.appendChild(controlsSection);
-    return header;
-  }
-
   private createPageTitle(): HTMLElement {
     const pageTitle = document.createElement('h1');
     pageTitle.className = 'page-title';
@@ -64,29 +119,6 @@ export class Header {
     pageTitle.appendChild(this.titleIconElement);
     pageTitle.appendChild(document.createTextNode(' Video'));
     return pageTitle;
-  }
-
-  setTitleIcon(iconClass: string): void {
-    if (this.titleIconElement) {
-      this.titleIconElement.className = '';
-      this.titleIconElement.className = `fas ${iconClass}`;
-    }
-  }
-
-  setTitleText(text: string): void {
-    if (this.pageTitleElement) {
-      const icon = this.pageTitleElement.querySelector('i');
-      this.pageTitleElement.innerHTML = '';
-      if (icon) {
-        this.pageTitleElement.appendChild(icon);
-      }
-      this.pageTitleElement.appendChild(document.createTextNode(` ${text}`));
-    }
-  }
-
-  setTitle(iconClass: string, text: string): void {
-    this.setTitleIcon(iconClass);
-    this.setTitleText(text);
   }
 
   private createPlaylistButton(): HTMLElement {
@@ -102,41 +134,10 @@ export class Header {
     badge.textContent = '0';
     playlistBtn.appendChild(badge);
     playlistBtn.addEventListener('click', () => {
-      if (window.app && window.app.musicStore) {
-        const currentTracks = window.app.musicStore.getAllTracks();
-        const modal = new PlaylistModal(currentTracks, window.app.playbackManager, window.app.playlistStore);
-        modal.open();
-      }
+      const currentTracks = this.musicStore.getAllTracks();
+      const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+      modal.open();
     });
     return playlistBtn;
-  }
-
-  public togglePlaylistButtonVisibility(isVisible: boolean): void {
-    const playlistBtn = document.getElementById('headerPlaylistBtn');
-    if (playlistBtn) {
-      playlistBtn.style.display = isVisible ? 'flex' : 'none';
-    }
-  }
-
-  public bindSearch(onSearch: (searchTerm: string) => void, containerElement: HTMLElement): void {
-    const searchInput = containerElement.querySelector('#globalSearchInput') as HTMLInputElement;
-    const clearButton = containerElement.querySelector('#globalSearchBox .search-clear-btn') as HTMLElement;
-    if (!searchInput) {
-      return;
-    }
-    searchInput.addEventListener('input', (event) => {
-      const currentTerm = (event.target as HTMLInputElement).value;
-      if (clearButton) {
-        clearButton.style.setProperty('display', currentTerm.length > 0 ? 'flex' : 'none', 'important');
-      }
-      onSearch(currentTerm);
-    });
-    if (clearButton) {
-      clearButton.addEventListener('click', () => {
-        searchInput.value = '';
-        clearButton.style.setProperty('display', 'none', 'important');
-        onSearch('');
-      });
-    }
   }
 }

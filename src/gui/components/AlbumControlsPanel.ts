@@ -1,5 +1,6 @@
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
+import { PlaylistStore } from '../../core/store/PlaylistStore.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
 import { AlbumTagEditorModal } from '../modals/AlbumTagEditorModal.js';
 import { PlaylistModal } from '../modals/PlaylistModal.js';
@@ -8,6 +9,7 @@ export class AlbumControlsPanel {
   constructor(
     private readonly albumTracks: Metadata[],
     private readonly playbackManager: PlaybackManager,
+    private readonly playlistStore: PlaylistStore,
     private readonly musicStore: MusicStore,
     private readonly onCloseParent: () => void,
   ) {}
@@ -20,26 +22,20 @@ export class AlbumControlsPanel {
     playBtn.innerHTML = '<i class="fas fa-play"></i> <span>Воспроизвести</span>';
     playBtn.addEventListener('click', () => {
       if (this.albumTracks.length > 0) {
-        const globalApp = (window as any).app;
-        if (globalApp) {
-          const store = globalApp.playlistStore || (globalApp.mainFrame ? globalApp.mainFrame.playlistStore : null);
-          if (store) {
-            const names = store.getPlaylistNames();
-            const activePlaylistName = names && names.length > 0 ? names[0] : 'Избранное';
-            if (!store.getPlaylist(activePlaylistName)) {
-              store.createPlaylist(activePlaylistName);
-            } else {
-              store.clearPlaylist(activePlaylistName);
-            }
-            const filePaths = this.albumTracks.map((track) => track.filePath);
-            store.addTracksToPlaylist(activePlaylistName, filePaths);
-            this.onCloseParent();
-            this.playbackManager.playMusic(this.albumTracks[0]);
-            const currentTracks = store.getPlaylistTracks(activePlaylistName);
-            const modal = new PlaylistModal(currentTracks, this.playbackManager, store);
-            modal.open();
-          }
+        const names = this.playlistStore.getPlaylistNames();
+        const activePlaylistName = names && names.length > 0 ? names[0] : 'Избранное';
+        if (!this.playlistStore.getPlaylist(activePlaylistName)) {
+          this.playlistStore.createPlaylist(activePlaylistName);
+        } else {
+          this.playlistStore.clearPlaylist(activePlaylistName);
         }
+        const filePaths = this.albumTracks.map((track) => track.filePath);
+        this.playlistStore.addTracksToPlaylist(activePlaylistName, filePaths);
+        this.onCloseParent();
+        this.playbackManager.playMusic(this.albumTracks[0]);
+        const currentTracks = this.playlistStore.getPlaylistTracks(activePlaylistName);
+        const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+        modal.open();
       }
     });
     const addBtn = document.createElement('button');
@@ -47,30 +43,24 @@ export class AlbumControlsPanel {
     addBtn.innerHTML = '<i class="fas fa-plus"></i> <span>Добавить в плейлист</span>';
     addBtn.addEventListener('click', () => {
       if (this.albumTracks.length > 0) {
-        const globalApp = (window as any).app;
-        if (globalApp) {
-          const store = globalApp.playlistStore || (globalApp.mainFrame ? globalApp.mainFrame.playlistStore : null);
-          if (store) {
-            const names = store.getPlaylistNames();
-            const activePlaylistName = names && names.length > 0 ? names[0] : 'Избранное';
-            if (!store.getPlaylist(activePlaylistName)) {
-              store.createPlaylist(activePlaylistName);
-            }
-            const filePathsToPush: string[] = [];
-            for (const track of this.albumTracks) {
-              if (!store.playlistHasTrack(activePlaylistName, track.filePath)) {
-                filePathsToPush.push(track.filePath);
-              }
-            }
-            if (filePathsToPush.length > 0) {
-              store.addTracksToPlaylist(activePlaylistName, filePathsToPush);
-            }
-            this.onCloseParent();
-            const currentTracks = store.getPlaylistTracks(activePlaylistName);
-            const modal = new PlaylistModal(currentTracks, this.playbackManager, store);
-            modal.open();
+        const names = this.playlistStore.getPlaylistNames();
+        const activePlaylistName = names && names.length > 0 ? names[0] : 'Избранное';
+        if (!this.playlistStore.getPlaylist(activePlaylistName)) {
+          this.playlistStore.createPlaylist(activePlaylistName);
+        }
+        const filePathsToPush: string[] = [];
+        for (const track of this.albumTracks) {
+          if (!this.playlistStore.playlistHasTrack(activePlaylistName, track.filePath)) {
+            filePathsToPush.push(track.filePath);
           }
         }
+        if (filePathsToPush.length > 0) {
+          this.playlistStore.addTracksToPlaylist(activePlaylistName, filePathsToPush);
+        }
+        this.onCloseParent();
+        const currentTracks = this.playlistStore.getPlaylistTracks(activePlaylistName);
+        const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+        modal.open();
       }
     });
     const editBtn = document.createElement('button');

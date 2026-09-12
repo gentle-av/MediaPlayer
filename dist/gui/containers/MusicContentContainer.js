@@ -1,7 +1,8 @@
 import { AlbumCard } from '../components/AlbumCard.js';
 export class MusicContentContainer {
-    constructor(musicStore, playbackManager) {
+    constructor(musicStore, playlistStore, playbackManager) {
         this.musicStore = musicStore;
+        this.playlistStore = playlistStore;
         this.playbackManager = playbackManager;
     }
     async render(targetElement, items) {
@@ -21,7 +22,7 @@ export class MusicContentContainer {
             const firstTrack = albumTracks[0];
             const currentAlbumName = firstTrack.album;
             const currentArtistName = firstTrack.artist;
-            const albumCard = new AlbumCard(currentAlbumName, currentArtistName, albumTracks, this.playbackManager, this.musicStore);
+            const albumCard = new AlbumCard(currentAlbumName, currentArtistName, albumTracks, this.playbackManager, this.musicStore, this.playlistStore);
             gridElement.appendChild(albumCard.render());
         });
         targetElement.appendChild(gridElement);

@@ -7,7 +7,7 @@ export class ContentManager {
         this.playlistStore = playlistStore;
         this.playbackManager = playbackManager;
         this.videoContentContainer = new VideoContentContainer(this.videoStore, this.playbackManager);
-        this.musicContentContainer = new MusicContentContainer(this.musicStore, this.playbackManager);
+        this.musicContentContainer = new MusicContentContainer(this.musicStore, this.playlistStore, this.playbackManager);
     }
     async getVideoContent(contentArea) {
         await this.videoContentContainer.render(contentArea);

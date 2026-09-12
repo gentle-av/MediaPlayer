@@ -1,11 +1,12 @@
 import { AlbumModal } from '../modals/AlbumModal.js';
 export class AlbumCard {
-    constructor(albumName, artistName, albumTracks, playbackManager, musicStore) {
+    constructor(albumName, artistName, albumTracks, playbackManager, musicStore, playlistStore) {
         this.albumName = albumName;
         this.artistName = artistName;
         this.albumTracks = albumTracks;
         this.playbackManager = playbackManager;
         this.musicStore = musicStore;
+        this.playlistStore = playlistStore;
     }
     render() {
         const cardElement = document.createElement('div');
@@ -65,7 +66,7 @@ export class AlbumCard {
         infoContainer.append(titleElement, artistElement, metaContainer);
         cardElement.append(artContainer, infoContainer);
         cardElement.addEventListener('click', () => {
-            const modal = new AlbumModal(this.albumName, this.artistName, this.albumTracks, this.playbackManager, this.musicStore);
+            const modal = new AlbumModal(this.albumName, this.artistName, this.albumTracks, this.playbackManager, this.musicStore, this.playlistStore);
             modal.open();
         });
         return cardElement;

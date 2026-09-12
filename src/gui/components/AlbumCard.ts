@@ -1,3 +1,4 @@
+import { PlaylistStore } from '../../core/store/PlaylistStore.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
@@ -10,6 +11,7 @@ export class AlbumCard {
     private readonly albumTracks: Metadata[],
     private readonly playbackManager: PlaybackManager,
     private readonly musicStore: MusicStore,
+    private readonly playlistStore: PlaylistStore,
   ) {}
 
   public render(): HTMLElement {
@@ -69,7 +71,14 @@ export class AlbumCard {
     infoContainer.append(titleElement, artistElement, metaContainer);
     cardElement.append(artContainer, infoContainer);
     cardElement.addEventListener('click', () => {
-      const modal = new AlbumModal(this.albumName, this.artistName, this.albumTracks, this.playbackManager, this.musicStore);
+      const modal = new AlbumModal(
+        this.albumName,
+        this.artistName,
+        this.albumTracks,
+        this.playbackManager,
+        this.musicStore,
+        this.playlistStore,
+      );
       modal.open();
     });
     return cardElement;

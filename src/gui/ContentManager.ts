@@ -18,7 +18,7 @@ export class ContentManager {
     private playbackManager: PlaybackManager,
   ) {
     this.videoContentContainer = new VideoContentContainer(this.videoStore, this.playbackManager);
-    this.musicContentContainer = new MusicContentContainer(this.musicStore, this.playbackManager);
+    this.musicContentContainer = new MusicContentContainer(this.musicStore, this.playlistStore, this.playbackManager);
   }
 
   async getVideoContent(contentArea: HTMLElement): Promise<HTMLElement | null> {

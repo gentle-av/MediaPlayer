@@ -1,8 +1,73 @@
 import { PlaylistModal } from './modals/PlaylistModal.js';
 export class Header {
-    constructor() {
+    constructor(musicStore, playlistStore, playbackManager) {
+        this.musicStore = musicStore;
+        this.playlistStore = playlistStore;
+        this.playbackManager = playbackManager;
         this.pageTitleElement = null;
         this.titleIconElement = null;
+    }
+    render() {
+        const header = document.createElement('header');
+        header.className = 'app-header';
+        const titleSection = document.createElement('div');
+        titleSection.className = 'header-title-section';
+        this.pageTitleElement = this.createPageTitle();
+        titleSection.appendChild(this.pageTitleElement);
+        header.appendChild(titleSection);
+        const controlsSection = document.createElement('div');
+        controlsSection.className = 'header-controls-section';
+        controlsSection.appendChild(this.createSearch());
+        controlsSection.appendChild(this.createPlaylistButton());
+        header.appendChild(controlsSection);
+        return header;
+    }
+    setTitleIcon(iconClass) {
+        if (this.titleIconElement) {
+            this.titleIconElement.className = '';
+            this.titleIconElement.className = `fas ${iconClass}`;
+        }
+    }
+    setTitleText(text) {
+        if (this.pageTitleElement) {
+            const icon = this.pageTitleElement.querySelector('i');
+            this.pageTitleElement.innerHTML = '';
+            if (icon) {
+                this.pageTitleElement.appendChild(icon);
+            }
+            this.pageTitleElement.appendChild(document.createTextNode(` ${text}`));
+        }
+    }
+    setTitle(iconClass, text) {
+        this.setTitleIcon(iconClass);
+        this.setTitleText(text);
+    }
+    togglePlaylistButtonVisibility(isVisible) {
+        const playlistBtn = document.getElementById('headerPlaylistBtn');
+        if (playlistBtn) {
+            playlistBtn.style.display = isVisible ? 'flex' : 'none';
+        }
+    }
+    bindSearch(onSearch, containerElement) {
+        const searchInput = containerElement.querySelector('#globalSearchInput');
+        const clearButton = containerElement.querySelector('#globalSearchBox .search-clear-btn');
+        if (!searchInput) {
+            return;
+        }
+        searchInput.addEventListener('input', (event) => {
+            const currentTerm = event.target.value;
+            if (clearButton) {
+                clearButton.style.setProperty('display', currentTerm.length > 0 ? 'flex' : 'none', 'important');
+            }
+            onSearch(currentTerm);
+        });
+        if (clearButton) {
+            clearButton.addEventListener('click', () => {
+                searchInput.value = '';
+                clearButton.style.setProperty('display', 'none', 'important');
+                onSearch('');
+            });
+        }
     }
     createSearch() {
         const searchWrapper = document.createElement('div');
@@ -33,21 +98,6 @@ export class Header {
         searchWrapper.appendChild(searchBox);
         return searchWrapper;
     }
-    render() {
-        const header = document.createElement('header');
-        header.className = 'app-header';
-        const titleSection = document.createElement('div');
-        titleSection.className = 'header-title-section';
-        this.pageTitleElement = this.createPageTitle();
-        titleSection.appendChild(this.pageTitleElement);
-        header.appendChild(titleSection);
-        const controlsSection = document.createElement('div');
-        controlsSection.className = 'header-controls-section';
-        controlsSection.appendChild(this.createSearch());
-        controlsSection.appendChild(this.createPlaylistButton());
-        header.appendChild(controlsSection);
-        return header;
-    }
     createPageTitle() {
         const pageTitle = document.createElement('h1');
         pageTitle.className = 'page-title';
@@ -56,26 +106,6 @@ export class Header {
         pageTitle.appendChild(this.titleIconElement);
         pageTitle.appendChild(document.createTextNode(' Video'));
         return pageTitle;
-    }
-    setTitleIcon(iconClass) {
-        if (this.titleIconElement) {
-            this.titleIconElement.className = '';
-            this.titleIconElement.className = `fas ${iconClass}`;
-        }
-    }
-    setTitleText(text) {
-        if (this.pageTitleElement) {
-            const icon = this.pageTitleElement.querySelector('i');
-            this.pageTitleElement.innerHTML = '';
-            if (icon) {
-                this.pageTitleElement.appendChild(icon);
-            }
-            this.pageTitleElement.appendChild(document.createTextNode(` ${text}`));
-        }
-    }
-    setTitle(iconClass, text) {
-        this.setTitleIcon(iconClass);
-        this.setTitleText(text);
     }
     createPlaylistButton() {
         const playlistBtn = document.createElement('button');
@@ -90,40 +120,11 @@ export class Header {
         badge.textContent = '0';
         playlistBtn.appendChild(badge);
         playlistBtn.addEventListener('click', () => {
-            if (window.app && window.app.musicStore) {
-                const currentTracks = window.app.musicStore.getAllTracks();
-                const modal = new PlaylistModal(currentTracks, window.app.playbackManager, window.app.playlistStore);
-                modal.open();
-            }
+            const currentTracks = this.musicStore.getAllTracks();
+            const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+            modal.open();
         });
         return playlistBtn;
-    }
-    togglePlaylistButtonVisibility(isVisible) {
-        const playlistBtn = document.getElementById('headerPlaylistBtn');
-        if (playlistBtn) {
-            playlistBtn.style.display = isVisible ? 'flex' : 'none';
-        }
-    }
-    bindSearch(onSearch, containerElement) {
-        const searchInput = containerElement.querySelector('#globalSearchInput');
-        const clearButton = containerElement.querySelector('#globalSearchBox .search-clear-btn');
-        if (!searchInput) {
-            return;
-        }
-        searchInput.addEventListener('input', (event) => {
-            const currentTerm = event.target.value;
-            if (clearButton) {
-                clearButton.style.setProperty('display', currentTerm.length > 0 ? 'flex' : 'none', 'important');
-            }
-            onSearch(currentTerm);
-        });
-        if (clearButton) {
-            clearButton.addEventListener('click', () => {
-                searchInput.value = '';
-                clearButton.style.setProperty('display', 'none', 'important');
-                onSearch('');
-            });
-        }
     }
 }
 //# sourceMappingURL=Header.js.map

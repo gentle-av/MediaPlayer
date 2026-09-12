@@ -1,28 +1,59 @@
 import { Header } from './Header.js';
 import { Sidebar } from './Sidebar.js';
 import { ContentManager } from './ContentManager.js';
-import { Player } from './Player.js';
 import { Settings } from './Settings.js';
-import { MusicStore } from '../core/store/MusicStore.js';
-import { VideoStore } from '../core/store/VideoStore.js';
-import { PlaylistStore } from '../core/store/PlaylistStore.js';
-import { PlaybackManager } from '../core/player/PlaybackManager.js';
 export class MainFrame {
-    constructor() {
+    constructor(musicStore, videoStore, playlistStore, playbackManager, player) {
+        this.musicStore = musicStore;
+        this.videoStore = videoStore;
+        this.playlistStore = playlistStore;
+        this.playbackManager = playbackManager;
+        this.player = player;
         this.currentTab = 'video';
         this.contentArea = null;
         this.activeSearchTerm = '';
-        this.musicStore = new MusicStore();
-        this.videoStore = new VideoStore();
-        this.playlistStore = new PlaylistStore(this.musicStore);
-        this.player = new Player();
         this.settings = new Settings();
-        this.playbackManager = new PlaybackManager(this.player, this.musicStore, this.videoStore);
         this.contentManager = new ContentManager(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager);
-        this.header = new Header();
+        this.header = new Header(this.musicStore, this.playlistStore, this.playbackManager);
         this.sidebar = new Sidebar((selectedTab) => {
             this.switchTab(selectedTab);
         });
+    }
+    render() {
+        const applicationContainerElement = document.createElement('div');
+        applicationContainerElement.className = 'app-container';
+        const renderedHeaderElement = this.header.render();
+        applicationContainerElement.appendChild(renderedHeaderElement);
+        const bodyWrapperElement = document.createElement('div');
+        bodyWrapperElement.className = 'body-wrapper';
+        const mainContentLayoutElement = document.createElement('div');
+        mainContentLayoutElement.className = 'main-content';
+        const renderedSidebarElement = this.sidebar.render();
+        mainContentLayoutElement.appendChild(renderedSidebarElement);
+        this.contentArea = document.createElement('div');
+        this.contentArea.className = 'content-area';
+        mainContentLayoutElement.appendChild(this.contentArea);
+        bodyWrapperElement.appendChild(mainContentLayoutElement);
+        const renderedPlayerElement = this.player.render();
+        renderedPlayerElement.classList.add('visible');
+        bodyWrapperElement.appendChild(renderedPlayerElement);
+        applicationContainerElement.appendChild(bodyWrapperElement);
+        this.updateContent(this.currentTab);
+        this.bindPlayerControls(applicationContainerElement);
+        setTimeout(() => {
+            const isAudioTab = this.currentTab === 'audio';
+            this.header.togglePlaylistButtonVisibility(isAudioTab);
+        }, 0);
+        this.bindHeaderEvents(applicationContainerElement);
+        return applicationContainerElement;
+    }
+    async initialize() {
+        try {
+            await this.musicStore.loadTracksFromServer();
+        }
+        catch (initializationError) {
+            console.error(initializationError);
+        }
     }
     async switchTab(targetTab) {
         this.currentTab = targetTab;
@@ -113,55 +144,6 @@ export class MainFrame {
                 }
             }
         }, containerElement);
-    }
-    render() {
-        const applicationContainerElement = document.createElement('div');
-        applicationContainerElement.className = 'app-container';
-        const renderedHeaderElement = this.header.render();
-        applicationContainerElement.appendChild(renderedHeaderElement);
-        const bodyWrapperElement = document.createElement('div');
-        bodyWrapperElement.className = 'body-wrapper';
-        const mainContentLayoutElement = document.createElement('div');
-        mainContentLayoutElement.className = 'main-content';
-        const renderedSidebarElement = this.sidebar.render();
-        mainContentLayoutElement.appendChild(renderedSidebarElement);
-        this.contentArea = document.createElement('div');
-        this.contentArea.className = 'content-area';
-        mainContentLayoutElement.appendChild(this.contentArea);
-        bodyWrapperElement.appendChild(mainContentLayoutElement);
-        const renderedPlayerElement = this.player.render();
-        renderedPlayerElement.classList.add('visible');
-        bodyWrapperElement.appendChild(renderedPlayerElement);
-        applicationContainerElement.appendChild(bodyWrapperElement);
-        this.updateContent(this.currentTab);
-        this.bindPlayerControls(applicationContainerElement);
-        setTimeout(() => {
-            const isAudioTab = this.currentTab === 'audio';
-            this.header.togglePlaylistButtonVisibility(isAudioTab);
-        }, 0);
-        this.bindHeaderEvents(applicationContainerElement);
-        return applicationContainerElement;
-    }
-    async initialize() {
-        try {
-            await this.musicStore.loadTracksFromServer();
-            console.log(`✅ Loaded ${this.musicStore.getLibrarySize()} tracks from server`);
-        }
-        catch (initializationError) {
-            console.error(initializationError);
-        }
-    }
-    getMusicStore() {
-        return this.musicStore;
-    }
-    getPlaylistStore() {
-        return this.playlistStore;
-    }
-    getVideoStore() {
-        return this.videoStore;
-    }
-    getPlaybackManager() {
-        return this.playbackManager;
     }
 }
 //# sourceMappingURL=MainFrame.js.map
