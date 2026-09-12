@@ -1,7 +1,5 @@
 import { Application } from './core/app/Application.js';
 
-import { Metadata } from './core/entities/music/Metadata.js';
-
 const application = new Application();
 (window as any).app = application;
 

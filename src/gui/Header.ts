@@ -1,3 +1,11 @@
+import { PlaylistModal } from './modals/PlaylistModal.js';
+
+declare global {
+  interface Window {
+    app: any;
+  }
+}
+
 export class Header {
   private pageTitleElement: HTMLElement | null = null;
   private titleIconElement: HTMLElement | null = null;
@@ -93,6 +101,13 @@ export class Header {
     badge.className = 'playlist-badge';
     badge.textContent = '0';
     playlistBtn.appendChild(badge);
+    playlistBtn.addEventListener('click', () => {
+      if (window.app && window.app.musicStore) {
+        const currentTracks = window.app.musicStore.getAllTracks();
+        const modal = new PlaylistModal(currentTracks, window.app.playbackManager, window.app.playlistStore);
+        modal.open();
+      }
+    });
     return playlistBtn;
   }
 

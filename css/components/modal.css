@@ -758,3 +758,19 @@
   border-top: 1px solid var(--bg3);
   background: var(--bg2);
 }
+
+.playlist-artist-group-header {
+  padding: 10px 12px 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--yellow);
+  letter-spacing: 1px;
+  border-bottom: 1px solid var(--bg3);
+  margin-top: 14px;
+  margin-bottom: 4px;
+  user-select: none;
+}
+.playlist-tracks-grouped-table .track-table-row {
+  margin-left: 8px;
+}

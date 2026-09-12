@@ -35,11 +35,26 @@ export class PlaybackManager {
         this.isAudioPaused = false;
         this.player.setVisibility(true);
         this.player.updateMediaInfo(track.title, track.artist);
-        const audioUrl = `${Config.getConfig().baseUrl}/api/music/file?path=${encodeURIComponent(track.filePath)}`;
-        this.player.playAudio(audioUrl, (elapsedSeconds, totalSeconds) => {
-            this.player.updateProgress(elapsedSeconds, totalSeconds);
-        }, () => {
-            this.handleMusicFinished();
+        fetch(`${Config.getConfig().baseUrl}/api/open-audio`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ path: track.filePath }),
+        })
+            .then((response) => {
+            if (!response.ok)
+                throw new Error(`HTTP error! status: ${response.status}`);
+            return response.json();
+        })
+            .then((data) => {
+            if (data.success) {
+                this.player.setPlayState(true);
+                this.startVideoPolling(track.filePath);
+            }
+        })
+            .catch((error) => {
+            console.error('Ошибка запуска воспроизведения на сервере:', error);
         });
         if (this.musicStore.getCurrentTrack() !== track) {
             this.musicStore.setCurrentTrack(track);
