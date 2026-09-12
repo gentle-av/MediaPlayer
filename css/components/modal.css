@@ -596,3 +596,29 @@
 .track-drag-marker:active {
   cursor: grabbing;
 }
+
+.album-modal-custom-footer {
+  display: flex;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--bg3);
+  background: var(--bg2);
+  flex-wrap: wrap;
+}
+.modal-delete-album-btn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  font-weight: 500;
+  font-size: 0.8rem;
+  border: none;
+}
+.modal-delete-album-btn:hover {
+  background: #ff6b5a !important;
+  transform: translateY(-1px);
+}

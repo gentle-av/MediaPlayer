@@ -1,6 +1,7 @@
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
+import { AlbumControlsPanel } from '../components/AlbumControlsPanel.js';
 
 export class AlbumModal {
   private modalElement: HTMLElement | null = null;
@@ -22,7 +23,9 @@ export class AlbumModal {
     modalContent.className = 'modal-content';
     const header = this.createHeader();
     const body = this.createBody();
-    modalContent.append(header, body);
+    const controlsPanel = new AlbumControlsPanel(this.albumTracks, this.playbackManager, () => this.close());
+    const footer = controlsPanel.render();
+    modalContent.append(header, body, footer);
     this.modalElement.appendChild(modalContent);
     document.body.appendChild(this.modalElement);
     this.modalElement.addEventListener('click', (e) => {
