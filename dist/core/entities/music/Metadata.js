@@ -1,24 +1,69 @@
 export class Metadata {
-    constructor(_title, _artist, _album, _duration, _track, _year, _genre, filePath) {
-        this._title = _title;
-        this._artist = _artist;
-        this._album = _album;
-        this._duration = _duration;
-        this._track = _track;
-        this._year = _year;
-        this._genre = _genre;
+    constructor(trackTitle, trackArtist, trackAlbum, trackDuration, trackNumber, trackYear, trackGenre, filePath) {
+        this.trackTitle = trackTitle;
+        this.trackArtist = trackArtist;
+        this.trackAlbum = trackAlbum;
+        this.trackDuration = trackDuration;
+        this.trackNumber = trackNumber;
+        this.trackYear = trackYear;
+        this.trackGenre = trackGenre;
         this.filePath = filePath;
         this.validate();
     }
     get albumKey() {
-        const artist = this._artist.trim() || 'Unknown Artist';
-        const album = this._album.trim() || 'Unknown Album';
+        const artist = this.trackArtist.trim() || 'Unknown Artist';
+        const album = this.trackAlbum.trim() || 'Unknown Album';
         return `${artist}---|---${album}`.toLowerCase();
     }
+    get title() {
+        return this.trackTitle;
+    }
+    get artist() {
+        return this.trackArtist;
+    }
+    get album() {
+        return this.trackAlbum;
+    }
+    get duration() {
+        return this.trackDuration;
+    }
+    get track() {
+        return this.trackNumber;
+    }
+    get year() {
+        return this.trackYear;
+    }
+    get genre() {
+        return this.trackGenre;
+    }
+    set title(title) {
+        this.trackTitle = title;
+    }
+    set artist(artist) {
+        this.trackArtist = artist;
+    }
+    set album(album) {
+        this.trackAlbum = album;
+    }
+    set duration(duration) {
+        this.validateDuration(duration);
+        this.trackDuration = duration;
+    }
+    set track(track) {
+        this.validateTrack(track);
+        this.trackNumber = track;
+    }
+    set year(year) {
+        this.validateYear(year);
+        this.trackYear = year;
+    }
+    set genre(genre) {
+        this.trackGenre = genre;
+    }
     validate() {
-        this.validateDuration(this._duration);
-        this.validateTrack(this._track);
-        this.validateYear(this._year);
+        this.validateDuration(this.trackDuration);
+        this.validateTrack(this.trackNumber);
+        this.validateYear(this.trackYear);
         this.validateFilePath(this.filePath);
     }
     validateDuration(duration) {
@@ -66,60 +111,15 @@ export class Metadata {
             throw new Error(`File must have a valid audio extension: ${Metadata.VALID_EXTENSIONS.join(', ')}`);
         }
     }
-    get title() {
-        return this._title;
-    }
-    get artist() {
-        return this._artist;
-    }
-    get album() {
-        return this._album;
-    }
-    get duration() {
-        return this._duration;
-    }
-    get track() {
-        return this._track;
-    }
-    get year() {
-        return this._year;
-    }
-    get genre() {
-        return this._genre;
-    }
-    set title(title) {
-        this._title = title;
-    }
-    set artist(artist) {
-        this._artist = artist;
-    }
-    set album(album) {
-        this._album = album;
-    }
-    set duration(duration) {
-        this.validateDuration(duration);
-        this._duration = duration;
-    }
-    set track(track) {
-        this.validateTrack(track);
-        this._track = track;
-    }
-    set year(year) {
-        this.validateYear(year);
-        this._year = year;
-    }
-    set genre(genre) {
-        this._genre = genre;
-    }
     toJSON() {
         return {
-            title: this._title,
-            artist: this._artist,
-            album: this._album,
-            duration: this._duration,
-            track: this._track,
-            year: this._year,
-            genre: this._genre,
+            title: this.trackTitle,
+            artist: this.trackArtist,
+            album: this.trackAlbum,
+            duration: this.trackDuration,
+            track: this.trackNumber,
+            year: this.trackYear,
+            genre: this.trackGenre,
             filePath: this.filePath,
         };
     }

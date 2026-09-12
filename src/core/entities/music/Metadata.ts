@@ -5,28 +5,87 @@ export class Metadata {
   private static readonly VALID_EXTENSIONS = ['.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg', '.wma'];
 
   constructor(
-    private _title: string,
-    private _artist: string,
-    private _album: string,
-    private _duration: number,
-    private _track: number,
-    private _year: number,
-    private _genre: string,
+    private trackTitle: string,
+    private trackArtist: string,
+    private trackAlbum: string,
+    private trackDuration: number,
+    private trackNumber: number,
+    private trackYear: number,
+    private trackGenre: string,
     public readonly filePath: string,
   ) {
     this.validate();
   }
 
   get albumKey(): string {
-    const artist = this._artist.trim() || 'Unknown Artist';
-    const album = this._album.trim() || 'Unknown Album';
+    const artist = this.trackArtist.trim() || 'Unknown Artist';
+    const album = this.trackAlbum.trim() || 'Unknown Album';
     return `${artist}---|---${album}`.toLowerCase();
   }
 
+  get title(): string {
+    return this.trackTitle;
+  }
+
+  get artist(): string {
+    return this.trackArtist;
+  }
+
+  get album(): string {
+    return this.trackAlbum;
+  }
+
+  get duration(): number {
+    return this.trackDuration;
+  }
+
+  get track(): number {
+    return this.trackNumber;
+  }
+
+  get year(): number {
+    return this.trackYear;
+  }
+
+  get genre(): string {
+    return this.trackGenre;
+  }
+
+  set title(title: string) {
+    this.trackTitle = title;
+  }
+
+  set artist(artist: string) {
+    this.trackArtist = artist;
+  }
+
+  set album(album: string) {
+    this.trackAlbum = album;
+  }
+
+  set duration(duration: number) {
+    this.validateDuration(duration);
+    this.trackDuration = duration;
+  }
+
+  set track(track: number) {
+    this.validateTrack(track);
+    this.trackNumber = track;
+  }
+
+  set year(year: number) {
+    this.validateYear(year);
+    this.trackYear = year;
+  }
+
+  set genre(genre: string) {
+    this.trackGenre = genre;
+  }
+
   private validate(): void {
-    this.validateDuration(this._duration);
-    this.validateTrack(this._track);
-    this.validateYear(this._year);
+    this.validateDuration(this.trackDuration);
+    this.validateTrack(this.trackNumber);
+    this.validateYear(this.trackYear);
     this.validateFilePath(this.filePath);
   }
 
@@ -79,62 +138,15 @@ export class Metadata {
     }
   }
 
-  get title(): string {
-    return this._title;
-  }
-  get artist(): string {
-    return this._artist;
-  }
-  get album(): string {
-    return this._album;
-  }
-  get duration(): number {
-    return this._duration;
-  }
-  get track(): number {
-    return this._track;
-  }
-  get year(): number {
-    return this._year;
-  }
-  get genre(): string {
-    return this._genre;
-  }
-
-  set title(title: string) {
-    this._title = title;
-  }
-  set artist(artist: string) {
-    this._artist = artist;
-  }
-  set album(album: string) {
-    this._album = album;
-  }
-  set duration(duration: number) {
-    this.validateDuration(duration);
-    this._duration = duration;
-  }
-  set track(track: number) {
-    this.validateTrack(track);
-    this._track = track;
-  }
-  set year(year: number) {
-    this.validateYear(year);
-    this._year = year;
-  }
-  set genre(genre: string) {
-    this._genre = genre;
-  }
-
   toJSON() {
     return {
-      title: this._title,
-      artist: this._artist,
-      album: this._album,
-      duration: this._duration,
-      track: this._track,
-      year: this._year,
-      genre: this._genre,
+      title: this.trackTitle,
+      artist: this.trackArtist,
+      album: this.trackAlbum,
+      duration: this.trackDuration,
+      track: this.trackNumber,
+      year: this.trackYear,
+      genre: this.trackGenre,
       filePath: this.filePath,
     };
   }
