@@ -191,7 +191,7 @@
 }
 
 .track-number {
-  font-family: "Monaco", "Courier New", monospace;
+  font-family: 'Monaco', 'Courier New', monospace;
   font-size: 0.75rem;
   font-weight: 500;
   color: var(--yellow);
@@ -214,7 +214,7 @@
 }
 
 .track-duration {
-  font-family: "Monaco", "Courier New", monospace;
+  font-family: 'Monaco', 'Courier New', monospace;
   font-size: 0.7rem;
   color: var(--fg3);
   min-width: 35px;
@@ -409,4 +409,190 @@
     width: 22px;
     height: 22px;
   }
+}
+
+.album-modal-custom-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--bg3);
+}
+
+.album-modal-cover-left {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--bg3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.album-modal-cover-left img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.album-modal-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.album-modal-info-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  flex: 1;
+  min-width: 0;
+  gap: 4px;
+  padding-right: 8px;
+}
+
+.album-modal-artist-name {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--yellow);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.album-modal-album-title {
+  font-size: 0.95rem;
+  color: var(--fg1);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 100%;
+}
+
+.album-tracks-table {
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 4px;
+}
+
+.track-table-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--bg2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.track-table-row:hover {
+  background: var(--bg3);
+  transform: translateX(2px);
+}
+
+.track-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.track-drag-marker {
+  color: var(--fg4);
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.track-drag-marker:active {
+  cursor: grabbing;
+}
+
+.track-table-number {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--yellow);
+  min-width: 24px;
+  flex-shrink: 0;
+}
+
+.track-table-name {
+  font-size: 0.9rem;
+  color: var(--fg0);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.track-row-right {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  padding-left: 16px;
+}
+
+.track-table-duration {
+  font-family: monospace;
+  font-size: 0.85rem;
+  color: var(--fg3);
+}
+
+.album-details-modal {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+.track-table-row {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  position: relative;
+  transition:
+    transform 0.15s ease,
+    background 0.2s ease;
+}
+.track-table-row.dragging {
+  opacity: 0.4;
+  background: var(--bg3);
+}
+.track-table-row.drag-over-above::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--yellow);
+  z-index: 10;
+  border-radius: 2px;
+}
+.track-table-row.drag-over-below::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--yellow);
+  z-index: 10;
+  border-radius: 2px;
+}
+.track-drag-marker {
+  cursor: grab;
+}
+.track-drag-marker:active {
+  cursor: grabbing;
 }

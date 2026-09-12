@@ -1,6 +1,7 @@
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
+import { AlbumModal } from '../modals/AlbumModal.js';
 
 export class AlbumCard {
   constructor(
@@ -68,9 +69,8 @@ export class AlbumCard {
     infoContainer.append(titleElement, artistElement, metaContainer);
     cardElement.append(artContainer, infoContainer);
     cardElement.addEventListener('click', () => {
-      if (this.albumTracks.length > 0) {
-        this.playbackManager.playMusic(this.albumTracks[0]);
-      }
+      const modal = new AlbumModal(this.albumName, this.artistName, this.albumTracks, this.playbackManager, this.musicStore);
+      modal.open();
     });
     return cardElement;
   }
