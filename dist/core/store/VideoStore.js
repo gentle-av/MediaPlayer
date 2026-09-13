@@ -5,8 +5,6 @@ export class VideoStore {
         this.currentPath = '/mnt/video';
         this.listeners = [];
         this.videoApiClient = new VideoApiClient();
-        this.activeDirectoryPath = '';
-        this.client = new VideoApiClient();
     }
     subscribe(listener) {
         this.listeners.push(listener);
@@ -14,14 +12,11 @@ export class VideoStore {
             this.listeners = this.listeners.filter((l) => l !== listener);
         };
     }
-    notifyListeners() {
-        this.listeners.forEach((listener) => listener());
-    }
     async loadLibrary(path) {
         if (path) {
             this.currentPath = path;
         }
-        this.currentLibrary = await this.client.listVideos(this.currentPath);
+        this.currentLibrary = await this.videoApiClient.listVideos(this.currentPath);
         this.notifyListeners();
     }
     getItems() {
@@ -65,7 +60,7 @@ export class VideoStore {
     }
     async openVideo(item) {
         if (item.isVideo) {
-            await this.client.openVideo(item.path);
+            await this.videoApiClient.openVideo(item.path);
         }
     }
     async removeFileSystemItem(itemPath, isDirectoryItem) {
@@ -76,6 +71,9 @@ export class VideoStore {
             await this.videoApiClient.moveToTrash(itemPath);
         }
         await this.loadLibrary(this.currentPath);
+    }
+    notifyListeners() {
+        this.listeners.forEach((listener) => listener());
     }
 }
 //# sourceMappingURL=VideoStore.js.map

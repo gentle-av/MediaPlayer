@@ -1,4 +1,4 @@
-import { VideoItem } from "./VideoItem.js";
+import { VideoItem } from './VideoItem.js';
 export class VideoLibrary {
     constructor(data) {
         this.items = data.items;

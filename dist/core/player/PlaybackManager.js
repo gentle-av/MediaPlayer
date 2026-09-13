@@ -55,7 +55,9 @@ export class PlaybackManager {
     async togglePlay() {
         if (this.currentType === 'music') {
             if (this.isAudioPaused) {
-                this.player.audioEngine.play().catch((error) => console.error(error));
+                this.player.audioEngine
+                    .play()
+                    .catch((error) => console.error(error));
                 this.isAudioPaused = false;
                 this.player.setPlayState(true);
             }

@@ -18,7 +18,7 @@ export class Sidebar {
             { icon: 'fa-music', text: 'Аудио', tab: 'audio' },
             { icon: 'fa-cog', text: 'Настройки', tab: 'settings' },
         ];
-        navItems.forEach(item => {
+        navItems.forEach((item) => {
             const btn = document.createElement('button');
             btn.className = 'sidebar-btn';
             if (item.tab === 'video') {
@@ -29,7 +29,9 @@ export class Sidebar {
                 btn.addEventListener('click', () => {
                     if (item.tab) {
                         this.onTabChange(item.tab);
-                        nav.querySelectorAll('.sidebar-btn').forEach(b => b.classList.remove('active'));
+                        nav
+                            .querySelectorAll('.sidebar-btn')
+                            .forEach((b) => b.classList.remove('active'));
                         btn.classList.add('active');
                     }
                 });

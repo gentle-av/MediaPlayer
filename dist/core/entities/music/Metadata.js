@@ -127,5 +127,13 @@ export class Metadata {
 Metadata.MAX_YEAR = new Date().getFullYear() + 1;
 Metadata.MAX_DURATION = 3600 * 10;
 Metadata.MAX_TRACK = 999;
-Metadata.VALID_EXTENSIONS = ['.mp3', '.flac', '.wav', '.m4a', '.aac', '.ogg', '.wma'];
+Metadata.VALID_EXTENSIONS = [
+    '.mp3',
+    '.flac',
+    '.wav',
+    '.m4a',
+    '.aac',
+    '.ogg',
+    '.wma',
+];
 //# sourceMappingURL=Metadata.js.map

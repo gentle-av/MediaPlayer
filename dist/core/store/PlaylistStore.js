@@ -1,4 +1,4 @@
-import { Playlist } from "../entities/music/Playlist.js";
+import { Playlist } from '../entities/music/Playlist.js';
 export class PlaylistStore {
     constructor(musicStore) {
         this.musicStore = musicStore;
@@ -8,11 +8,11 @@ export class PlaylistStore {
     subscribe(listener) {
         this.listeners.push(listener);
         return () => {
-            this.listeners = this.listeners.filter(l => l !== listener);
+            this.listeners = this.listeners.filter((l) => l !== listener);
         };
     }
     notifyListeners() {
-        this.listeners.forEach(listener => listener());
+        this.listeners.forEach((listener) => listener());
     }
     createPlaylist(name) {
         if (!name || !name.trim()) {
@@ -192,7 +192,7 @@ export class PlaylistStore {
             return this.getAllPlaylists();
         }
         const lowerQuery = query.toLowerCase().trim();
-        return this.getAllPlaylists().filter(playlist => playlist.playlistName.toLowerCase().includes(lowerQuery));
+        return this.getAllPlaylists().filter((playlist) => playlist.playlistName.toLowerCase().includes(lowerQuery));
     }
     searchTracksInPlaylist(playlistName, query) {
         if (!playlistName || !playlistName.trim()) {
@@ -211,24 +211,24 @@ export class PlaylistStore {
             return tracks;
         }
         const lowerQuery = query.toLowerCase().trim();
-        return tracks.filter(track => track.title.toLowerCase().includes(lowerQuery) ||
+        return tracks.filter((track) => track.title.toLowerCase().includes(lowerQuery) ||
             track.artist.toLowerCase().includes(lowerQuery) ||
             track.album.toLowerCase().includes(lowerQuery) ||
             track.genre.toLowerCase().includes(lowerQuery));
     }
     getPlaylistStatistics() {
         let totalTracks = 0;
-        this.playlists.forEach(playlist => {
+        this.playlists.forEach((playlist) => {
             totalTracks += playlist.size;
         });
         return {
             totalPlaylists: this.playlists.size,
-            totalTracks: totalTracks
+            totalTracks: totalTracks,
         };
     }
     toJSON() {
         return {
-            playlists: Array.from(this.playlists.values()).map(playlist => playlist.toJSON())
+            playlists: Array.from(this.playlists.values()).map((playlist) => playlist.toJSON()),
         };
     }
 }

@@ -3,15 +3,13 @@ import { VideoApiClient } from '../api/VideoApiClient.js';
 import { VideoLibrary } from '../entities/video/VideoLibrary.js';
 
 export class VideoStore {
-  private client: VideoApiClient;
   private currentLibrary: VideoLibrary | null = null;
   private currentPath: string = '/mnt/video';
   private listeners: (() => void)[] = [];
-  private videoApiClient = new VideoApiClient();
-  private activeDirectoryPath = '';
+  private videoApiClient: VideoApiClient;
 
   constructor() {
-    this.client = new VideoApiClient();
+    this.videoApiClient = new VideoApiClient();
   }
 
   subscribe(listener: () => void): () => void {
@@ -21,15 +19,13 @@ export class VideoStore {
     };
   }
 
-  private notifyListeners(): void {
-    this.listeners.forEach((listener) => listener());
-  }
-
   async loadLibrary(path?: string): Promise<void> {
     if (path) {
       this.currentPath = path;
     }
-    this.currentLibrary = await this.client.listVideos(this.currentPath);
+    this.currentLibrary = await this.videoApiClient.listVideos(
+      this.currentPath,
+    );
     this.notifyListeners();
   }
 
@@ -84,11 +80,11 @@ export class VideoStore {
 
   async openVideo(item: VideoItem): Promise<void> {
     if (item.isVideo) {
-      await this.client.openVideo(item.path);
+      await this.videoApiClient.openVideo(item.path);
     }
   }
 
-  public async removeFileSystemItem(
+  async removeFileSystemItem(
     itemPath: string,
     isDirectoryItem: boolean,
   ): Promise<void> {
@@ -98,5 +94,9 @@ export class VideoStore {
       await this.videoApiClient.moveToTrash(itemPath);
     }
     await this.loadLibrary(this.currentPath);
+  }
+
+  private notifyListeners(): void {
+    this.listeners.forEach((listener) => listener());
   }
 }

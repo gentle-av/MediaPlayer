@@ -26,7 +26,8 @@ export class AudioTrackMenu {
         const listContainer = document.createElement('div');
         listContainer.className = 'audio-stream-list';
         try {
-            const statusResponse = await fetch(`${Config.getConfig().baseUrl}/api/video/status?path=${encodeURIComponent(currentVideoPath)}`);
+            const statusResponse = await fetch(`${Config.getConfig().baseUrl}` +
+                `/api/video/status?path=${encodeURIComponent(currentVideoPath)}`);
             const playbackStatus = await statusResponse.json();
             const currentTrackIndex = playbackStatus.audioTrackIndex ?? -1;
             const tracksResponse = await fetch(`${Config.getConfig().baseUrl}/api/video/tracks`, {
@@ -37,7 +38,9 @@ export class AudioTrackMenu {
                 body: JSON.stringify({ path: currentVideoPath }),
             });
             const trackListData = await tracksResponse.json();
-            if (!trackListData.success || !trackListData.tracks || trackListData.tracks.length === 0) {
+            if (!trackListData.success ||
+                !trackListData.tracks ||
+                trackListData.tracks.length === 0) {
                 const emptyElement = document.createElement('div');
                 emptyElement.className = 'audio-stream-item';
                 emptyElement.textContent = 'Дорожки не найдены';
@@ -52,7 +55,8 @@ export class AudioTrackMenu {
                     }
                     const nameElement = document.createElement('span');
                     nameElement.className = 'audio-stream-name';
-                    nameElement.textContent = track.title || track.lang || `Дорожка ${track.id}`;
+                    nameElement.textContent =
+                        track.title || track.lang || `Дорожка ${track.id}`;
                     itemElement.appendChild(nameElement);
                     if (track.codec) {
                         const codecElement = document.createElement('span');

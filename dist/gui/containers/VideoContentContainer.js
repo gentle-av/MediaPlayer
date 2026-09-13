@@ -18,7 +18,8 @@ export class VideoContentContainer {
                 await this.render(targetElement);
             });
         }
-        if (this.videoStore.getItems().length === 0 && this.videoStore.getCurrentPath() === '/mnt/video') {
+        if (this.videoStore.getItems().length === 0 &&
+            this.videoStore.getCurrentPath() === '/mnt/video') {
             await this.videoStore.loadLibrary('/mnt/video');
             history.replaceState({ path: '/mnt/video' }, '');
         }

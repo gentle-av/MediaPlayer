@@ -9,7 +9,8 @@ export class PlaylistModal {
     open() {
         this.close();
         this.modalElement = document.createElement('div');
-        this.modalElement.className = 'modal active album-details-modal playlist-modal-custom';
+        this.modalElement.className =
+            'modal active album-details-modal playlist-modal-custom';
         const modalContent = document.createElement('div');
         modalContent.className = 'modal-content';
         const header = this.createHeader();
@@ -37,7 +38,16 @@ export class PlaylistModal {
         const leftIconContainer = document.createElement('div');
         leftIconContainer.className = 'album-modal-cover-left';
         leftIconContainer.innerHTML = `
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+          width="32"
+          height="32"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--yellow)"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
         <line x1="8" y1="6" x2="21" y2="6"></line>
         <line x1="8" y1="12" x2="21" y2="12"></line>
         <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -66,7 +76,8 @@ export class PlaylistModal {
         const bodyElement = document.createElement('div');
         bodyElement.className = 'modal-body';
         const tableContainer = document.createElement('div');
-        tableContainer.className = 'album-tracks-table playlist-tracks-grouped-table';
+        tableContainer.className =
+            'album-tracks-table playlist-tracks-grouped-table';
         const tracksByArtist = this.groupTracksByArtist(this.playlistTracks);
         let globalIndex = 0;
         tracksByArtist.forEach((tracks, artist) => {
@@ -84,11 +95,18 @@ export class PlaylistModal {
                 const dragMarker = document.createElement('span');
                 dragMarker.className = 'track-drag-marker';
                 dragMarker.innerHTML = `
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="9" cy="5" r="1"></circle> <circle cx="15" cy="5" r="1"></circle>
-            <circle cx="9" cy="12" r="1"></circle> <circle cx="15" cy="12" r="1"></circle>
-            <circle cx="9" cy="19" r="1"></circle> <circle cx="15" cy="19" r="1"></circle>
-          </svg>
+<svg
+    width="14"
+    height="14"
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    stroke-width="2"
+  >
+  <circle cx="9" cy="5" r="1"></circle> <circle cx="15" cy="5" r="1"></circle>
+  <circle cx="9" cy="12" r="1"></circle> <circle cx="15" cy="12" r="1"></circle>
+  <circle cx="9" cy="19" r="1"></circle> <circle cx="15" cy="19" r="1"></circle>
+</svg>
         `;
                 const numberElement = document.createElement('span');
                 numberElement.className = 'track-table-number';
@@ -122,7 +140,8 @@ export class PlaylistModal {
         footerElement.className = 'modal-album-actions album-modal-custom-footer';
         const playAllBtn = document.createElement('button');
         playAllBtn.className = 'modal-play-btn';
-        playAllBtn.innerHTML = '<i class="fas fa-play"></i> <span>Слушать плейлист</span>';
+        playAllBtn.innerHTML =
+            '<i class="fas fa-play"></i> <span>Слушать плейлист</span>';
         playAllBtn.addEventListener('click', () => {
             if (this.playlistTracks.length > 0) {
                 this.playbackManager.playMusic(this.playlistTracks[0]);
@@ -130,7 +149,8 @@ export class PlaylistModal {
         });
         const clearAllBtn = document.createElement('button');
         clearAllBtn.className = 'modal-delete-album-btn';
-        clearAllBtn.innerHTML = '<i class="fas fa-minus-circle"></i> <span>Очистить</span>';
+        clearAllBtn.innerHTML =
+            '<i class="fas fa-minus-circle"></i> <span>Очистить</span>';
         clearAllBtn.style.setProperty('background', 'var(--red)', 'important');
         clearAllBtn.style.setProperty('color', 'var(--bg0)', 'important');
         clearAllBtn.addEventListener('click', () => {

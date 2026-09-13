@@ -12,7 +12,8 @@ export class MusicContentContainer {
         targetElement.innerHTML = '';
         const activeTracks = items || this.musicStore.getAllTracks();
         if (activeTracks.length === 0) {
-            targetElement.innerHTML = '<div class="empty">🎵 Альбомы не найдены</div>';
+            targetElement.innerHTML =
+                '<div class="empty">🎵 Альбомы не найдены</div>';
             return null;
         }
         const gridElement = document.createElement('div');

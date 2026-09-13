@@ -13,7 +13,8 @@ export class AlbumControlsPanel {
         footerElement.className = 'modal-album-actions album-modal-custom-footer';
         const playBtn = document.createElement('button');
         playBtn.className = 'modal-play-btn';
-        playBtn.innerHTML = '<i class="fas fa-play"></i> <span>Воспроизвести</span>';
+        playBtn.innerHTML =
+            '<i class="fas fa-play"></i> <span>Воспроизвести</span>';
         playBtn.addEventListener('click', () => {
             if (this.albumTracks.length > 0) {
                 const names = this.playlistStore.getPlaylistNames();
@@ -35,7 +36,8 @@ export class AlbumControlsPanel {
         });
         const addBtn = document.createElement('button');
         addBtn.className = 'modal-add-btn';
-        addBtn.innerHTML = '<i class="fas fa-plus"></i> <span>Добавить в плейлист</span>';
+        addBtn.innerHTML =
+            '<i class="fas fa-plus"></i> <span>Добавить в плейлист</span>';
         addBtn.addEventListener('click', () => {
             if (this.albumTracks.length > 0) {
                 const names = this.playlistStore.getPlaylistNames();
@@ -60,7 +62,8 @@ export class AlbumControlsPanel {
         });
         const editBtn = document.createElement('button');
         editBtn.className = 'modal-edit-album-btn';
-        editBtn.innerHTML = '<i class="fas fa-edit"></i> <span>Редактировать</span>';
+        editBtn.innerHTML =
+            '<i class="fas fa-edit"></i> <span>Редактировать</span>';
         editBtn.addEventListener('click', () => {
             if (this.albumTracks.length > 0) {
                 const firstTrack = this.albumTracks[0];
@@ -70,7 +73,8 @@ export class AlbumControlsPanel {
         });
         const deleteBtn = document.createElement('button');
         deleteBtn.className = 'modal-delete-album-btn';
-        deleteBtn.innerHTML = '<i class="fas fa-trash-alt"></i> <span>Удалить</span>';
+        deleteBtn.innerHTML =
+            '<i class="fas fa-trash-alt"></i> <span>Удалить</span>';
         deleteBtn.style.setProperty('background', 'var(--red)', 'important');
         deleteBtn.style.setProperty('color', 'var(--bg0)', 'important');
         deleteBtn.addEventListener('click', () => {

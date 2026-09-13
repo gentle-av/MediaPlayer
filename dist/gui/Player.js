@@ -55,7 +55,16 @@ export class Player {
         if (this.playButtonIcon) {
             if (isPlaying) {
                 this.playButtonIcon.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+          >
             <rect x="6" y="4" width="4" height="16"></rect>
             <rect x="14" y="4" width="4" height="16"></rect>
           </svg>
@@ -63,7 +72,16 @@ export class Player {
             }
             else {
                 this.playButtonIcon.innerHTML = `
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
             <polygon points="5 3 19 12 5 21 5 3"></polygon>
           </svg>
         `;
@@ -97,7 +115,9 @@ export class Player {
         }
         const calculatedMinutes = Math.floor(totalSeconds / 60);
         const calculatedSeconds = Math.floor(totalSeconds % 60);
-        return `${calculatedMinutes}:${calculatedSeconds < 10 ? '0' : ''}${calculatedSeconds}`;
+        return (`${calculatedMinutes}:` +
+            `${calculatedSeconds < 10 ? '0' : ''}` +
+            `${calculatedSeconds}`);
     }
     render() {
         const rootPlayerElement = document.createElement('div');
@@ -111,7 +131,16 @@ export class Player {
         const previewArtElement = document.createElement('div');
         previewArtElement.className = 'universal-bottom-player-preview';
         previewArtElement.innerHTML = `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="var(--yellow)"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
         <path d="M9 18V5l12-2v13"></path>
         <circle cx="6" cy="18" r="3"></circle>
         <circle cx="18" cy="16" r="3"></circle>
@@ -133,15 +162,18 @@ export class Player {
         const timelineContainerElement = document.createElement('div');
         timelineContainerElement.className = 'universal-bottom-player-progress';
         const flexProgressBarContainer = document.createElement('div');
-        flexProgressBarContainer.className = 'universal-bottom-player-progress-bar-container';
+        flexProgressBarContainer.className =
+            'universal-bottom-player-progress-bar-container';
         this.timeCurrentElement = document.createElement('span');
         this.timeCurrentElement.className = 'universal-bottom-player-time-current';
         this.timeCurrentElement.textContent = '0:00';
         flexProgressBarContainer.appendChild(this.timeCurrentElement);
         const backgroundProgressBarTrack = document.createElement('div');
-        backgroundProgressBarTrack.className = 'universal-bottom-player-progress-bar';
+        backgroundProgressBarTrack.className =
+            'universal-bottom-player-progress-bar';
         this.progressFillElement = document.createElement('div');
-        this.progressFillElement.className = 'universal-bottom-player-progress-fill';
+        this.progressFillElement.className =
+            'universal-bottom-player-progress-fill';
         backgroundProgressBarTrack.appendChild(this.progressFillElement);
         flexProgressBarContainer.appendChild(backgroundProgressBarTrack);
         this.timeTotalElement = document.createElement('span');
@@ -153,13 +185,23 @@ export class Player {
         const controlButtonsContainer = document.createElement('div');
         controlButtonsContainer.className = 'universal-bottom-player-controls';
         this.audioStreamButton = document.createElement('button');
-        this.audioStreamButton.className = 'universal-bottom-player-btn audio-stream-btn';
+        this.audioStreamButton.className =
+            'universal-bottom-player-btn audio-stream-btn';
         this.audioStreamButton.style.setProperty('display', 'none');
         this.audioStreamButton.style.setProperty('background', 'var(--bg2)');
         this.audioStreamButton.style.setProperty('border', '1px solid var(--bg3)');
         this.audioStreamButton.style.setProperty('border-radius', '50%');
         this.audioStreamButton.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
         <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
         <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -177,14 +219,24 @@ export class Player {
         const skipBackwardButton = document.createElement('button');
         skipBackwardButton.className = 'universal-bottom-player-btn';
         skipBackwardButton.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
         <polygon points="19 20 9 12 19 4 19 20"></polygon>
         <line x1="5" y1="19" x2="5" y2="5"></line>
       </svg>
     `;
         controlButtonsContainer.appendChild(skipBackwardButton);
         const standardPlayButton = document.createElement('button');
-        standardPlayButton.className = 'universal-bottom-player-btn universal-bottom-player-play';
+        standardPlayButton.className =
+            'universal-bottom-player-btn universal-bottom-player-play';
         const playIconHolder = document.createElement('span');
         playIconHolder.className = 'play-icon-holder';
         playIconHolder.style.display = 'flex';
@@ -193,9 +245,19 @@ export class Player {
         this.setPlayState(false);
         controlButtonsContainer.appendChild(standardPlayButton);
         const stopButton = document.createElement('button');
-        stopButton.className = 'universal-bottom-player-btn universal-bottom-player-stop';
+        stopButton.className =
+            'universal-bottom-player-btn universal-bottom-player-stop';
         stopButton.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
         <rect x="4" y="4" width="16" height="16"></rect>
       </svg>
     `;
@@ -203,7 +265,16 @@ export class Player {
         const skipForwardButton = document.createElement('button');
         skipForwardButton.className = 'universal-bottom-player-btn';
         skipForwardButton.innerHTML = `
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
         <polygon points="5 4 15 12 5 20 5 4"></polygon>
         <line x1="19" y1="5" x2="19" y2="19"></line>
       </svg>
