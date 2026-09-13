@@ -43,26 +43,51 @@ export class PlaybackManager {
         this.startPolling(videoItem.path);
     }
     async playMusic(track, playlistContext = []) {
-        this.stopCurrentPlayback();
-        this.currentType = 'music';
-        this.isAudioPaused = false;
-        if (playlistContext.length > 0) {
-            this.currentPlaylist = playlistContext;
-            this.currentTrackIndex = playlistContext.findIndex((t) => t.filePath === track.filePath);
+        // Исправлено сравнение контекстов: проверяем длину и путь первого трека, чтобы понять, тот же ли это альбом
+        const isSameContext = playlistContext.length > 0 &&
+            this.currentPlaylist.length === playlistContext.length &&
+            this.currentPlaylist[0]?.filePath === playlistContext[0]?.filePath;
+        if (!isSameContext) {
+            this.stopCurrentPlayback();
+            this.currentType = 'music';
+            this.isAudioPaused = false;
+            if (playlistContext.length > 0) {
+                this.currentPlaylist = playlistContext;
+                this.currentTrackIndex = playlistContext.findIndex((t) => t.filePath === track.filePath);
+            }
+            else {
+                this.currentPlaylist = [track];
+                this.currentTrackIndex = 0;
+            }
+            this.mediaPlayer.setVisibility(true);
+            this.mediaPlayer.updateMediaInfo(track.title, track.artist);
+            if (this.musicStore.getCurrentTrack() !== track) {
+                this.musicStore.setCurrentTrack(track);
+            }
+            const paths = this.currentPlaylist.map((t) => t.filePath);
+            const success = await this.musicApiClient.playAudioPlaylist(paths);
+            if (success) {
+                if (this.currentTrackIndex > 0) {
+                    await this.musicApiClient.changeAudioTrackByIndex(this.currentTrackIndex);
+                }
+                this.mediaPlayer.setPlayState(true);
+                this.startPolling(track.filePath);
+            }
         }
         else {
-            this.currentPlaylist = [track];
-            this.currentTrackIndex = 0;
-        }
-        this.mediaPlayer.setVisibility(true);
-        this.mediaPlayer.updateMediaInfo(track.title, track.artist);
-        if (this.musicStore.getCurrentTrack() !== track) {
-            this.musicStore.setCurrentTrack(track);
-        }
-        const success = await this.musicApiClient.playAudioFile(track.filePath);
-        if (success) {
-            this.mediaPlayer.setPlayState(true);
-            this.startPolling(track.filePath);
+            // Контекст тот же (тот же альбом), просто переключаем индекс на бэкенде
+            this.currentTrackIndex = this.currentPlaylist.findIndex((t) => t.filePath === track.filePath);
+            this.mediaPlayer.updateMediaInfo(track.title, track.artist);
+            if (this.musicStore.getCurrentTrack() !== track) {
+                this.musicStore.setCurrentTrack(track);
+            }
+            const success = await this.musicApiClient.changeAudioTrackByIndex(this.currentTrackIndex);
+            if (success) {
+                this.isAudioPaused = false;
+                this.mediaPlayer.setPlayState(true);
+                // Перезапускаем поллинг под путь нового трека, чтобы статус запрашивался корректно
+                this.startPolling(track.filePath);
+            }
         }
     }
     async togglePlay() {
@@ -147,6 +172,7 @@ export class PlaybackManager {
                     }
                     if (current !== undefined && total !== undefined) {
                         this.mediaPlayer.updateProgress(current, total);
+                        // Если трек завершается (осталась 1 секунда или меньше), переключаем на следующий
                         if (total > 0 && current >= total - 1) {
                             this.playNextTrack();
                             return;

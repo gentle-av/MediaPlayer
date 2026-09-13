@@ -226,17 +226,37 @@ export class MusicApiClient extends BaseApiClient<unknown> {
     }
   }
 
+  public async playAudioPlaylist(trackPaths: string[]): Promise<boolean> {
+    try {
+      const cleanPaths = trackPaths.map((path) => path.replace(/\\/g, '/'));
+      const response = await this.request<any>('api/audio/playlist', {
+        method: 'POST',
+        body: JSON.stringify({ tracks: cleanPaths }),
+      });
+      return response && response.status === 200;
+    } catch (error) {
+      console.error('Failed to load playlist to backend:', error);
+      return false;
+    }
+  }
+
+  public async changeAudioTrackByIndex(index: number): Promise<boolean> {
+    try {
+      const response = await this.request<any>('api/audio/index', {
+        method: 'POST',
+        body: JSON.stringify({ index }),
+      });
+      return response && response.status === 200;
+    } catch (error) {
+      console.error(`Failed to change track to index ${index}:`, error);
+      return false;
+    }
+  }
+
   public async playAudioFile(trackPath: string): Promise<boolean> {
     try {
       const cleanPath = trackPath.replace(/\\/g, '/');
       const requestBody = JSON.stringify({ path: cleanPath });
-      console.log('\n[FRONTEND DEBUG] === Sending to /api/audio/file ===');
-      console.log('URL:', this.buildUrl('api/audio/file'));
-      console.log('Method: POST');
-      console.log('Headers: Content-Type: application/json');
-      console.log('Body String:', requestBody);
-      console.log('Body Objectized:', JSON.parse(requestBody));
-      console.log('=========================================\n');
       const response = await this.request<any>('api/audio/file', {
         method: 'POST',
         body: requestBody,
