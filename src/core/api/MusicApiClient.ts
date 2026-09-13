@@ -226,6 +226,27 @@ export class MusicApiClient extends BaseApiClient<unknown> {
     }
   }
 
+  public async updateTrackTags(payload: {
+    path: string;
+    title?: string;
+    artist?: string;
+    album?: string;
+    genre?: string;
+    track?: number;
+    year?: number;
+  }): Promise<boolean> {
+    try {
+      const response = await this.request<any>('api/music/update-tags', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      });
+      return response && response.status === 200;
+    } catch (error) {
+      console.error('Failed to update track tags via API:', error);
+      return false;
+    }
+  }
+
   public async playAudioPlaylist(trackPaths: string[]): Promise<boolean> {
     try {
       const cleanPaths = trackPaths.map((path) => path.replace(/\\/g, '/'));

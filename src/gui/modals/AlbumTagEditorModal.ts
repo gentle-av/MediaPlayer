@@ -1,15 +1,20 @@
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
+import { MusicApiClient } from '../../core/api/MusicApiClient.js';
+import { ToastService } from '../components/ToastService.js';
 
 export class AlbumTagEditorModal {
   private modalElement: HTMLElement | null = null;
+  private readonly musicApiClient: MusicApiClient;
 
   constructor(
     private readonly albumName: string,
     private readonly artistName: string,
     private readonly albumTracks: Metadata[],
     private readonly musicStore: MusicStore,
-  ) {}
+  ) {
+    this.musicApiClient = new MusicApiClient();
+  }
 
   public open(): void {
     this.close();
@@ -88,6 +93,7 @@ export class AlbumTagEditorModal {
     artistLabel.textContent = 'Исполнитель:';
     const artistInput = document.createElement('input');
     artistInput.type = 'text';
+    artistInput.id = 'albumTagEditorArtistInput';
     artistInput.className = 'tag-editor-input-artist';
     artistInput.value = this.artistName;
     artistField.append(artistLabel, artistInput);
@@ -97,6 +103,7 @@ export class AlbumTagEditorModal {
     albumLabel.textContent = 'Альбом:';
     const albumInput = document.createElement('input');
     albumInput.type = 'text';
+    albumInput.id = 'albumTagEditorAlbumInput';
     albumInput.className = 'tag-editor-input-album';
     albumInput.value = this.albumName;
     albumField.append(albumLabel, albumInput);
@@ -110,9 +117,11 @@ export class AlbumTagEditorModal {
     bodyElement.className = 'modal-body tag-editor-custom-body';
     const tableContainer = document.createElement('div');
     tableContainer.className = 'tag-editor-tracks-table';
+    tableContainer.id = 'albumTagEditorTracksTableContainer';
     this.albumTracks.forEach((track, index) => {
       const row = document.createElement('div');
       row.className = 'tag-editor-track-row';
+      row.dataset.filePath = track.filePath;
       const leftSection = document.createElement('div');
       leftSection.className = 'tag-editor-row-left';
       const numberElement = document.createElement('span');
@@ -146,9 +155,69 @@ export class AlbumTagEditorModal {
     const saveBtn = document.createElement('button');
     saveBtn.className = 'modal-play-btn';
     saveBtn.innerHTML = '<span>Сохранить изменения</span>';
-    saveBtn.addEventListener('click', () => {
-      console.log('Сохранение измененных тегов альбома и треков');
+    saveBtn.addEventListener('click', async () => {
+      const artistInput = document.getElementById(
+        'albumTagEditorArtistInput',
+      ) as HTMLInputElement;
+      const albumInput = document.getElementById(
+        'albumTagEditorAlbumInput',
+      ) as HTMLInputElement;
+      if (!artistInput || !albumInput) return;
+      const newArtist = artistInput.value.trim();
+      const newAlbum = albumInput.value.trim();
+      const tableContainer = document.getElementById(
+        'albumTagEditorTracksTableContainer',
+      );
+      if (!tableContainer) return;
+      const rows = tableContainer.querySelectorAll('.tag-editor-track-row');
+      let totalUpdated = 0;
+      let failedCount = 0;
+      ToastService.getInstance().show('Сохранение тегов...', 'info');
+      for (const row of Array.from(rows)) {
+        const rowElement = row as HTMLElement;
+        const path = rowElement.dataset.filePath;
+        const nameInput = rowElement.querySelector(
+          '.tag-editor-track-name-input',
+        ) as HTMLInputElement;
+        const numberSpan = rowElement.querySelector(
+          '.tag-editor-track-number',
+        ) as HTMLElement;
+        if (!path || !nameInput || !numberSpan) continue;
+        const trackNumber = parseInt(numberSpan.textContent || '0', 10);
+        const payload = {
+          path: path,
+          artist: newArtist,
+          album: newAlbum,
+          title: nameInput.value.trim(),
+          track: isNaN(trackNumber) ? 0 : trackNumber,
+        };
+        const success = await this.musicApiClient.updateTrackTags(payload);
+        if (success) {
+          totalUpdated++;
+        } else {
+          failedCount++;
+        }
+      }
+      if (totalUpdated > 0) {
+        await this.musicStore.loadTracksFromServer();
+        ToastService.getInstance().show(
+          `Успешно обновлено тегов: ${totalUpdated}`,
+          'success',
+        );
+      }
+      if (failedCount > 0) {
+        ToastService.getInstance().show(
+          `Не удалось обновить файлов: ${failedCount} (проверьте, что это .flac)`,
+          'error',
+        );
+      }
       this.close();
+      const parentModalClose = document.querySelector(
+        '.album-details-modal .modal-close',
+      ) as HTMLElement;
+      if (parentModalClose) {
+        parentModalClose.click();
+      }
     });
     footerElement.append(cancelBtn, saveBtn);
     return footerElement;

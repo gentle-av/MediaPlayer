@@ -145,6 +145,19 @@ export class MusicApiClient extends BaseApiClient {
             throw error;
         }
     }
+    async updateTrackTags(payload) {
+        try {
+            const response = await this.request('api/music/update-tags', {
+                method: 'POST',
+                body: JSON.stringify(payload),
+            });
+            return response && response.status === 200;
+        }
+        catch (error) {
+            console.error('Failed to update track tags via API:', error);
+            return false;
+        }
+    }
     async playAudioPlaylist(trackPaths) {
         try {
             const cleanPaths = trackPaths.map((path) => path.replace(/\\/g, '/'));
