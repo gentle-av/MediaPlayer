@@ -1,5 +1,6 @@
 import { AlbumTagEditorModal } from '../modals/AlbumTagEditorModal.js';
 import { PlaylistModal } from '../modals/PlaylistModal.js';
+import { ToastService } from './ToastService.js';
 export class AlbumControlsPanel {
     constructor(albumTracks, playbackManager, playlistStore, musicStore, onCloseParent) {
         this.albumTracks = albumTracks;
@@ -22,16 +23,12 @@ export class AlbumControlsPanel {
                 if (!this.playlistStore.getPlaylist(activePlaylistName)) {
                     this.playlistStore.createPlaylist(activePlaylistName);
                 }
-                else {
-                    this.playlistStore.clearPlaylist(activePlaylistName);
-                }
+                this.playlistStore.clearPlaylist(activePlaylistName);
                 const filePaths = this.albumTracks.map((track) => track.filePath);
                 this.playlistStore.addTracksToPlaylist(activePlaylistName, filePaths);
                 this.onCloseParent();
                 this.playbackManager.playMusic(this.albumTracks[0]);
-                const currentTracks = this.playlistStore.getPlaylistTracks(activePlaylistName);
-                const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
-                modal.open();
+                ToastService.getInstance().show('Альбом добавлен в плейлист и запущен', 'success');
             }
         });
         const addBtn = document.createElement('button');
@@ -53,6 +50,10 @@ export class AlbumControlsPanel {
                 }
                 if (filePathsToPush.length > 0) {
                     this.playlistStore.addTracksToPlaylist(activePlaylistName, filePathsToPush);
+                    ToastService.getInstance().show(`Добавлено треков: ${filePathsToPush.length}`, 'success');
+                }
+                else {
+                    ToastService.getInstance().show('Все треки уже есть в плейлисте', 'info');
                 }
                 this.onCloseParent();
                 const currentTracks = this.playlistStore.getPlaylistTracks(activePlaylistName);
@@ -80,6 +81,7 @@ export class AlbumControlsPanel {
         deleteBtn.addEventListener('click', () => {
             if (confirm('Вы уверены, что хотите удалить весь альбом с диска?')) {
                 this.onCloseParent();
+                ToastService.getInstance().show('Запрос на удаление альбома отправлен', 'info');
             }
         });
         footerElement.append(playBtn, addBtn, editBtn, deleteBtn);

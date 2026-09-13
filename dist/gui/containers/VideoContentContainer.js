@@ -11,14 +11,15 @@ export class VideoContentContainer {
     async render(targetElement) {
         if (!targetElement)
             return null;
-        while (targetElement.firstChild) {
-            targetElement.removeChild(targetElement.firstChild);
-        }
         const uiState = UiStateStore.getInstance().getState();
         const filterTerm = uiState.searchQuery;
         const activePath = uiState.currentPath;
-        if (this.videoStore.getCurrentPath() !== activePath) {
+        if (!this.videoStore.isLoaded() ||
+            this.videoStore.getCurrentPath() !== activePath) {
             await this.videoStore.loadLibrary(activePath);
+        }
+        while (targetElement.firstChild) {
+            targetElement.removeChild(targetElement.firstChild);
         }
         let allItems = this.videoStore.getItems();
         if (filterTerm) {

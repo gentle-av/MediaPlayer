@@ -49,6 +49,9 @@ export class VideoStore {
             await this.loadLibrary(item.path);
         }
     }
+    isLoaded() {
+        return this.currentLibrary !== null;
+    }
     search(term) {
         if (!this.currentLibrary)
             return [];

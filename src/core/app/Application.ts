@@ -4,6 +4,7 @@ import { VideoStore } from '../store/VideoStore.js';
 import { PlaylistStore } from '../store/PlaylistStore.js';
 import { PlaybackManager } from '../player/PlaybackManager.js';
 import { Player } from '../../gui/Player.js';
+import { HashRouter } from '../player/HashRouter.js';
 
 export class Application {
   private mainContainer: HTMLElement | null;
@@ -13,6 +14,7 @@ export class Application {
   private playlistStore: PlaylistStore;
   private playbackManager: PlaybackManager;
   private player: Player;
+  private hashRouter: HashRouter;
 
   constructor() {
     this.mainContainer = document.getElementById('main');
@@ -32,7 +34,8 @@ export class Application {
       this.playbackManager,
       this.player,
     );
-    this.initialize();
+    this.hashRouter = new HashRouter();
+    this.initialize().catch((error) => console.error(error));
     this.render();
   }
 

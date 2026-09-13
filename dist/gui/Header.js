@@ -120,7 +120,9 @@ export class Header {
         badge.textContent = '0';
         playlistBtn.appendChild(badge);
         playlistBtn.addEventListener('click', () => {
-            const currentTracks = this.musicStore.getAllTracks();
+            const names = this.playlistStore.getPlaylistNames();
+            const activeName = names && names.length > 0 ? names[0] : 'Избранное';
+            const currentTracks = this.playlistStore.getPlaylistTracks(activeName);
             const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
             modal.open();
         });

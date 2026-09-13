@@ -1,0 +1,27 @@
+.toast-container .notification {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  font-size: 0.9rem;
+  font-weight: 500;
+  pointer-events: auto;
+  min-width: 250px;
+  max-width: 380px;
+}
+
+.toast-container .notification.success {
+  background: var(--green);
+  color: var(--bg0);
+}
+
+.toast-container .notification.error {
+  background: var(--red);
+  color: var(--bg0);
+}
+
+.toast-container .notification.info {
+  background: var(--yellow);
+  color: var(--bg0);
+}

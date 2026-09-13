@@ -66,6 +66,10 @@ export class VideoStore {
     }
   }
 
+  public isLoaded(): boolean {
+    return this.currentLibrary !== null;
+  }
+
   search(term: string): VideoItem[] {
     if (!this.currentLibrary) return [];
     return this.currentLibrary.items.filter((item) =>
