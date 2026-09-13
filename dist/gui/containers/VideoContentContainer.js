@@ -1,34 +1,24 @@
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { ConfirmModal } from '../menu/ConfirmModal.js';
+import { UiStateStore } from '../../core/store/UiStateStore.js';
 export class VideoContentContainer {
     constructor(videoStore, playbackManager) {
         this.videoStore = videoStore;
         this.playbackManager = playbackManager;
-        this.handlePopstateRef = null;
-        this.currentTargetElement = null;
         this.contextMenu = new ContextMenu();
         this.confirmModal = new ConfirmModal();
     }
-    async render(targetElement, filterTerm) {
+    async render(targetElement) {
         if (!targetElement)
             return null;
-        this.currentTargetElement = targetElement;
-        if (!this.handlePopstateRef) {
-            this.handlePopstateRef = async (event) => {
-                const state = event.state;
-                const targetPath = state && state.path ? state.path : '/mnt/video';
-                await this.videoStore.loadLibrary(targetPath);
-                await this.render(this.currentTargetElement);
-            };
-            window.addEventListener('popstate', this.handlePopstateRef);
-        }
-        if (this.videoStore.getItems().length === 0 &&
-            this.videoStore.getCurrentPath() === '/mnt/video') {
-            await this.videoStore.loadLibrary('/mnt/video');
-            history.replaceState({ path: '/mnt/video' }, '');
-        }
         while (targetElement.firstChild) {
             targetElement.removeChild(targetElement.firstChild);
+        }
+        const uiState = UiStateStore.getInstance().getState();
+        const filterTerm = uiState.searchQuery;
+        const activePath = uiState.currentPath;
+        if (this.videoStore.getCurrentPath() !== activePath) {
+            await this.videoStore.loadLibrary(activePath);
         }
         let allItems = this.videoStore.getItems();
         if (filterTerm) {
@@ -55,9 +45,7 @@ export class VideoContentContainer {
             videoCardElement.addEventListener('click', async (e) => {
                 e.preventDefault();
                 if (item.isDirectory) {
-                    await this.videoStore.navigateToFolder(item);
-                    history.pushState({ path: this.videoStore.getCurrentPath() }, '');
-                    await this.render(targetElement);
+                    UiStateStore.getInstance().setCurrentPath(item.path);
                 }
                 else if (item.isVideo) {
                     await this.playbackManager.playVideo(item);
@@ -69,9 +57,7 @@ export class VideoContentContainer {
                         label: item.isDirectory ? 'Открыть папку' : 'Воспроизвести',
                         action: async () => {
                             if (item.isDirectory) {
-                                await this.videoStore.navigateToFolder(item);
-                                history.pushState({ path: this.videoStore.getCurrentPath() }, '');
-                                await this.render(targetElement);
+                                UiStateStore.getInstance().setCurrentPath(item.path);
                             }
                             else if (item.isVideo) {
                                 await this.playbackManager.playVideo(item);
@@ -96,13 +82,7 @@ export class VideoContentContainer {
         targetElement.appendChild(gridElement);
         return gridElement;
     }
-    dispose() {
-        if (this.handlePopstateRef) {
-            window.removeEventListener('popstate', this.handlePopstateRef);
-            this.handlePopstateRef = null;
-        }
-        this.currentTargetElement = null;
-    }
+    dispose() { }
     createVideoCardElement(videoItem) {
         const cardElement = document.createElement('figure');
         cardElement.className = 'video-card';

@@ -1,6 +1,10 @@
 export class UiStateStore {
     constructor() {
-        this.state = { currentTab: 'video', searchQuery: '' };
+        this.state = {
+            currentTab: 'video',
+            searchQuery: '',
+            currentPath: '/mnt/video',
+        };
         this.listeners = [];
     }
     static getInstance() {
@@ -19,6 +23,10 @@ export class UiStateStore {
     setTab(tab) {
         this.state.currentTab = tab;
         this.state.searchQuery = '';
+        this.notify();
+    }
+    setCurrentPath(path) {
+        this.state.currentPath = path;
         this.notify();
     }
     subscribe(listener) {

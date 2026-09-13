@@ -3,11 +3,16 @@ export type TabType = 'video' | 'audio' | 'settings';
 export interface UiState {
   currentTab: TabType;
   searchQuery: string;
+  currentPath: string;
 }
 
 export class UiStateStore {
   private static instance: UiStateStore | null = null;
-  private state: UiState = { currentTab: 'video', searchQuery: '' };
+  private state: UiState = {
+    currentTab: 'video',
+    searchQuery: '',
+    currentPath: '/mnt/video',
+  };
   private listeners: Array<(state: UiState) => void> = [];
 
   private constructor() {}
@@ -31,6 +36,11 @@ export class UiStateStore {
   public setTab(tab: TabType): void {
     this.state.currentTab = tab;
     this.state.searchQuery = '';
+    this.notify();
+  }
+
+  public setCurrentPath(path: string): void {
+    this.state.currentPath = path;
     this.notify();
   }
 

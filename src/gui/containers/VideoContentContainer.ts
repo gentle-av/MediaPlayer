@@ -4,13 +4,11 @@ import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { ConfirmModal } from '../menu/ConfirmModal.js';
 import { Component } from '../components/Component.js';
+import { UiStateStore } from '../../core/store/UiStateStore.js';
 
 export class VideoContentContainer implements Component {
   private readonly contextMenu: ContextMenu;
   private readonly confirmModal: ConfirmModal;
-  private handlePopstateRef: ((event: PopStateEvent) => Promise<void>) | null =
-    null;
-  private currentTargetElement: HTMLElement | null = null;
 
   constructor(
     private readonly videoStore: VideoStore,
@@ -22,28 +20,16 @@ export class VideoContentContainer implements Component {
 
   public async render(
     targetElement: HTMLElement | null,
-    filterTerm?: string,
   ): Promise<HTMLElement | null> {
     if (!targetElement) return null;
-    this.currentTargetElement = targetElement;
-    if (!this.handlePopstateRef) {
-      this.handlePopstateRef = async (event: PopStateEvent) => {
-        const state = event.state;
-        const targetPath = state && state.path ? state.path : '/mnt/video';
-        await this.videoStore.loadLibrary(targetPath);
-        await this.render(this.currentTargetElement);
-      };
-      window.addEventListener('popstate', this.handlePopstateRef);
-    }
-    if (
-      this.videoStore.getItems().length === 0 &&
-      this.videoStore.getCurrentPath() === '/mnt/video'
-    ) {
-      await this.videoStore.loadLibrary('/mnt/video');
-      history.replaceState({ path: '/mnt/video' }, '');
-    }
     while (targetElement.firstChild) {
       targetElement.removeChild(targetElement.firstChild);
+    }
+    const uiState = UiStateStore.getInstance().getState();
+    const filterTerm = uiState.searchQuery;
+    const activePath = uiState.currentPath;
+    if (this.videoStore.getCurrentPath() !== activePath) {
+      await this.videoStore.loadLibrary(activePath);
     }
     let allItems = this.videoStore.getItems();
     if (filterTerm) {
@@ -70,9 +56,7 @@ export class VideoContentContainer implements Component {
       videoCardElement.addEventListener('click', async (e) => {
         e.preventDefault();
         if (item.isDirectory) {
-          await this.videoStore.navigateToFolder(item);
-          history.pushState({ path: this.videoStore.getCurrentPath() }, '');
-          await this.render(targetElement);
+          UiStateStore.getInstance().setCurrentPath(item.path);
         } else if (item.isVideo) {
           await this.playbackManager.playVideo(item);
         }
@@ -83,12 +67,7 @@ export class VideoContentContainer implements Component {
             label: item.isDirectory ? 'Открыть папку' : 'Воспроизвести',
             action: async () => {
               if (item.isDirectory) {
-                await this.videoStore.navigateToFolder(item);
-                history.pushState(
-                  { path: this.videoStore.getCurrentPath() },
-                  '',
-                );
-                await this.render(targetElement);
+                UiStateStore.getInstance().setCurrentPath(item.path);
               } else if (item.isVideo) {
                 await this.playbackManager.playVideo(item);
               }
@@ -120,13 +99,7 @@ export class VideoContentContainer implements Component {
     return gridElement;
   }
 
-  public dispose(): void {
-    if (this.handlePopstateRef) {
-      window.removeEventListener('popstate', this.handlePopstateRef);
-      this.handlePopstateRef = null;
-    }
-    this.currentTargetElement = null;
-  }
+  public dispose(): void {}
 
   private createVideoCardElement(videoItem: VideoItem): HTMLElement {
     const cardElement = document.createElement('figure');
