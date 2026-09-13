@@ -1,14 +1,17 @@
 import { AlbumCard } from '../components/AlbumCard.js';
+import { UiStateStore } from '../../core/store/UiStateStore.js';
 export class MusicContentContainer {
     constructor(musicStore, playlistStore, playbackManager) {
         this.musicStore = musicStore;
         this.playlistStore = playlistStore;
         this.playbackManager = playbackManager;
     }
-    async render(targetElement, filterTerm) {
+    async render(targetElement) {
         if (!targetElement)
             return null;
         targetElement.innerHTML = '';
+        const uiState = UiStateStore.getInstance().getState();
+        const filterTerm = uiState.searchQuery;
         let activeTracks = this.musicStore.getAllTracks();
         if (filterTerm) {
             activeTracks = this.musicStore.searchTracks(filterTerm);

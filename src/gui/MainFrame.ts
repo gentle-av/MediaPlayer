@@ -10,6 +10,7 @@ import { VideoContentContainer } from './containers/VideoContentContainer.js';
 import { MusicContentContainer } from './containers/MusicContentContainer.js';
 import { ComponentFactory, TabType } from './components/ComponentFactory.js';
 import { Component } from './components/Component.js';
+import { UiStateStore, UiState } from '../core/store/UiStateStore.js';
 
 export class MainFrame {
   private header: Header;
@@ -18,7 +19,6 @@ export class MainFrame {
   private componentFactory: ComponentFactory;
   private currentTab: TabType = 'video';
   private contentArea: HTMLElement | null = null;
-  private activeSearchTerm: string = '';
   private currentLiveComponent: Component | null = null;
 
   constructor(
@@ -58,6 +58,18 @@ export class MainFrame {
     renderedPlayer.classList.add('visible');
     bodyWrapper.appendChild(renderedPlayer);
     appContainer.appendChild(bodyWrapper);
+    UiStateStore.getInstance().subscribe(async (state: UiState) => {
+      if (this.currentTab !== state.currentTab) {
+        this.currentTab = state.currentTab;
+        if (this.currentLiveComponent) this.currentLiveComponent.dispose();
+        this.currentLiveComponent = this.componentFactory.create(
+          state.currentTab,
+        );
+      }
+      if (this.contentArea) {
+        await this.currentLiveComponent?.render(this.contentArea);
+      }
+    });
     this.updateContent(this.currentTab);
     this.bindPlayerControls(appContainer);
     setTimeout(() => {
@@ -93,8 +105,6 @@ export class MainFrame {
   }
 
   private async switchTab(targetTab: TabType): Promise<void> {
-    this.currentTab = targetTab;
-    this.activeSearchTerm = '';
     const searchInput = document.getElementById(
       'globalSearchInput',
     ) as HTMLInputElement;
@@ -111,19 +121,14 @@ export class MainFrame {
     const config = tabConfigs[targetTab];
     this.header.setTitle(config.icon, config.text);
     this.header.togglePlaylistButtonVisibility(targetTab === 'audio');
-    await this.updateContent(targetTab);
+    UiStateStore.getInstance().setTab(targetTab);
   }
 
   private async updateContent(activeTab: TabType): Promise<void> {
     if (!this.contentArea) return;
-    if (this.currentLiveComponent) {
-      this.currentLiveComponent.dispose();
-    }
+    if (this.currentLiveComponent) this.currentLiveComponent.dispose();
     this.currentLiveComponent = this.componentFactory.create(activeTab);
-    await this.currentLiveComponent.render(
-      this.contentArea,
-      this.activeSearchTerm,
-    );
+    await this.currentLiveComponent.render(this.contentArea);
   }
 
   private bindPlayerControls(renderedAppElement: HTMLElement): void {
@@ -147,13 +152,7 @@ export class MainFrame {
 
   private bindHeaderEvents(containerElement: HTMLElement): void {
     this.header.bindSearch(async (searchTerm: string) => {
-      this.activeSearchTerm = searchTerm;
-      if (this.currentLiveComponent && this.contentArea) {
-        await this.currentLiveComponent.render(
-          this.contentArea,
-          this.activeSearchTerm,
-        );
-      }
+      UiStateStore.getInstance().setSearchQuery(searchTerm);
     }, containerElement);
   }
 }

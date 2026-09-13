@@ -4,6 +4,7 @@ import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { AlbumCard } from '../components/AlbumCard.js';
 import { Component } from '../components/Component.js';
+import { UiStateStore } from '../../core/store/UiStateStore.js';
 
 export class MusicContentContainer implements Component {
   constructor(
@@ -14,10 +15,11 @@ export class MusicContentContainer implements Component {
 
   public async render(
     targetElement: HTMLElement | null,
-    filterTerm?: string,
   ): Promise<HTMLElement | null> {
     if (!targetElement) return null;
     targetElement.innerHTML = '';
+    const uiState = UiStateStore.getInstance().getState();
+    const filterTerm = uiState.searchQuery;
     let activeTracks = this.musicStore.getAllTracks();
     if (filterTerm) {
       activeTracks = this.musicStore.searchTracks(filterTerm);

@@ -4,6 +4,7 @@ import { Settings } from './Settings.js';
 import { VideoContentContainer } from './containers/VideoContentContainer.js';
 import { MusicContentContainer } from './containers/MusicContentContainer.js';
 import { ComponentFactory } from './components/ComponentFactory.js';
+import { UiStateStore } from '../core/store/UiStateStore.js';
 export class MainFrame {
     constructor(musicStore, videoStore, playlistStore, playbackManager, player) {
         this.musicStore = musicStore;
@@ -13,7 +14,6 @@ export class MainFrame {
         this.player = player;
         this.currentTab = 'video';
         this.contentArea = null;
-        this.activeSearchTerm = '';
         this.currentLiveComponent = null;
         this.settings = new Settings();
         this.componentFactory = new ComponentFactory();
@@ -40,6 +40,17 @@ export class MainFrame {
         renderedPlayer.classList.add('visible');
         bodyWrapper.appendChild(renderedPlayer);
         appContainer.appendChild(bodyWrapper);
+        UiStateStore.getInstance().subscribe(async (state) => {
+            if (this.currentTab !== state.currentTab) {
+                this.currentTab = state.currentTab;
+                if (this.currentLiveComponent)
+                    this.currentLiveComponent.dispose();
+                this.currentLiveComponent = this.componentFactory.create(state.currentTab);
+            }
+            if (this.contentArea) {
+                await this.currentLiveComponent?.render(this.contentArea);
+            }
+        });
         this.updateContent(this.currentTab);
         this.bindPlayerControls(appContainer);
         setTimeout(() => {
@@ -62,8 +73,6 @@ export class MainFrame {
         this.componentFactory.register('settings', () => this.settings);
     }
     async switchTab(targetTab) {
-        this.currentTab = targetTab;
-        this.activeSearchTerm = '';
         const searchInput = document.getElementById('globalSearchInput');
         const clearButton = document.querySelector('.search-clear-btn');
         if (searchInput)
@@ -78,16 +87,15 @@ export class MainFrame {
         const config = tabConfigs[targetTab];
         this.header.setTitle(config.icon, config.text);
         this.header.togglePlaylistButtonVisibility(targetTab === 'audio');
-        await this.updateContent(targetTab);
+        UiStateStore.getInstance().setTab(targetTab);
     }
     async updateContent(activeTab) {
         if (!this.contentArea)
             return;
-        if (this.currentLiveComponent) {
+        if (this.currentLiveComponent)
             this.currentLiveComponent.dispose();
-        }
         this.currentLiveComponent = this.componentFactory.create(activeTab);
-        await this.currentLiveComponent.render(this.contentArea, this.activeSearchTerm);
+        await this.currentLiveComponent.render(this.contentArea);
     }
     bindPlayerControls(renderedAppElement) {
         const playPauseBtn = renderedAppElement.querySelector('.universal-bottom-player-play');
@@ -105,10 +113,7 @@ export class MainFrame {
     }
     bindHeaderEvents(containerElement) {
         this.header.bindSearch(async (searchTerm) => {
-            this.activeSearchTerm = searchTerm;
-            if (this.currentLiveComponent && this.contentArea) {
-                await this.currentLiveComponent.render(this.contentArea, this.activeSearchTerm);
-            }
+            UiStateStore.getInstance().setSearchQuery(searchTerm);
         }, containerElement);
     }
 }
