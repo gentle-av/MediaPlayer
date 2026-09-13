@@ -1,19 +1,20 @@
 import { VideoStore } from '../../core/store/VideoStore.js';
 import { VideoItem } from '../../core/entities/video/VideoItem.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
-import { ContextMenu } from '../menu//ContextMenu.js';
+import { ContextMenu } from '../menu/ContextMenu.js';
 import { ConfirmModal } from '../menu/ConfirmModal.js';
 
 export class VideoContentContainer {
-  private readonly videoStore: VideoStore;
-  private readonly playbackManager: PlaybackManager;
   private readonly contextMenu: ContextMenu;
   private readonly confirmModal: ConfirmModal;
-  private static isPopstateBound = false;
+  private handlePopstateRef: ((event: PopStateEvent) => Promise<void>) | null =
+    null;
+  private currentTargetElement: HTMLElement | null = null;
 
-  constructor(videoStore: VideoStore, playbackManager: PlaybackManager) {
-    this.videoStore = videoStore;
-    this.playbackManager = playbackManager;
+  constructor(
+    private readonly videoStore: VideoStore,
+    private readonly playbackManager: PlaybackManager,
+  ) {
     this.contextMenu = new ContextMenu();
     this.confirmModal = new ConfirmModal();
   }
@@ -23,14 +24,15 @@ export class VideoContentContainer {
     items?: VideoItem[],
   ): Promise<HTMLElement | null> {
     if (!targetElement) return null;
-    if (!VideoContentContainer.isPopstateBound) {
-      VideoContentContainer.isPopstateBound = true;
-      window.addEventListener('popstate', async (event) => {
-        const targetPath =
-          event.state && event.state.path ? event.state.path : '/mnt/video';
+    this.currentTargetElement = targetElement;
+    if (!this.handlePopstateRef) {
+      this.handlePopstateRef = async (event: PopStateEvent) => {
+        const state = event.state;
+        const targetPath = state && state.path ? state.path : '/mnt/video';
         await this.videoStore.loadLibrary(targetPath);
-        await this.render(targetElement);
-      });
+        await this.render(this.currentTargetElement);
+      };
+      window.addEventListener('popstate', this.handlePopstateRef);
     }
     if (
       this.videoStore.getItems().length === 0 &&
@@ -39,10 +41,15 @@ export class VideoContentContainer {
       await this.videoStore.loadLibrary('/mnt/video');
       history.replaceState({ path: '/mnt/video' }, '');
     }
-    targetElement.innerHTML = '';
+    while (targetElement.firstChild) {
+      targetElement.removeChild(targetElement.firstChild);
+    }
     const allItems = items || this.videoStore.getItems();
     if (allItems.length === 0) {
-      targetElement.innerHTML = '<div class="empty">📁 Папка пуста</div>';
+      const emptyDiv = document.createElement('div');
+      emptyDiv.className = 'empty';
+      emptyDiv.textContent = '📁 Папка пуста';
+      targetElement.appendChild(emptyDiv);
       return null;
     }
     const gridElement = document.createElement('div');
@@ -109,6 +116,14 @@ export class VideoContentContainer {
     return gridElement;
   }
 
+  public dispose(): void {
+    if (this.handlePopstateRef) {
+      window.removeEventListener('popstate', this.handlePopstateRef);
+      this.handlePopstateRef = null;
+    }
+    this.currentTargetElement = null;
+  }
+
   private createVideoCardElement(videoItem: VideoItem): HTMLElement {
     const cardElement = document.createElement('figure');
     cardElement.className = 'video-card';
@@ -145,21 +160,29 @@ export class VideoContentContainer {
     });
     if (videoItem.isDirectory) {
       iconContainer.innerHTML = `
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+          stroke="var(--orange)" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1
+            2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
         </svg>
       `;
     } else if (videoItem.isVideo) {
       iconContainer.innerHTML = `
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#e74c3c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+          stroke="#e74c3c" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
           <path d="M23 7l-7 5 7 5V7z"></path>
           <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
         </svg>
       `;
     } else {
       iconContainer.innerHTML = `
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--fg3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+          stroke="var(--fg3)" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0
+            0 2-2V8z"></path>
           <polyline points="14 2 14 8 20 8"></polyline>
         </svg>
       `;
