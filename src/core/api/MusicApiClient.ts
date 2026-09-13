@@ -73,25 +73,6 @@ export class MusicApiClient extends BaseApiClient<unknown> {
     super('api/music');
   }
 
-  public async getAlbumArtBlob(
-    album: string,
-    artist: string,
-  ): Promise<Blob | null> {
-    try {
-      const url = this.buildUrl('api/music/albumart/by-album');
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ album, artist }),
-      });
-      if (!response.ok) return null;
-      return await response.blob();
-    } catch (error) {
-      console.error(error);
-      return null;
-    }
-  }
-
   public async getAllTracks(): Promise<Metadata[]> {
     try {
       const response = await this.request<MusicListResponse>('api/music/list');
@@ -242,6 +223,86 @@ export class MusicApiClient extends BaseApiClient<unknown> {
     } catch (error) {
       console.error(error);
       throw error;
+    }
+  }
+
+  public async playAudioFile(trackPath: string): Promise<boolean> {
+    try {
+      const cleanPath = trackPath.replace(/\\/g, '/');
+      const requestBody = JSON.stringify({ path: cleanPath });
+      console.log('\n[FRONTEND DEBUG] === Sending to /api/audio/file ===');
+      console.log('URL:', this.buildUrl('api/audio/file'));
+      console.log('Method: POST');
+      console.log('Headers: Content-Type: application/json');
+      console.log('Body String:', requestBody);
+      console.log('Body Objectized:', JSON.parse(requestBody));
+      console.log('=========================================\n');
+      const response = await this.request<any>('api/audio/file', {
+        method: 'POST',
+        body: requestBody,
+      });
+      if (!response || !response.data) return false;
+      const rawData = response.data;
+      return !!(rawData.success || rawData.status === 'success');
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  public async getAlbumArtBlob(
+    album: string,
+    artist: string,
+  ): Promise<Blob | null> {
+    try {
+      const url = this.buildUrl('api/music/albumart/by-album');
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ album, artist }),
+      });
+      if (!response.ok) return null;
+      return await response.blob();
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  public async toggleAudioPlayback(isPaused: boolean): Promise<boolean> {
+    try {
+      const endpoint = isPaused ? 'api/audio/play' : 'api/audio/pause';
+      const response = await this.request<ActionResponse>(endpoint, {
+        method: 'POST',
+      });
+      return response.data.success;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  public async stopAudioPlayback(): Promise<boolean> {
+    try {
+      const response = await this.request<ActionResponse>('api/audio/stop', {
+        method: 'POST',
+      });
+      return response.data.success;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  public async getAudioTimeInfo(): Promise<any> {
+    try {
+      const response = await this.request<any>('api/audio/time', {
+        method: 'GET',
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return null;
     }
   }
 }

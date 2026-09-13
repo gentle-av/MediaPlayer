@@ -147,28 +147,23 @@ export class PlaylistModal {
   private createFooter(): HTMLElement {
     const footerElement = document.createElement('div');
     footerElement.className = 'modal-album-actions album-modal-custom-footer';
-    // const playAllBtn = document.createElement('button');
-    // playAllBtn.className = 'modal-play-btn';
-    // playAllBtn.innerHTML =
-    //   '<i class="fas fa-play"></i> <span>Слушать плейлист</span>';
-    // playAllBtn.addEventListener('click', () => {
-    //   if (this.playlistTracks.length > 0) {
-    //     this.playbackManager.playMusic(this.playlistTracks[0]);
-    //   }
-    // });
     const clearAllBtn = document.createElement('button');
     clearAllBtn.className = 'modal-delete-album-btn';
     clearAllBtn.innerHTML =
       '<i class="fas fa-minus-circle"></i> <span>Очистить</span>';
     clearAllBtn.style.setProperty('background', 'var(--red)', 'important');
     clearAllBtn.style.setProperty('color', 'var(--bg0)', 'important');
-    clearAllBtn.addEventListener('click', () => {
+    clearAllBtn.addEventListener('click', async () => {
       if (confirm('Очистить текущий список воспроизведения?')) {
+        const names = this.playlistStore.getPlaylistNames();
+        const activeName = names && names.length > 0 ? names[0] : 'Избранное';
+        this.playlistStore.clearPlaylist(activeName);
         this.playlistTracks.length = 0;
+        await this.playbackManager.stop();
         this.close();
       }
     });
-    footerElement.append(/*playAllBtn,*/ clearAllBtn);
+    footerElement.append(clearAllBtn);
     return footerElement;
   }
 

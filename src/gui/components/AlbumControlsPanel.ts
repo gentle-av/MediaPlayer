@@ -34,7 +34,7 @@ export class AlbumControlsPanel {
         const filePaths = this.albumTracks.map((track) => track.filePath);
         this.playlistStore.addTracksToPlaylist(activePlaylistName, filePaths);
         this.onCloseParent();
-        this.playbackManager.playMusic(this.albumTracks[0]);
+        this.playbackManager.playMusic(this.albumTracks[0], this.albumTracks);
         ToastService.getInstance().show(
           'Альбом добавлен в плейлист и запущен',
           'success',

@@ -41,44 +41,6 @@ export class MainFrame {
     });
   }
 
-  public render(): HTMLElement {
-    const appContainer = document.createElement('div');
-    appContainer.className = 'app-container';
-    appContainer.appendChild(this.header.render());
-    const bodyWrapper = document.createElement('div');
-    bodyWrapper.className = 'body-wrapper';
-    const mainContent = document.createElement('div');
-    mainContent.className = 'main-content';
-    mainContent.appendChild(this.sidebar.render());
-    this.contentArea = document.createElement('div');
-    this.contentArea.className = 'content-area';
-    mainContent.appendChild(this.contentArea);
-    bodyWrapper.appendChild(mainContent);
-    const renderedPlayer = this.player.render();
-    renderedPlayer.classList.add('visible');
-    bodyWrapper.appendChild(renderedPlayer);
-    appContainer.appendChild(bodyWrapper);
-    UiStateStore.getInstance().subscribe(async (state: UiState) => {
-      if (this.currentTab !== state.currentTab) {
-        this.currentTab = state.currentTab;
-        if (this.currentLiveComponent) this.currentLiveComponent.dispose();
-        this.currentLiveComponent = this.componentFactory.create(
-          state.currentTab,
-        );
-      }
-      if (this.contentArea) {
-        await this.currentLiveComponent?.render(this.contentArea);
-      }
-    });
-    this.updateContent(this.currentTab);
-    this.bindPlayerControls(appContainer);
-    setTimeout(() => {
-      this.header.togglePlaylistButtonVisibility(this.currentTab === 'audio');
-    }, 0);
-    this.bindHeaderEvents(appContainer);
-    return appContainer;
-  }
-
   public async initialize(): Promise<void> {
     try {
       await this.musicStore.loadTracksFromServer();
@@ -131,23 +93,53 @@ export class MainFrame {
     await this.currentLiveComponent.render(this.contentArea);
   }
 
-  private bindPlayerControls(renderedAppElement: HTMLElement): void {
-    const playPauseBtn = renderedAppElement.querySelector(
-      '.universal-bottom-player-play',
-    );
-    if (playPauseBtn) {
-      playPauseBtn.addEventListener('click', () => {
+  public render(): HTMLElement {
+    const appContainer = document.createElement('div');
+    appContainer.className = 'app-container';
+    appContainer.appendChild(this.header.render());
+    const bodyWrapper = document.createElement('div');
+    bodyWrapper.className = 'body-wrapper';
+    const mainContent = document.createElement('div');
+    mainContent.className = 'main-content';
+    mainContent.appendChild(this.sidebar.render());
+    this.contentArea = document.createElement('div');
+    this.contentArea.className = 'content-area';
+    mainContent.appendChild(this.contentArea);
+    bodyWrapper.appendChild(mainContent);
+    const renderedPlayer = this.player.render();
+    renderedPlayer.classList.add('visible');
+    bodyWrapper.appendChild(renderedPlayer);
+    appContainer.appendChild(bodyWrapper);
+    UiStateStore.getInstance().subscribe(async (state: UiState) => {
+      if (this.currentTab !== state.currentTab) {
+        this.currentTab = state.currentTab;
+        if (this.currentLiveComponent) this.currentLiveComponent.dispose();
+        this.currentLiveComponent = this.componentFactory.create(
+          state.currentTab,
+        );
+      }
+      if (this.contentArea) {
+        await this.currentLiveComponent?.render(this.contentArea);
+      }
+    });
+    this.updateContent(this.currentTab);
+    this.bindPlayerControls();
+    setTimeout(() => {
+      this.header.togglePlaylistButtonVisibility(this.currentTab === 'audio');
+    }, 0);
+    this.bindHeaderEvents(appContainer);
+    return appContainer;
+  }
+
+  private bindPlayerControls(): void {
+    this.player.bindControls(
+      () => {
         this.playbackManager.togglePlay();
-      });
-    }
-    const stopBtn = renderedAppElement.querySelector(
-      '.universal-bottom-player-stop',
-    );
-    if (stopBtn) {
-      stopBtn.addEventListener('click', () => {
+      },
+      () => {
         this.playbackManager.stop();
-      });
-    }
+      },
+    );
   }
 
   private bindHeaderEvents(containerElement: HTMLElement): void {

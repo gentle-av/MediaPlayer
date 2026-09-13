@@ -13,6 +13,8 @@ export class Player implements IMediaPlayer {
   private audioEngine: HTMLAudioElement;
   private audioTrackMenu = new AudioTrackMenu();
   private activeVideoPath = '';
+  private onPlayPauseCallback: (() => void) | null = null;
+  private onStopCallback: (() => void) | null = null;
 
   constructor() {
     this.audioEngine = new Audio();
@@ -22,6 +24,52 @@ export class Player implements IMediaPlayer {
     if (this.playerElement) {
       this.playerElement.style.display = isVisible ? 'flex' : 'none';
     }
+  }
+
+  public bindControls(onPlayPause: () => void, onStop: () => void): void {
+    this.onPlayPauseCallback = onPlayPause;
+    this.onStopCallback = onStop;
+  }
+
+  private createControlsContainer(): HTMLElement {
+    const controlsContainer = document.createElement('div');
+    controlsContainer.className = 'universal-bottom-player-controls';
+    this.audioStreamButton = this.createAudioStreamButton();
+    const skipBackwardBtn = this.createControlButton(
+      `<polygon points="19 20 9 12 19 4 19 20"></polygon>
+       <line x1="5" y1="19" x2="5" y2="5"></line>`,
+    );
+    const standardPlayBtn = document.createElement('button');
+    standardPlayBtn.className =
+      'universal-bottom-player-btn universal-bottom-player-play';
+    const playIconHolder = document.createElement('span');
+    playIconHolder.className = 'play-icon-holder';
+    playIconHolder.style.display = 'flex';
+    standardPlayBtn.appendChild(playIconHolder);
+    this.playButtonIcon = playIconHolder;
+    this.setPlayState(false);
+    standardPlayBtn.addEventListener('click', () => {
+      if (this.onPlayPauseCallback) this.onPlayPauseCallback();
+    });
+    const stopBtn = this.createControlButton(
+      '<rect x="4" y="4" width="16" height="16"></rect>',
+      'universal-bottom-player-stop',
+    );
+    stopBtn.addEventListener('click', () => {
+      if (this.onStopCallback) this.onStopCallback();
+    });
+    const skipForwardBtn = this.createControlButton(
+      `<polygon points="5 4 15 12 5 20 5 4"></polygon>
+       <line x1="19" y1="5" x2="19" y2="19"></line>`,
+    );
+    controlsContainer.append(
+      this.audioStreamButton,
+      skipBackwardBtn,
+      standardPlayBtn,
+      stopBtn,
+      skipForwardBtn,
+    );
+    return controlsContainer;
   }
 
   public updateMediaInfo(
@@ -205,41 +253,6 @@ export class Player implements IMediaPlayer {
     flexProgressBar.appendChild(this.timeTotalElement);
     timelineContainer.appendChild(flexProgressBar);
     return timelineContainer;
-  }
-
-  private createControlsContainer(): HTMLElement {
-    const controlsContainer = document.createElement('div');
-    controlsContainer.className = 'universal-bottom-player-controls';
-    this.audioStreamButton = this.createAudioStreamButton();
-    const skipBackwardBtn = this.createControlButton(
-      `<polygon points="19 20 9 12 19 4 19 20"></polygon>
-       <line x1="5" y1="19" x2="5" y2="5"></line>`,
-    );
-    const standardPlayBtn = document.createElement('button');
-    standardPlayBtn.className =
-      'universal-bottom-player-btn universal-bottom-player-play';
-    const playIconHolder = document.createElement('span');
-    playIconHolder.className = 'play-icon-holder';
-    playIconHolder.style.display = 'flex';
-    standardPlayBtn.appendChild(playIconHolder);
-    this.playButtonIcon = playIconHolder;
-    this.setPlayState(false);
-    const stopBtn = this.createControlButton(
-      '<rect x="4" y="4" width="16" height="16"></rect>',
-      'universal-bottom-player-stop',
-    );
-    const skipForwardBtn = this.createControlButton(
-      `<polygon points="5 4 15 12 5 20 5 4"></polygon>
-       <line x1="19" y1="5" x2="19" y2="19"></line>`,
-    );
-    controlsContainer.append(
-      this.audioStreamButton,
-      skipBackwardBtn,
-      standardPlayBtn,
-      stopBtn,
-      skipForwardBtn,
-    );
-    return controlsContainer;
   }
 
   private createAudioStreamButton(): HTMLButtonElement {

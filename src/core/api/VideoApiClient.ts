@@ -60,4 +60,40 @@ export class VideoApiClient extends BaseApiClient<unknown> {
       return false;
     }
   }
+
+  public async toggleVideoPlayback(): Promise<boolean> {
+    try {
+      const response = await this.request<{ isPlaying: boolean }>(
+        'api/video/toggle-play',
+        { method: 'POST' },
+      );
+      return response.status === 200;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
+  public async getVideoStatus(videoPath: string): Promise<any> {
+    try {
+      const path = `api/video/status?path=${encodeURIComponent(videoPath)}`;
+      const response = await this.request<any>(path, { method: 'GET' });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
+  public async closeVideo(): Promise<boolean> {
+    try {
+      const response = await this.request<any>('api/video/close', {
+        method: 'POST',
+      });
+      return response.status === 200;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
 }

@@ -23,42 +23,6 @@ export class MainFrame {
             this.switchTab(selectedTab);
         });
     }
-    render() {
-        const appContainer = document.createElement('div');
-        appContainer.className = 'app-container';
-        appContainer.appendChild(this.header.render());
-        const bodyWrapper = document.createElement('div');
-        bodyWrapper.className = 'body-wrapper';
-        const mainContent = document.createElement('div');
-        mainContent.className = 'main-content';
-        mainContent.appendChild(this.sidebar.render());
-        this.contentArea = document.createElement('div');
-        this.contentArea.className = 'content-area';
-        mainContent.appendChild(this.contentArea);
-        bodyWrapper.appendChild(mainContent);
-        const renderedPlayer = this.player.render();
-        renderedPlayer.classList.add('visible');
-        bodyWrapper.appendChild(renderedPlayer);
-        appContainer.appendChild(bodyWrapper);
-        UiStateStore.getInstance().subscribe(async (state) => {
-            if (this.currentTab !== state.currentTab) {
-                this.currentTab = state.currentTab;
-                if (this.currentLiveComponent)
-                    this.currentLiveComponent.dispose();
-                this.currentLiveComponent = this.componentFactory.create(state.currentTab);
-            }
-            if (this.contentArea) {
-                await this.currentLiveComponent?.render(this.contentArea);
-            }
-        });
-        this.updateContent(this.currentTab);
-        this.bindPlayerControls(appContainer);
-        setTimeout(() => {
-            this.header.togglePlaylistButtonVisibility(this.currentTab === 'audio');
-        }, 0);
-        this.bindHeaderEvents(appContainer);
-        return appContainer;
-    }
     async initialize() {
         try {
             await this.musicStore.loadTracksFromServer();
@@ -97,19 +61,48 @@ export class MainFrame {
         this.currentLiveComponent = this.componentFactory.create(activeTab);
         await this.currentLiveComponent.render(this.contentArea);
     }
-    bindPlayerControls(renderedAppElement) {
-        const playPauseBtn = renderedAppElement.querySelector('.universal-bottom-player-play');
-        if (playPauseBtn) {
-            playPauseBtn.addEventListener('click', () => {
-                this.playbackManager.togglePlay();
-            });
-        }
-        const stopBtn = renderedAppElement.querySelector('.universal-bottom-player-stop');
-        if (stopBtn) {
-            stopBtn.addEventListener('click', () => {
-                this.playbackManager.stop();
-            });
-        }
+    render() {
+        const appContainer = document.createElement('div');
+        appContainer.className = 'app-container';
+        appContainer.appendChild(this.header.render());
+        const bodyWrapper = document.createElement('div');
+        bodyWrapper.className = 'body-wrapper';
+        const mainContent = document.createElement('div');
+        mainContent.className = 'main-content';
+        mainContent.appendChild(this.sidebar.render());
+        this.contentArea = document.createElement('div');
+        this.contentArea.className = 'content-area';
+        mainContent.appendChild(this.contentArea);
+        bodyWrapper.appendChild(mainContent);
+        const renderedPlayer = this.player.render();
+        renderedPlayer.classList.add('visible');
+        bodyWrapper.appendChild(renderedPlayer);
+        appContainer.appendChild(bodyWrapper);
+        UiStateStore.getInstance().subscribe(async (state) => {
+            if (this.currentTab !== state.currentTab) {
+                this.currentTab = state.currentTab;
+                if (this.currentLiveComponent)
+                    this.currentLiveComponent.dispose();
+                this.currentLiveComponent = this.componentFactory.create(state.currentTab);
+            }
+            if (this.contentArea) {
+                await this.currentLiveComponent?.render(this.contentArea);
+            }
+        });
+        this.updateContent(this.currentTab);
+        this.bindPlayerControls();
+        setTimeout(() => {
+            this.header.togglePlaylistButtonVisibility(this.currentTab === 'audio');
+        }, 0);
+        this.bindHeaderEvents(appContainer);
+        return appContainer;
+    }
+    bindPlayerControls() {
+        this.player.bindControls(() => {
+            this.playbackManager.togglePlay();
+        }, () => {
+            this.playbackManager.stop();
+        });
     }
     bindHeaderEvents(containerElement) {
         this.header.bindSearch(async (searchTerm) => {

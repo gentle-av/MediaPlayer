@@ -28,8 +28,11 @@ export class BaseApiClient {
         });
     }
     buildUrl(path) {
-        const cleanPath = path.startsWith('/') ? path : `/${path}`;
-        return `${this.baseUrl}${cleanPath}`;
+        if (path.startsWith('http://') || path.startsWith('https://')) {
+            return path;
+        }
+        const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+        return `${this.baseUrl}/${cleanPath}`;
     }
     async request(path, options = {}) {
         const url = this.buildUrl(path);

@@ -47,8 +47,11 @@ export class BaseApiClient<T> {
   }
 
   protected buildUrl(path: string): string {
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
-    return `${this.baseUrl}${cleanPath}`;
+    if (path.startsWith('http://') || path.startsWith('https://')) {
+      return path;
+    }
+    const cleanPath = path.startsWith('/') ? path.slice(1) : path;
+    return `${this.baseUrl}/${cleanPath}`;
   }
 
   protected async request<R>(

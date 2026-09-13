@@ -56,5 +56,38 @@ export class VideoApiClient extends BaseApiClient {
             return false;
         }
     }
+    async toggleVideoPlayback() {
+        try {
+            const response = await this.request('api/video/toggle-play', { method: 'POST' });
+            return response.status === 200;
+        }
+        catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
+    async getVideoStatus(videoPath) {
+        try {
+            const path = `api/video/status?path=${encodeURIComponent(videoPath)}`;
+            const response = await this.request(path, { method: 'GET' });
+            return response.data;
+        }
+        catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
+    async closeVideo() {
+        try {
+            const response = await this.request('api/video/close', {
+                method: 'POST',
+            });
+            return response.status === 200;
+        }
+        catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
 }
 //# sourceMappingURL=VideoApiClient.js.map
