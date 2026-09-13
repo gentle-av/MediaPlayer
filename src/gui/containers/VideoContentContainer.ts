@@ -3,8 +3,9 @@ import { VideoItem } from '../../core/entities/video/VideoItem.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { ConfirmModal } from '../menu/ConfirmModal.js';
+import { Component } from '../components/Component.js';
 
-export class VideoContentContainer {
+export class VideoContentContainer implements Component {
   private readonly contextMenu: ContextMenu;
   private readonly confirmModal: ConfirmModal;
   private handlePopstateRef: ((event: PopStateEvent) => Promise<void>) | null =
@@ -21,7 +22,7 @@ export class VideoContentContainer {
 
   public async render(
     targetElement: HTMLElement | null,
-    items?: VideoItem[],
+    filterTerm?: string,
   ): Promise<HTMLElement | null> {
     if (!targetElement) return null;
     this.currentTargetElement = targetElement;
@@ -44,7 +45,10 @@ export class VideoContentContainer {
     while (targetElement.firstChild) {
       targetElement.removeChild(targetElement.firstChild);
     }
-    const allItems = items || this.videoStore.getItems();
+    let allItems = this.videoStore.getItems();
+    if (filterTerm) {
+      allItems = this.videoStore.search(filterTerm);
+    }
     if (allItems.length === 0) {
       const emptyDiv = document.createElement('div');
       emptyDiv.className = 'empty';

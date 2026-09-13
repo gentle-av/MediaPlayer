@@ -5,12 +5,14 @@ export class MusicContentContainer {
         this.playlistStore = playlistStore;
         this.playbackManager = playbackManager;
     }
-    async render(targetElement, items) {
-        if (!targetElement) {
+    async render(targetElement, filterTerm) {
+        if (!targetElement)
             return null;
-        }
         targetElement.innerHTML = '';
-        const activeTracks = items || this.musicStore.getAllTracks();
+        let activeTracks = this.musicStore.getAllTracks();
+        if (filterTerm) {
+            activeTracks = this.musicStore.searchTracks(filterTerm);
+        }
         if (activeTracks.length === 0) {
             targetElement.innerHTML =
                 '<div class="empty">🎵 Альбомы не найдены</div>';
@@ -21,14 +23,13 @@ export class MusicContentContainer {
         const groupedAlbums = this.groupTracksByAlbum(activeTracks);
         groupedAlbums.forEach((albumTracks) => {
             const firstTrack = albumTracks[0];
-            const currentAlbumName = firstTrack.album;
-            const currentArtistName = firstTrack.artist;
-            const albumCard = new AlbumCard(currentAlbumName, currentArtistName, albumTracks, this.playbackManager, this.musicStore, this.playlistStore);
+            const albumCard = new AlbumCard(firstTrack.album, firstTrack.artist, albumTracks, this.playbackManager, this.musicStore, this.playlistStore);
             gridElement.appendChild(albumCard.render());
         });
         targetElement.appendChild(gridElement);
         return gridElement;
     }
+    dispose() { }
     groupTracksByAlbum(tracks) {
         const map = new Map();
         tracks.forEach((track) => {
