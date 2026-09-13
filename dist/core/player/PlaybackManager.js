@@ -1,7 +1,7 @@
 import { Config } from '../config/Config.js';
 export class PlaybackManager {
-    constructor(player, musicStore, videoStore) {
-        this.player = player;
+    constructor(mediaPlayer, musicStore, videoStore) {
+        this.mediaPlayer = mediaPlayer;
         this.musicStore = musicStore;
         this.videoStore = videoStore;
         this.currentType = 'none';
@@ -15,9 +15,9 @@ export class PlaybackManager {
         this.stopCurrentPlayback();
         this.currentType = 'video';
         this.currentVideoPath = videoItem.path;
-        this.player.setVisibility(true);
-        this.player.updateMediaInfo(videoItem.name, 'Видео-трансляция', videoItem.path);
-        this.player.setPlayState(true);
+        this.mediaPlayer.setVisibility(true);
+        this.mediaPlayer.updateMediaInfo(videoItem.name, 'Видео-трансляция', videoItem.path);
+        this.mediaPlayer.setPlayState(true);
         await this.videoStore.openVideo(videoItem);
         this.startVideoPolling(videoItem.path);
     }
@@ -25,23 +25,22 @@ export class PlaybackManager {
         this.stopCurrentPlayback();
         this.currentType = 'music';
         this.isAudioPaused = false;
-        this.player.setVisibility(true);
-        this.player.updateMediaInfo(track.title, track.artist);
+        this.mediaPlayer.setVisibility(true);
+        this.mediaPlayer.updateMediaInfo(track.title, track.artist);
         fetch(`${Config.getConfig().baseUrl}/api/open-audio`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ path: track.filePath }),
         })
             .then((response) => {
-            if (!response.ok)
+            if (!response.ok) {
                 throw new Error(`HTTP error status ${response.status}`);
+            }
             return response.json();
         })
             .then((data) => {
             if (data.success) {
-                this.player.setPlayState(true);
+                this.mediaPlayer.setPlayState(true);
                 this.startVideoPolling(track.filePath);
             }
         })
@@ -55,16 +54,16 @@ export class PlaybackManager {
     async togglePlay() {
         if (this.currentType === 'music') {
             if (this.isAudioPaused) {
-                this.player.audioEngine
+                this.mediaPlayer.audioEngine
                     .play()
                     .catch((error) => console.error(error));
                 this.isAudioPaused = false;
-                this.player.setPlayState(true);
+                this.mediaPlayer.setPlayState(true);
             }
             else {
-                this.player.audioEngine.pause();
+                this.mediaPlayer.audioEngine.pause();
                 this.isAudioPaused = true;
-                this.player.setPlayState(false);
+                this.mediaPlayer.setPlayState(false);
             }
         }
         else if (this.currentType === 'video') {
@@ -76,7 +75,7 @@ export class PlaybackManager {
                 });
                 if (response.ok) {
                     const status = await response.json();
-                    this.player.setPlayState(status.isPlaying);
+                    this.mediaPlayer.setPlayState(status.isPlaying);
                 }
             }
             catch (error) {
@@ -99,35 +98,29 @@ export class PlaybackManager {
         this.stopCurrentPlayback();
     }
     playNextTrack() {
-        if (this.currentType !== 'music') {
+        if (this.currentType !== 'music')
             return;
-        }
         const track = this.musicStore.getCurrentTrack();
-        if (!track) {
+        if (!track)
             return;
-        }
         const nextIndex = this.musicStore.getTrackIndex(track) + 1;
         if (nextIndex < this.musicStore.getLibrarySize()) {
             const nextTrack = this.musicStore.getTrackByIndex(nextIndex);
-            if (nextTrack) {
+            if (nextTrack)
                 this.playMusic(nextTrack);
-            }
         }
     }
     playPreviousTrack() {
-        if (this.currentType !== 'music') {
+        if (this.currentType !== 'music')
             return;
-        }
         const track = this.musicStore.getCurrentTrack();
-        if (!track) {
+        if (!track)
             return;
-        }
         const previousIndex = this.musicStore.getTrackIndex(track) - 1;
         if (previousIndex >= 0) {
             const previousTrack = this.musicStore.getTrackByIndex(previousIndex);
-            if (previousTrack) {
+            if (previousTrack)
                 this.playMusic(previousTrack);
-            }
         }
     }
     stopCurrentPlayback() {
@@ -136,18 +129,17 @@ export class PlaybackManager {
             this.pollingIntervalId = null;
         }
         if (this.currentType === 'music') {
-            this.player.stopAudio();
+            this.mediaPlayer.stopAudio();
             this.musicStore.setCurrentTrack(null);
         }
         this.currentType = 'none';
         this.currentVideoPath = '';
         this.isAudioPaused = false;
-        this.player.setVisibility(false);
+        this.mediaPlayer.setVisibility(false);
     }
     dispose() {
-        if (this.unsubscribeMusic) {
+        if (this.unsubscribeMusic)
             this.unsubscribeMusic();
-        }
         this.stopCurrentPlayback();
     }
     initSubscriptions() {
@@ -159,15 +151,15 @@ export class PlaybackManager {
         });
     }
     startVideoPolling(videoPath) {
-        if (this.pollingIntervalId) {
+        if (this.pollingIntervalId)
             clearInterval(this.pollingIntervalId);
-        }
         this.pollingIntervalId = window.setInterval(async () => {
             try {
-                const response = await fetch(`${Config.getConfig().baseUrl}/api/video/status?path=${encodeURIComponent(videoPath)}`);
+                const response = await fetch(`${Config.getConfig().baseUrl}/api/video/status?path=` +
+                    `${encodeURIComponent(videoPath)}`);
                 const status = await response.json();
                 if (status.currentTime !== undefined && status.duration !== undefined) {
-                    this.player.updateProgress(status.currentTime, status.duration);
+                    this.mediaPlayer.updateProgress(status.currentTime, status.duration);
                 }
                 if (status.ended || status.isPlaying === false) {
                     this.stopCurrentPlayback();

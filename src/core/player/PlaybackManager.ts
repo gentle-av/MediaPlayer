@@ -1,4 +1,4 @@
-import { Player } from '../../gui/Player.js';
+import { IMediaPlayer } from './IMediaPlayer.js';
 import { MusicStore } from '../store/MusicStore.js';
 import { VideoStore } from '../store/VideoStore.js';
 import { VideoItem } from '../entities/video/VideoItem.js';
@@ -15,7 +15,7 @@ export class PlaybackManager {
   private currentVideoPath: string = '';
 
   constructor(
-    private player: Player,
+    private mediaPlayer: IMediaPlayer,
     private musicStore: MusicStore,
     private videoStore: VideoStore,
   ) {
@@ -26,13 +26,13 @@ export class PlaybackManager {
     this.stopCurrentPlayback();
     this.currentType = 'video';
     this.currentVideoPath = videoItem.path;
-    this.player.setVisibility(true);
-    this.player.updateMediaInfo(
+    this.mediaPlayer.setVisibility(true);
+    this.mediaPlayer.updateMediaInfo(
       videoItem.name,
       'Видео-трансляция',
       videoItem.path,
     );
-    this.player.setPlayState(true);
+    this.mediaPlayer.setPlayState(true);
     await this.videoStore.openVideo(videoItem);
     this.startVideoPolling(videoItem.path);
   }
@@ -41,23 +41,22 @@ export class PlaybackManager {
     this.stopCurrentPlayback();
     this.currentType = 'music';
     this.isAudioPaused = false;
-    this.player.setVisibility(true);
-    this.player.updateMediaInfo(track.title, track.artist);
+    this.mediaPlayer.setVisibility(true);
+    this.mediaPlayer.updateMediaInfo(track.title, track.artist);
     fetch(`${Config.getConfig().baseUrl}/api/open-audio`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ path: track.filePath }),
     })
       .then((response) => {
-        if (!response.ok)
+        if (!response.ok) {
           throw new Error(`HTTP error status ${response.status}`);
+        }
         return response.json();
       })
       .then((data) => {
         if (data.success) {
-          this.player.setPlayState(true);
+          this.mediaPlayer.setPlayState(true);
           this.startVideoPolling(track.filePath);
         }
       })
@@ -72,15 +71,15 @@ export class PlaybackManager {
   public async togglePlay(): Promise<void> {
     if (this.currentType === 'music') {
       if (this.isAudioPaused) {
-        (this.player as any).audioEngine
+        (this.mediaPlayer as any).audioEngine
           .play()
           .catch((error: Error) => console.error(error));
         this.isAudioPaused = false;
-        this.player.setPlayState(true);
+        this.mediaPlayer.setPlayState(true);
       } else {
-        (this.player as any).audioEngine.pause();
+        (this.mediaPlayer as any).audioEngine.pause();
         this.isAudioPaused = true;
-        this.player.setPlayState(false);
+        this.mediaPlayer.setPlayState(false);
       }
     } else if (this.currentType === 'video') {
       try {
@@ -94,7 +93,7 @@ export class PlaybackManager {
         );
         if (response.ok) {
           const status = await response.json();
-          this.player.setPlayState(status.isPlaying);
+          this.mediaPlayer.setPlayState(status.isPlaying);
         }
       } catch (error) {
         console.error(error);
@@ -117,36 +116,24 @@ export class PlaybackManager {
   }
 
   public playNextTrack(): void {
-    if (this.currentType !== 'music') {
-      return;
-    }
+    if (this.currentType !== 'music') return;
     const track = this.musicStore.getCurrentTrack();
-    if (!track) {
-      return;
-    }
+    if (!track) return;
     const nextIndex = this.musicStore.getTrackIndex(track) + 1;
     if (nextIndex < this.musicStore.getLibrarySize()) {
       const nextTrack = this.musicStore.getTrackByIndex(nextIndex);
-      if (nextTrack) {
-        this.playMusic(nextTrack);
-      }
+      if (nextTrack) this.playMusic(nextTrack);
     }
   }
 
   public playPreviousTrack(): void {
-    if (this.currentType !== 'music') {
-      return;
-    }
+    if (this.currentType !== 'music') return;
     const track = this.musicStore.getCurrentTrack();
-    if (!track) {
-      return;
-    }
+    if (!track) return;
     const previousIndex = this.musicStore.getTrackIndex(track) - 1;
     if (previousIndex >= 0) {
       const previousTrack = this.musicStore.getTrackByIndex(previousIndex);
-      if (previousTrack) {
-        this.playMusic(previousTrack);
-      }
+      if (previousTrack) this.playMusic(previousTrack);
     }
   }
 
@@ -156,19 +143,17 @@ export class PlaybackManager {
       this.pollingIntervalId = null;
     }
     if (this.currentType === 'music') {
-      this.player.stopAudio();
+      this.mediaPlayer.stopAudio();
       this.musicStore.setCurrentTrack(null);
     }
     this.currentType = 'none';
     this.currentVideoPath = '';
     this.isAudioPaused = false;
-    this.player.setVisibility(false);
+    this.mediaPlayer.setVisibility(false);
   }
 
   public dispose(): void {
-    if (this.unsubscribeMusic) {
-      this.unsubscribeMusic();
-    }
+    if (this.unsubscribeMusic) this.unsubscribeMusic();
     this.stopCurrentPlayback();
   }
 
@@ -182,17 +167,16 @@ export class PlaybackManager {
   }
 
   private startVideoPolling(videoPath: string): void {
-    if (this.pollingIntervalId) {
-      clearInterval(this.pollingIntervalId);
-    }
+    if (this.pollingIntervalId) clearInterval(this.pollingIntervalId);
     this.pollingIntervalId = window.setInterval(async () => {
       try {
         const response = await fetch(
-          `${Config.getConfig().baseUrl}/api/video/status?path=${encodeURIComponent(videoPath)}`,
+          `${Config.getConfig().baseUrl}/api/video/status?path=` +
+            `${encodeURIComponent(videoPath)}`,
         );
         const status = await response.json();
         if (status.currentTime !== undefined && status.duration !== undefined) {
-          this.player.updateProgress(status.currentTime, status.duration);
+          this.mediaPlayer.updateProgress(status.currentTime, status.duration);
         }
         if (status.ended || status.isPlaying === false) {
           this.stopCurrentPlayback();

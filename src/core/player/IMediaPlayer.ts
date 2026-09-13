@@ -1,0 +1,13 @@
+export interface IMediaPlayer {
+  setVisibility(isVisible: boolean): void;
+
+  updateMediaInfo(
+    mediaTitle: string,
+    mediaArtist: string,
+    videoPath?: string,
+  ): void;
+
+  updateProgress(elapsedSeconds: number, totalSeconds: number): void;
+  setPlayState(isPlaying: boolean): void;
+  stopAudio(): void;
+}
