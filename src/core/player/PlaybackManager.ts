@@ -1,3 +1,4 @@
+import { Config } from '../config/Config.js';
 import { IMediaPlayer } from './IMediaPlayer.js';
 import { MusicStore } from '../store/MusicStore.js';
 import { VideoStore } from '../store/VideoStore.js';
@@ -25,6 +26,22 @@ export class PlaybackManager {
   ) {
     this.musicApiClient = new MusicApiClient();
     this.videoApiClient = new VideoApiClient();
+  }
+
+  public async seek(seconds: number): Promise<void> {
+    if (this.currentType === 'music') {
+      await this.musicApiClient.seekAudioPlayback(seconds);
+    } else if (this.currentType === 'video') {
+      try {
+        await fetch(`${Config.getConfig().baseUrl}/api/mpv/seek`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ time: seconds }),
+        });
+      } catch (error) {
+        console.error(error);
+      }
+    }
   }
 
   public async playVideo(videoItem: VideoItem): Promise<void> {
@@ -115,7 +132,7 @@ export class PlaybackManager {
 
   public stopCurrentPlayback(): void {
     if (this.pollingIntervalId) {
-      clearInterval(this.pollingIntervalId);
+      clearTimeout(this.pollingIntervalId);
       this.pollingIntervalId = null;
     }
     if (this.currentType === 'music') {
@@ -133,29 +150,45 @@ export class PlaybackManager {
   }
 
   private startPolling(targetPath: string): void {
-    if (this.pollingIntervalId) clearInterval(this.pollingIntervalId);
-    this.pollingIntervalId = window.setInterval(async () => {
-      const response =
-        this.currentType === 'video'
-          ? await this.videoApiClient.getVideoStatus(targetPath)
-          : await this.musicApiClient.getAudioTimeInfo();
-      if (!response) return;
-      const metrics = response.data || response;
-      let current: number | undefined;
-      let total: number | undefined;
-      if (metrics.currentTime !== undefined) {
-        current = metrics.currentTime;
-        total = metrics.duration;
-      } else if (metrics.data && metrics.data.currentTime !== undefined) {
-        current = metrics.data.currentTime;
-        total = metrics.data.duration;
+    if (this.pollingIntervalId) {
+      clearTimeout(this.pollingIntervalId);
+      this.pollingIntervalId = null;
+    }
+    const executePollTick = async () => {
+      if (this.currentType === 'none') return;
+      try {
+        const response =
+          this.currentType === 'video'
+            ? await this.videoApiClient.getVideoStatus(targetPath)
+            : await this.musicApiClient.getAudioTimeInfo();
+        if (response) {
+          const metrics = response.data || response;
+          let current: number | undefined;
+          let total: number | undefined;
+          if (metrics.currentTime !== undefined) {
+            current = metrics.currentTime;
+            total = metrics.duration;
+          } else if (metrics.data && metrics.data.currentTime !== undefined) {
+            current = metrics.data.currentTime;
+            total = metrics.data.duration;
+          }
+          if (current !== undefined && total !== undefined) {
+            this.mediaPlayer.updateProgress(current, total);
+            if (total > 0 && current >= total - 1) {
+              this.playNextTrack();
+              return;
+            }
+          }
+          if (metrics.ended || metrics.isPlaying === false) {
+            this.playNextTrack();
+            return;
+          }
+        }
+      } catch (error) {
+        console.warn(error);
       }
-      if (current !== undefined && total !== undefined) {
-        this.mediaPlayer.updateProgress(current, total);
-      }
-      if (metrics.ended || metrics.isPlaying === false) {
-        this.stopCurrentPlayback();
-      }
-    }, 1000);
+      this.pollingIntervalId = window.setTimeout(executePollTick, 1000);
+    };
+    this.pollingIntervalId = window.setTimeout(executePollTick, 600);
   }
 }

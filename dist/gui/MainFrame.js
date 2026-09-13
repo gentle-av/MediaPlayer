@@ -102,7 +102,10 @@ export class MainFrame {
             this.playbackManager.togglePlay();
         }, () => {
             this.playbackManager.stop();
+        }, (seconds) => {
+            this.playbackManager.seek(seconds);
         });
+        this.player.onPlayPauseCallback = this.playbackManager;
     }
     bindHeaderEvents(containerElement) {
         this.header.bindSearch(async (searchTerm) => {

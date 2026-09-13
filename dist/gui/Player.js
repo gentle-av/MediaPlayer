@@ -13,6 +13,8 @@ export class Player {
         this.activeVideoPath = '';
         this.onPlayPauseCallback = null;
         this.onStopCallback = null;
+        this.onSeekCallback = null;
+        this.totalDuration = 0;
         this.audioEngine = new Audio();
     }
     setVisibility(isVisible) {
@@ -20,9 +22,11 @@ export class Player {
             this.playerElement.style.display = isVisible ? 'flex' : 'none';
         }
     }
-    bindControls(onPlayPause, onStop) {
+    bindControls(onPlayPause, onStop, onSeek) {
         this.onPlayPauseCallback = onPlayPause;
         this.onStopCallback = onStop;
+        if (onSeek)
+            this.onSeekCallback = onSeek;
     }
     createControlsContainer() {
         const controlsContainer = document.createElement('div');
@@ -74,6 +78,7 @@ export class Player {
         this.updateProgress(0, 0);
     }
     updateProgress(elapsedSeconds, totalSeconds) {
+        this.totalDuration = totalSeconds;
         if (this.timeCurrentElement) {
             this.timeCurrentElement.textContent = this.formatTime(elapsedSeconds);
         }
@@ -197,6 +202,16 @@ export class Player {
         this.progressFillElement.className =
             'universal-bottom-player-progress-fill';
         backgroundProgressBar.appendChild(this.progressFillElement);
+        backgroundProgressBar.addEventListener('click', (e) => {
+            if (this.totalDuration > 0 && this.onSeekCallback) {
+                const rect = backgroundProgressBar.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const width = rect.width;
+                const percentage = Math.max(0, Math.min(1, clickX / width));
+                const targetSeconds = percentage * this.totalDuration;
+                this.onSeekCallback(targetSeconds);
+            }
+        });
         flexProgressBar.appendChild(backgroundProgressBar);
         this.timeTotalElement = document.createElement('span');
         this.timeTotalElement.className = 'universal-bottom-player-time-total';

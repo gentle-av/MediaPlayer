@@ -139,7 +139,11 @@ export class MainFrame {
       () => {
         this.playbackManager.stop();
       },
+      (seconds: number) => {
+        this.playbackManager.seek(seconds);
+      },
     );
+    (this.player as any).onPlayPauseCallback = this.playbackManager;
   }
 
   private bindHeaderEvents(containerElement: HTMLElement): void {

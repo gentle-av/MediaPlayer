@@ -10,4 +10,10 @@ export interface IMediaPlayer {
   updateProgress(elapsedSeconds: number, totalSeconds: number): void;
   setPlayState(isPlaying: boolean): void;
   stopAudio(): void;
+
+  bindControls(
+    onPlayPause: () => void,
+    onStop: () => void,
+    onSeek?: (seconds: number) => void,
+  ): void;
 }

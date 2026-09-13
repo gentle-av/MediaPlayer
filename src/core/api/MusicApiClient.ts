@@ -305,4 +305,17 @@ export class MusicApiClient extends BaseApiClient<unknown> {
       return null;
     }
   }
+
+  public async seekAudioPlayback(position: number): Promise<boolean> {
+    try {
+      const response = await this.request<any>('api/audio/seek', {
+        method: 'POST',
+        body: JSON.stringify({ position }),
+      });
+      return response && response.status === 200;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
 }

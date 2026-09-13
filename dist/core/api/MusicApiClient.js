@@ -224,5 +224,18 @@ export class MusicApiClient extends BaseApiClient {
             return null;
         }
     }
+    async seekAudioPlayback(position) {
+        try {
+            const response = await this.request('api/audio/seek', {
+                method: 'POST',
+                body: JSON.stringify({ position }),
+            });
+            return response && response.status === 200;
+        }
+        catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
 }
 //# sourceMappingURL=MusicApiClient.js.map

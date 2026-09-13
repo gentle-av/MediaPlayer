@@ -15,6 +15,8 @@ export class Player implements IMediaPlayer {
   private activeVideoPath = '';
   private onPlayPauseCallback: (() => void) | null = null;
   private onStopCallback: (() => void) | null = null;
+  private onSeekCallback: ((seconds: number) => void) | null = null;
+  private totalDuration: number = 0;
 
   constructor() {
     this.audioEngine = new Audio();
@@ -26,9 +28,14 @@ export class Player implements IMediaPlayer {
     }
   }
 
-  public bindControls(onPlayPause: () => void, onStop: () => void): void {
+  public bindControls(
+    onPlayPause: () => void,
+    onStop: () => void,
+    onSeek?: (seconds: number) => void,
+  ): void {
     this.onPlayPauseCallback = onPlayPause;
     this.onStopCallback = onStop;
+    if (onSeek) this.onSeekCallback = onSeek;
   }
 
   private createControlsContainer(): HTMLElement {
@@ -104,6 +111,7 @@ export class Player implements IMediaPlayer {
   }
 
   public updateProgress(elapsedSeconds: number, totalSeconds: number): void {
+    this.totalDuration = totalSeconds;
     if (this.timeCurrentElement) {
       this.timeCurrentElement.textContent = this.formatTime(elapsedSeconds);
     }
@@ -246,6 +254,16 @@ export class Player implements IMediaPlayer {
     this.progressFillElement.className =
       'universal-bottom-player-progress-fill';
     backgroundProgressBar.appendChild(this.progressFillElement);
+    backgroundProgressBar.addEventListener('click', (e: MouseEvent) => {
+      if (this.totalDuration > 0 && this.onSeekCallback) {
+        const rect = backgroundProgressBar.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const width = rect.width;
+        const percentage = Math.max(0, Math.min(1, clickX / width));
+        const targetSeconds = percentage * this.totalDuration;
+        this.onSeekCallback(targetSeconds);
+      }
+    });
     flexProgressBar.appendChild(backgroundProgressBar);
     this.timeTotalElement = document.createElement('span');
     this.timeTotalElement.className = 'universal-bottom-player-time-total';
