@@ -147,15 +147,15 @@ export class PlaylistModal {
   private createFooter(): HTMLElement {
     const footerElement = document.createElement('div');
     footerElement.className = 'modal-album-actions album-modal-custom-footer';
-    const playAllBtn = document.createElement('button');
-    playAllBtn.className = 'modal-play-btn';
-    playAllBtn.innerHTML =
-      '<i class="fas fa-play"></i> <span>Слушать плейлист</span>';
-    playAllBtn.addEventListener('click', () => {
-      if (this.playlistTracks.length > 0) {
-        this.playbackManager.playMusic(this.playlistTracks[0]);
-      }
-    });
+    // const playAllBtn = document.createElement('button');
+    // playAllBtn.className = 'modal-play-btn';
+    // playAllBtn.innerHTML =
+    //   '<i class="fas fa-play"></i> <span>Слушать плейлист</span>';
+    // playAllBtn.addEventListener('click', () => {
+    //   if (this.playlistTracks.length > 0) {
+    //     this.playbackManager.playMusic(this.playlistTracks[0]);
+    //   }
+    // });
     const clearAllBtn = document.createElement('button');
     clearAllBtn.className = 'modal-delete-album-btn';
     clearAllBtn.innerHTML =
@@ -168,7 +168,7 @@ export class PlaylistModal {
         this.close();
       }
     });
-    footerElement.append(playAllBtn, clearAllBtn);
+    footerElement.append(/*playAllBtn,*/ clearAllBtn);
     return footerElement;
   }
 
