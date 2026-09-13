@@ -7,80 +7,64 @@ export interface ApiResponse<T> {
 }
 
 export class BaseApiClient<T> {
-  private endpoint: string;
-  constructor(endpoint: string) {
-    this.endpoint = endpoint;
+  protected readonly baseUrl: string;
+
+  constructor(protected readonly endpoint: string = '') {
+    this.baseUrl = Config.getConfig().baseUrl;
   }
-  async getAll(): Promise<ApiResponse<T[]>> {
-    const response = await fetch(
-      `${Config.getConfig().baseUrl}/${this.endpoint}`,
-    );
-    const data = await response.json();
-    return {
-      data,
-      status: response.status,
-    };
+
+  public async getAll(): Promise<ApiResponse<T[]>> {
+    return this.request<T[]>(this.endpoint);
   }
-  async getById(id: string | number): Promise<ApiResponse<T>> {
-    const response = await fetch(
-      `${Config.getConfig().baseUrl}/${this.endpoint}/${id}`,
-    );
-    const data = await response.json();
-    return {
-      data,
-      status: response.status,
-    };
+
+  public async getById(id: string | number): Promise<ApiResponse<T>> {
+    return this.request<T>(`${this.endpoint}/${id}`);
   }
-  async create(entity: Omit<T, 'id'>): Promise<ApiResponse<T>> {
-    const response = await fetch(
-      `${Config.getConfig().baseUrl}/${this.endpoint}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(entity),
-      },
-    );
-    const data = await response.json();
-    return {
-      data,
-      status: response.status,
-    };
+
+  public async create(entity: Omit<T, 'id'>): Promise<ApiResponse<T>> {
+    return this.request<T>(this.endpoint, {
+      method: 'POST',
+      body: JSON.stringify(entity),
+    });
   }
-  async update(
+
+  public async update(
     id: string | number,
     entity: Partial<T>,
   ): Promise<ApiResponse<T>> {
-    const response = await fetch(
-      `${Config.getConfig().baseUrl}/${this.endpoint}/${id}`,
-      {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(entity),
-      },
-    );
-    const data = await response.json();
-    return {
-      data,
-      status: response.status,
-    };
+    return this.request<T>(`${this.endpoint}/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(entity),
+    });
   }
-  async delete(
+
+  public async delete(
     id: string | number,
   ): Promise<ApiResponse<{ success: boolean }>> {
-    const response = await fetch(
-      `${Config.getConfig().baseUrl}/${this.endpoint}/${id}`,
-      {
-        method: 'DELETE',
-      },
-    );
+    return this.request<{ success: boolean }>(`${this.endpoint}/${id}`, {
+      method: 'DELETE',
+    });
+  }
+
+  protected buildUrl(path: string): string {
+    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    return `${this.baseUrl}${cleanPath}`;
+  }
+
+  protected async request<R>(
+    path: string,
+    options: RequestInit = {},
+  ): Promise<ApiResponse<R>> {
+    const url = this.buildUrl(path);
+    const headers = new Headers(options.headers);
+    if (!headers.has('Content-Type') && options.body) {
+      headers.set('Content-Type', 'application/json');
+    }
+    const response = await fetch(url, { ...options, headers });
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status} url: ${url}`);
+    }
     const data = await response.json();
-    return {
-      data,
-      status: response.status,
-    };
+    return { data, status: response.status };
   }
 }

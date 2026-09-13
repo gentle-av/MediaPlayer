@@ -10,6 +10,9 @@ export class Metadata {
         this.filePath = filePath;
         this.validate();
     }
+    static fromJson(file) {
+        return new Metadata(file.title || 'Unknown', file.artist || 'Unknown Artist', file.album || 'Unknown Album', file.duration || 0, file.track || 0, file.year || 0, file.genre || 'Unknown', file.path);
+    }
     get albumKey() {
         const artist = this.trackArtist.trim() || 'Unknown Artist';
         const album = this.trackAlbum.trim() || 'Unknown Album';
@@ -108,7 +111,8 @@ export class Metadata {
         }
         const hasValidExtension = Metadata.VALID_EXTENSIONS.some((ext) => filePath.toLowerCase().endsWith(ext));
         if (!hasValidExtension) {
-            throw new Error(`File must have a valid audio extension: ${Metadata.VALID_EXTENSIONS.join(', ')}`);
+            throw new Error(`File must have a valid audio extension: ` +
+                `${Metadata.VALID_EXTENSIONS.join(', ')}`);
         }
     }
     toJSON() {

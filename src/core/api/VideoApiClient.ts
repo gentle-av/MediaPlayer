@@ -1,75 +1,63 @@
-import { Config } from '../config/Config.js';
+import { BaseApiClient } from './BaseApiClient.js';
 import { VideoLibrary } from '../entities/video/VideoLibrary.js';
 
-export class VideoApiClient {
-  private baseUrl: string;
+export class VideoApiClient extends BaseApiClient<unknown> {
   constructor() {
-    this.baseUrl = Config.getConfig().baseUrl;
+    super('api/video');
   }
 
-  async listVideos(path: string = '/mnt/video'): Promise<VideoLibrary> {
+  public async listVideos(path: string = '/mnt/video'): Promise<VideoLibrary> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/video/list`, {
+      const response = await this.request<unknown>('api/video/list', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({ path }),
       });
-      if (!response.ok) {
-        throw new Error(`HTTP error status ${response.status}`);
-      }
-      const data = await response.json();
-      return VideoLibrary.fromJson(data);
+      return VideoLibrary.fromJson(response.data);
     } catch (error) {
       console.error(error);
-      return new VideoLibrary({
-        items: [],
-        path: path,
-        success: false,
-      });
+      return new VideoLibrary({ items: [], path, success: false });
     }
   }
 
-  async openVideo(path: string): Promise<boolean> {
+  public async openVideo(path: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/api/video/open`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      const response = await this.request<{ success: boolean }>(
+        'api/video/open',
+        {
+          method: 'POST',
+          body: JSON.stringify({ path }),
         },
-        body: JSON.stringify({ path }),
-      });
-      if (!response.ok) {
-        throw new Error(`HTTP error status ${response.status}`);
-      }
-      const data = await response.json();
-      return data.success;
+      );
+      return response.data.success;
     } catch (error) {
       console.error(error);
       return false;
     }
   }
 
-  async moveToTrash(targetFilePath: string): Promise<boolean> {
-    const response = await fetch('/api/trash', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ path: targetFilePath }),
-    });
-    return response.ok;
+  public async moveToTrash(targetFilePath: string): Promise<boolean> {
+    try {
+      const response = await this.request<unknown>('api/trash', {
+        method: 'POST',
+        body: JSON.stringify({ path: targetFilePath }),
+      });
+      return response.status === 200;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 
-  async deleteDirectory(targetDirectoryPath: string): Promise<boolean> {
-    const response = await fetch('/api/delete-directory', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ path: targetDirectoryPath }),
-    });
-    return response.ok;
+  public async deleteDirectory(targetDirectoryPath: string): Promise<boolean> {
+    try {
+      const response = await this.request<unknown>('api/delete-directory', {
+        method: 'POST',
+        body: JSON.stringify({ path: targetDirectoryPath }),
+      });
+      return response.status === 200;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
   }
 }

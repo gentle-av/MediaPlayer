@@ -25,6 +25,28 @@ export class Metadata {
     this.validate();
   }
 
+  public static fromJson(file: {
+    title?: string;
+    artist?: string;
+    album?: string;
+    duration?: number;
+    track?: number;
+    year?: number;
+    genre?: string;
+    path: string;
+  }): Metadata {
+    return new Metadata(
+      file.title || 'Unknown',
+      file.artist || 'Unknown Artist',
+      file.album || 'Unknown Album',
+      file.duration || 0,
+      file.track || 0,
+      file.year || 0,
+      file.genre || 'Unknown',
+      file.path,
+    );
+  }
+
   get albumKey(): string {
     const artist = this.trackArtist.trim() || 'Unknown Artist';
     const album = this.trackAlbum.trim() || 'Unknown Album';
@@ -147,12 +169,13 @@ export class Metadata {
     );
     if (!hasValidExtension) {
       throw new Error(
-        `File must have a valid audio extension: ${Metadata.VALID_EXTENSIONS.join(', ')}`,
+        `File must have a valid audio extension: ` +
+          `${Metadata.VALID_EXTENSIONS.join(', ')}`,
       );
     }
   }
 
-  toJSON() {
+  public toJSON() {
     return {
       title: this.trackTitle,
       artist: this.trackArtist,

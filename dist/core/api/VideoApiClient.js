@@ -1,47 +1,29 @@
-import { Config } from '../config/Config.js';
+import { BaseApiClient } from './BaseApiClient.js';
 import { VideoLibrary } from '../entities/video/VideoLibrary.js';
-export class VideoApiClient {
+export class VideoApiClient extends BaseApiClient {
     constructor() {
-        this.baseUrl = Config.getConfig().baseUrl;
+        super('api/video');
     }
     async listVideos(path = '/mnt/video') {
         try {
-            const response = await fetch(`${this.baseUrl}/api/video/list`, {
+            const response = await this.request('api/video/list', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({ path }),
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
-            return VideoLibrary.fromJson(data);
+            return VideoLibrary.fromJson(response.data);
         }
         catch (error) {
             console.error(error);
-            return new VideoLibrary({
-                items: [],
-                path: path,
-                success: false,
-            });
+            return new VideoLibrary({ items: [], path, success: false });
         }
     }
     async openVideo(path) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/video/open`, {
+            const response = await this.request('api/video/open', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
                 body: JSON.stringify({ path }),
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
-            return data.success;
+            return response.data.success;
         }
         catch (error) {
             console.error(error);
@@ -49,24 +31,30 @@ export class VideoApiClient {
         }
     }
     async moveToTrash(targetFilePath) {
-        const response = await fetch('/api/trash', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ path: targetFilePath }),
-        });
-        return response.ok;
+        try {
+            const response = await this.request('api/trash', {
+                method: 'POST',
+                body: JSON.stringify({ path: targetFilePath }),
+            });
+            return response.status === 200;
+        }
+        catch (error) {
+            console.error(error);
+            return false;
+        }
     }
     async deleteDirectory(targetDirectoryPath) {
-        const response = await fetch('/api/delete-directory', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ path: targetDirectoryPath }),
-        });
-        return response.ok;
+        try {
+            const response = await this.request('api/delete-directory', {
+                method: 'POST',
+                body: JSON.stringify({ path: targetDirectoryPath }),
+            });
+            return response.status === 200;
+        }
+        catch (error) {
+            console.error(error);
+            return false;
+        }
     }
 }
 //# sourceMappingURL=VideoApiClient.js.map

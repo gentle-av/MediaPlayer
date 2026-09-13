@@ -1,21 +1,19 @@
-import { Config } from '../config/Config.js';
+import { BaseApiClient } from './BaseApiClient.js';
 import { Metadata } from '../entities/music/Metadata.js';
-export class MusicApiClient {
+export class MusicApiClient extends BaseApiClient {
     constructor() {
-        this.baseUrl = Config.getConfig().baseUrl;
+        super('api/music');
     }
     async getAlbumArtBlob(album, artist) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/music/albumart/by-album`, {
+            const url = this.buildUrl('api/music/albumart/by-album');
+            const response = await fetch(url, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ album, artist }),
             });
-            if (!response.ok) {
+            if (!response.ok)
                 return null;
-            }
             return await response.blob();
         }
         catch (error) {
@@ -25,19 +23,15 @@ export class MusicApiClient {
     }
     async getAllTracks() {
         try {
-            const response = await fetch(`${this.baseUrl}/api/music/list`);
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
+            const response = await this.request('api/music/list');
+            const data = response.data;
             if (!data.success) {
                 throw new Error(data.error || 'Failed to fetch tracks');
             }
             const tracks = [];
             for (const file of data.files) {
                 try {
-                    const track = new Metadata(file.title || 'Unknown', file.artist || 'Unknown Artist', file.album || 'Unknown Album', file.duration || 0, file.track || 0, file.year || 0, file.genre || 'Unknown', file.path);
-                    tracks.push(track);
+                    tracks.push(Metadata.fromJson(file));
                 }
                 catch (error) {
                     console.warn(error);
@@ -52,15 +46,13 @@ export class MusicApiClient {
     }
     async getTracksByArtist(artist) {
         try {
-            const response = await fetch(`${this.baseUrl}/api/music/tracks/artist/${encodeURIComponent(artist)}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
+            const path = `api/music/tracks/artist/${encodeURIComponent(artist)}`;
+            const response = await this.request(path);
+            const data = response.data;
             if (!data.success) {
                 throw new Error(data.error || 'Failed to fetch tracks by artist');
             }
-            return data.tracks.map((track) => new Metadata(track.title || 'Unknown', track.artist || 'Unknown Artist', track.album || 'Unknown Album', track.duration || 0, track.track || 0, track.year || 0, track.genre || 'Unknown', track.path));
+            return data.tracks.map((track) => Metadata.fromJson(track));
         }
         catch (error) {
             console.error(error);
@@ -69,19 +61,16 @@ export class MusicApiClient {
     }
     async getTracksByAlbum(album, artist) {
         try {
-            let url = `${this.baseUrl}/api/music/tracks/album/${encodeURIComponent(album)}`;
+            let path = `api/music/tracks/album/${encodeURIComponent(album)}`;
             if (artist) {
-                url += `?artist=${encodeURIComponent(artist)}`;
+                path += `?artist=${encodeURIComponent(artist)}`;
             }
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
+            const response = await this.request(path);
+            const data = response.data;
             if (!data.success) {
                 throw new Error(data.error || 'Failed to fetch tracks by album');
             }
-            return data.tracks.map((track) => new Metadata(track.title || 'Unknown', track.artist || 'Unknown Artist', track.album || 'Unknown Album', track.duration || 0, track.track || 0, track.year || 0, track.genre || 'Unknown', track.path));
+            return data.tracks.map((track) => Metadata.fromJson(track));
         }
         catch (error) {
             console.error(error);
@@ -90,11 +79,8 @@ export class MusicApiClient {
     }
     async getArtists() {
         try {
-            const response = await fetch(`${this.baseUrl}/api/music/artists`);
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
+            const response = await this.request('api/music/artists');
+            const data = response.data;
             if (!data.success) {
                 throw new Error(data.error || 'Failed to fetch artists');
             }
@@ -107,15 +93,12 @@ export class MusicApiClient {
     }
     async getAlbums(artist) {
         try {
-            let url = `${this.baseUrl}/api/music/albums`;
+            let path = 'api/music/albums';
             if (artist) {
-                url += `?artist=${encodeURIComponent(artist)}`;
+                path += `?artist=${encodeURIComponent(artist)}`;
             }
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
+            const response = await this.request(path);
+            const data = response.data;
             if (!data.success) {
                 throw new Error(data.error || 'Failed to fetch albums');
             }
@@ -128,15 +111,12 @@ export class MusicApiClient {
     }
     async getAlbumsPaginated(page = 1, pageSize = 20, artist) {
         try {
-            let url = `${this.baseUrl}/api/music/albums/paginated?page=${page}&pageSize=${pageSize}`;
+            let path = `api/music/albums/paginated?page=${page}&pageSize=${pageSize}`;
             if (artist) {
-                url += `&artist=${encodeURIComponent(artist)}`;
+                path += `&artist=${encodeURIComponent(artist)}`;
             }
-            const response = await fetch(url);
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
+            const response = await this.request(path);
+            const data = response.data;
             if (!data.success) {
                 throw new Error(data.error || 'Failed to fetch albums');
             }
@@ -152,20 +132,14 @@ export class MusicApiClient {
     }
     async forceRescan(directory) {
         try {
-            let url = `${this.baseUrl}/api/music/remove-missing`;
+            let path = 'api/music/remove-missing';
             if (directory) {
-                url += `?dir=${encodeURIComponent(directory)}`;
+                path += `?dir=${encodeURIComponent(directory)}`;
             }
-            const response = await fetch(url, {
+            const response = await this.request(path, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
+            const data = response.data;
             if (!data.success) {
                 throw new Error(data.error || 'Failed to rescan');
             }
@@ -177,16 +151,8 @@ export class MusicApiClient {
     }
     async validatePlaylists() {
         try {
-            const response = await fetch(`${this.baseUrl}/api/music/validate-playlists`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error status ${response.status}`);
-            }
-            const data = await response.json();
+            const response = await this.request('api/music/validate-playlists', { method: 'POST' });
+            const data = response.data;
             if (!data.success) {
                 throw new Error(data.error || 'Failed to validate playlists');
             }
