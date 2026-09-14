@@ -19,47 +19,25 @@ export class Player {
     }
     setVisibility(isVisible) {
         if (this.playerElement) {
-            this.playerElement.style.display = isVisible ? 'flex' : 'none';
+            if (isVisible) {
+                this.playerElement.classList.add('visible');
+            }
+            else {
+                this.playerElement.classList.remove('visible');
+            }
         }
     }
     bindControls(onPlayPause, onStop, onSeek) {
         this.onPlayPauseCallback = onPlayPause;
         this.onStopCallback = onStop;
-        if (onSeek)
+        if (onSeek) {
             this.onSeekCallback = onSeek;
-    }
-    createControlsContainer() {
-        const controlsContainer = document.createElement('div');
-        controlsContainer.className = 'universal-bottom-player-controls';
-        this.audioStreamButton = this.createAudioStreamButton();
-        const skipBackwardBtn = this.createControlButton(`<polygon points="19 20 9 12 19 4 19 20"></polygon>
-       <line x1="5" y1="19" x2="5" y2="5"></line>`);
-        const standardPlayBtn = document.createElement('button');
-        standardPlayBtn.className =
-            'universal-bottom-player-btn universal-bottom-player-play';
-        const playIconHolder = document.createElement('span');
-        playIconHolder.className = 'play-icon-holder';
-        playIconHolder.style.display = 'flex';
-        standardPlayBtn.appendChild(playIconHolder);
-        this.playButtonIcon = playIconHolder;
-        this.setPlayState(false);
-        standardPlayBtn.addEventListener('click', () => {
-            if (this.onPlayPauseCallback)
-                this.onPlayPauseCallback();
-        });
-        const stopBtn = this.createControlButton('<rect x="4" y="4" width="16" height="16"></rect>', 'universal-bottom-player-stop');
-        stopBtn.addEventListener('click', () => {
-            if (this.onStopCallback)
-                this.onStopCallback();
-        });
-        const skipForwardBtn = this.createControlButton(`<polygon points="5 4 15 12 5 20 5 4"></polygon>
-       <line x1="19" y1="5" x2="19" y2="19"></line>`);
-        controlsContainer.append(this.audioStreamButton, skipBackwardBtn, standardPlayBtn, stopBtn, skipForwardBtn);
-        return controlsContainer;
+        }
     }
     updateMediaInfo(mediaTitle, mediaArtist, videoPath) {
-        if (this.trackNameElement)
+        if (this.trackNameElement) {
             this.trackNameElement.textContent = mediaTitle;
+        }
         if (this.trackArtistElement) {
             this.trackArtistElement.textContent = mediaArtist;
         }
@@ -91,8 +69,9 @@ export class Player {
         }
     }
     setPlayState(isPlaying) {
-        if (!this.playButtonIcon)
+        if (!this.playButtonIcon) {
             return;
+        }
         if (isPlaying) {
             this.playButtonIcon.innerHTML = `
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"
@@ -134,20 +113,9 @@ export class Player {
         this.audioEngine.onended = null;
         this.setPlayState(false);
     }
-    formatTime(totalSeconds) {
-        if (isNaN(totalSeconds) || totalSeconds === Infinity || totalSeconds < 0) {
-            return '0:00';
-        }
-        const calculatedMinutes = Math.floor(totalSeconds / 60);
-        const calculatedSeconds = Math.floor(totalSeconds % 60);
-        return (`${calculatedMinutes}:` +
-            `${calculatedSeconds < 10 ? '0' : ''}` +
-            `${calculatedSeconds}`);
-    }
     render() {
         const rootPlayerElement = document.createElement('div');
         rootPlayerElement.className = 'universal-bottom-player';
-        rootPlayerElement.style.display = 'none';
         this.playerElement = rootPlayerElement;
         const contentWrapperElement = document.createElement('div');
         contentWrapperElement.className = 'universal-bottom-player-content';
@@ -157,6 +125,16 @@ export class Player {
         contentWrapperElement.append(metadataContainer, timelineContainer, controlsContainer);
         rootPlayerElement.appendChild(contentWrapperElement);
         return rootPlayerElement;
+    }
+    formatTime(totalSeconds) {
+        if (isNaN(totalSeconds) || totalSeconds === Infinity || totalSeconds < 0) {
+            return '0:00';
+        }
+        const calculatedMinutes = Math.floor(totalSeconds / 60);
+        const calculatedSeconds = Math.floor(totalSeconds % 60);
+        return (`${calculatedMinutes}:` +
+            `${calculatedSeconds < 10 ? '0' : ''}` +
+            `${calculatedSeconds}`);
     }
     createMetadataContainer() {
         const metadataContainer = document.createElement('div');
@@ -219,6 +197,37 @@ export class Player {
         flexProgressBar.appendChild(this.timeTotalElement);
         timelineContainer.appendChild(flexProgressBar);
         return timelineContainer;
+    }
+    createControlsContainer() {
+        const controlsContainer = document.createElement('div');
+        controlsContainer.className = 'universal-bottom-player-controls';
+        this.audioStreamButton = this.createAudioStreamButton();
+        const skipBackwardBtn = this.createControlButton(`<polygon points="19 20 9 12 19 4 19 20"></polygon>
+       <line x1="5" y1="19" x2="5" y2="5"></line>`);
+        const standardPlayBtn = document.createElement('button');
+        standardPlayBtn.className =
+            'universal-bottom-player-btn universal-bottom-player-play';
+        const playIconHolder = document.createElement('span');
+        playIconHolder.className = 'play-icon-holder';
+        playIconHolder.style.display = 'flex';
+        standardPlayBtn.appendChild(playIconHolder);
+        this.playButtonIcon = playIconHolder;
+        this.setPlayState(false);
+        standardPlayBtn.addEventListener('click', () => {
+            if (this.onPlayPauseCallback) {
+                this.onPlayPauseCallback();
+            }
+        });
+        const stopBtn = this.createControlButton('<rect x="4" y="4" width="16" height="16"></rect>', 'universal-bottom-player-stop');
+        stopBtn.addEventListener('click', () => {
+            if (this.onStopCallback) {
+                this.onStopCallback();
+            }
+        });
+        const skipForwardBtn = this.createControlButton(`<polygon points="5 4 15 12 5 20 5 4"></polygon>
+       <line x1="19" y1="5" x2="19" y2="19"></line>`);
+        controlsContainer.append(this.audioStreamButton, skipBackwardBtn, standardPlayBtn, stopBtn, skipForwardBtn);
+        return controlsContainer;
     }
     createAudioStreamButton() {
         const btn = document.createElement('button');
