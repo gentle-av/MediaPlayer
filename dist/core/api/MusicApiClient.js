@@ -158,6 +158,16 @@ export class MusicApiClient extends BaseApiClient {
             return false;
         }
     }
+    async getDatabaseStats() {
+        try {
+            const response = await this.request('api/music/stats');
+            return response.data;
+        }
+        catch (error) {
+            console.error('Failed to fetch database statistics:', error);
+            return null;
+        }
+    }
     async playAudioPlaylist(trackPaths) {
         try {
             const cleanPaths = trackPaths.map((path) => path.replace(/\\/g, '/'));

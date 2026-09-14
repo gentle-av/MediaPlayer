@@ -247,6 +247,16 @@ export class MusicApiClient extends BaseApiClient<unknown> {
     }
   }
 
+  public async getDatabaseStats(): Promise<any> {
+    try {
+      const response = await this.request<any>('api/music/stats');
+      return response.data;
+    } catch (error) {
+      console.error('Failed to fetch database statistics:', error);
+      return null;
+    }
+  }
+
   public async playAudioPlaylist(trackPaths: string[]): Promise<boolean> {
     try {
       const cleanPaths = trackPaths.map((path) => path.replace(/\\/g, '/'));
