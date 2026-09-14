@@ -31,36 +31,6 @@ export class MainFrame {
             console.error(error);
         }
     }
-    initFactory() {
-        this.componentFactory.register('video', () => new VideoContentContainer(this.videoStore, this.playbackManager));
-        this.componentFactory.register('audio', () => new MusicContentContainer(this.musicStore, this.playlistStore, this.playbackManager));
-        this.componentFactory.register('settings', () => this.settings);
-    }
-    async switchTab(targetTab) {
-        const searchInput = document.getElementById('globalSearchInput');
-        const clearButton = document.querySelector('.search-clear-btn');
-        if (searchInput)
-            searchInput.value = '';
-        if (clearButton)
-            clearButton.style.display = 'none';
-        const tabConfigs = {
-            video: { icon: 'fa-film', text: 'Видео' },
-            audio: { icon: 'fa-music', text: 'Аудио' },
-            settings: { icon: 'fa-cog', text: 'Настройки' },
-        };
-        const config = tabConfigs[targetTab];
-        this.header.setTitle(config.icon, config.text);
-        this.header.togglePlaylistButtonVisibility(targetTab === 'audio');
-        UiStateStore.getInstance().setTab(targetTab);
-    }
-    async updateContent(activeTab) {
-        if (!this.contentArea)
-            return;
-        if (this.currentLiveComponent)
-            this.currentLiveComponent.dispose();
-        this.currentLiveComponent = this.componentFactory.create(activeTab);
-        await this.currentLiveComponent.render(this.contentArea);
-    }
     render() {
         const appContainer = document.createElement('div');
         appContainer.className = 'app-container';
@@ -69,7 +39,8 @@ export class MainFrame {
         bodyWrapper.className = 'body-wrapper';
         const mainContent = document.createElement('div');
         mainContent.className = 'main-content';
-        mainContent.appendChild(this.sidebar.render());
+        const sidebarElement = this.sidebar.render();
+        mainContent.appendChild(sidebarElement);
         this.contentArea = document.createElement('div');
         this.contentArea.className = 'content-area';
         mainContent.appendChild(this.contentArea);
@@ -81,12 +52,7 @@ export class MainFrame {
         UiStateStore.getInstance().subscribe(async (state) => {
             if (this.currentTab !== state.currentTab) {
                 this.currentTab = state.currentTab;
-                if (this.currentLiveComponent)
-                    this.currentLiveComponent.dispose();
-                this.currentLiveComponent = this.componentFactory.create(state.currentTab);
-            }
-            if (this.contentArea) {
-                await this.currentLiveComponent?.render(this.contentArea);
+                this.updateContent(state.currentTab);
             }
         });
         this.updateContent(this.currentTab);
@@ -96,6 +62,40 @@ export class MainFrame {
         }, 0);
         this.bindHeaderEvents(appContainer);
         return appContainer;
+    }
+    initFactory() {
+        this.componentFactory.register('video', () => new VideoContentContainer(this.videoStore, this.playbackManager));
+        this.componentFactory.register('audio', () => new MusicContentContainer(this.musicStore, this.playlistStore, this.playbackManager));
+        this.componentFactory.register('settings', () => this.settings);
+    }
+    async switchTab(targetTab) {
+        const searchInput = document.getElementById('globalSearchInput');
+        const clearButton = document.querySelector('.search-clear-btn');
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        if (clearButton) {
+            clearButton.style.display = 'none';
+        }
+        const tabConfigs = {
+            video: { icon: 'fa-film', text: 'Видео' },
+            audio: { icon: 'fa-music', text: 'Аудио' },
+            settings: { icon: 'fa-cog', text: 'Настройки' },
+        };
+        const config = tabConfigs[targetTab];
+        this.header.setTitle(config.icon, config.text);
+        this.header.togglePlaylistButtonVisibility(targetTab === 'audio');
+        UiStateStore.getInstance().setTab(targetTab);
+    }
+    async updateContent(activeTab) {
+        if (!this.contentArea) {
+            return;
+        }
+        if (this.currentLiveComponent) {
+            this.currentLiveComponent.dispose();
+        }
+        this.currentLiveComponent = this.componentFactory.create(activeTab);
+        await this.currentLiveComponent.render(this.contentArea);
     }
     bindPlayerControls() {
         this.player.bindControls(() => {

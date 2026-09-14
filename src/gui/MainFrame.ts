@@ -49,6 +49,39 @@ export class MainFrame {
     }
   }
 
+  public render(): HTMLElement {
+    const appContainer = document.createElement('div');
+    appContainer.className = 'app-container';
+    appContainer.appendChild(this.header.render());
+    const bodyWrapper = document.createElement('div');
+    bodyWrapper.className = 'body-wrapper';
+    const mainContent = document.createElement('div');
+    mainContent.className = 'main-content';
+    const sidebarElement = this.sidebar.render();
+    mainContent.appendChild(sidebarElement);
+    this.contentArea = document.createElement('div');
+    this.contentArea.className = 'content-area';
+    mainContent.appendChild(this.contentArea);
+    bodyWrapper.appendChild(mainContent);
+    const renderedPlayer = this.player.render();
+    renderedPlayer.classList.add('visible');
+    bodyWrapper.appendChild(renderedPlayer);
+    appContainer.appendChild(bodyWrapper);
+    UiStateStore.getInstance().subscribe(async (state: UiState) => {
+      if (this.currentTab !== state.currentTab) {
+        this.currentTab = state.currentTab;
+        this.updateContent(state.currentTab);
+      }
+    });
+    this.updateContent(this.currentTab);
+    this.bindPlayerControls();
+    setTimeout(() => {
+      this.header.togglePlaylistButtonVisibility(this.currentTab === 'audio');
+    }, 0);
+    this.bindHeaderEvents(appContainer);
+    return appContainer;
+  }
+
   private initFactory(): void {
     this.componentFactory.register(
       'video',
@@ -73,8 +106,12 @@ export class MainFrame {
     const clearButton = document.querySelector(
       '.search-clear-btn',
     ) as HTMLElement;
-    if (searchInput) searchInput.value = '';
-    if (clearButton) clearButton.style.display = 'none';
+    if (searchInput) {
+      searchInput.value = '';
+    }
+    if (clearButton) {
+      clearButton.style.display = 'none';
+    }
     const tabConfigs = {
       video: { icon: 'fa-film', text: 'Видео' },
       audio: { icon: 'fa-music', text: 'Аудио' },
@@ -87,48 +124,14 @@ export class MainFrame {
   }
 
   private async updateContent(activeTab: TabType): Promise<void> {
-    if (!this.contentArea) return;
-    if (this.currentLiveComponent) this.currentLiveComponent.dispose();
+    if (!this.contentArea) {
+      return;
+    }
+    if (this.currentLiveComponent) {
+      this.currentLiveComponent.dispose();
+    }
     this.currentLiveComponent = this.componentFactory.create(activeTab);
     await this.currentLiveComponent.render(this.contentArea);
-  }
-
-  public render(): HTMLElement {
-    const appContainer = document.createElement('div');
-    appContainer.className = 'app-container';
-    appContainer.appendChild(this.header.render());
-    const bodyWrapper = document.createElement('div');
-    bodyWrapper.className = 'body-wrapper';
-    const mainContent = document.createElement('div');
-    mainContent.className = 'main-content';
-    mainContent.appendChild(this.sidebar.render());
-    this.contentArea = document.createElement('div');
-    this.contentArea.className = 'content-area';
-    mainContent.appendChild(this.contentArea);
-    bodyWrapper.appendChild(mainContent);
-    const renderedPlayer = this.player.render();
-    renderedPlayer.classList.add('visible');
-    bodyWrapper.appendChild(renderedPlayer);
-    appContainer.appendChild(bodyWrapper);
-    UiStateStore.getInstance().subscribe(async (state: UiState) => {
-      if (this.currentTab !== state.currentTab) {
-        this.currentTab = state.currentTab;
-        if (this.currentLiveComponent) this.currentLiveComponent.dispose();
-        this.currentLiveComponent = this.componentFactory.create(
-          state.currentTab,
-        );
-      }
-      if (this.contentArea) {
-        await this.currentLiveComponent?.render(this.contentArea);
-      }
-    });
-    this.updateContent(this.currentTab);
-    this.bindPlayerControls();
-    setTimeout(() => {
-      this.header.togglePlaylistButtonVisibility(this.currentTab === 'audio');
-    }, 0);
-    this.bindHeaderEvents(appContainer);
-    return appContainer;
   }
 
   private bindPlayerControls(): void {
