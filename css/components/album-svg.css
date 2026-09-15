@@ -1,0 +1,9 @@
+.album-card-svg {
+  width: 48px;
+  height: 48px;
+  fill: none;
+  stroke: var(--yellow);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}

@@ -9,6 +9,7 @@ import { MusicBackgroundMenu } from '../menu/MusicBackgroundMenu.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
 import { ConfirmModal } from '../menu/ConfirmModal.js';
 import { ToastService } from '../components/ToastService.js';
+import { AlbumImageSafetyProvider } from '../components/AlbumImageSafetyProvider.js';
 
 export class MusicContentContainer implements Component {
   private readonly backgroundMenu: MusicBackgroundMenu;
@@ -29,6 +30,12 @@ export class MusicContentContainer implements Component {
     targetElement: HTMLElement | null,
   ): Promise<HTMLElement | null> {
     if (!targetElement) return null;
+    targetElement.querySelectorAll('.album-card').forEach((existingCard) => {
+      const uniqueUid = (existingCard as HTMLElement).dataset.uid;
+      if (uniqueUid) {
+        AlbumImageSafetyProvider.revokeUrlByKey(uniqueUid);
+      }
+    });
     targetElement.innerHTML = '';
     const uiState = UiStateStore.getInstance().getState();
     const filterTerm = uiState.searchQuery;
@@ -96,6 +103,12 @@ export class MusicContentContainer implements Component {
   public dispose(): void {
     this.backgroundMenu.close();
     this.contextMenu.close();
+    document.querySelectorAll('.album-card').forEach((activeCard) => {
+      const uniqueUid = (activeCard as HTMLElement).dataset.uid;
+      if (uniqueUid) {
+        AlbumImageSafetyProvider.revokeUrlByKey(uniqueUid);
+      }
+    });
   }
 
   private groupTracksByAlbum(tracks: Metadata[]): Map<string, Metadata[]> {

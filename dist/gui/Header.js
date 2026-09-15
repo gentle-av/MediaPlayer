@@ -74,12 +74,22 @@ export class Header {
         searchWrapper.className = 'search-wrapper';
         const searchBox = document.createElement('div');
         searchBox.id = 'globalSearchBox';
-        searchBox.innerHTML = `
-      <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--fg3); flex-shrink: 0;">
-        <circle cx="11" cy="11" r="8"></circle>
-        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-      </svg>
-    `;
+        const vectorRoot = document.createElementNS('http://w3.org', 'svg');
+        vectorRoot.setAttribute('class', 'search-icon');
+        vectorRoot.setAttribute('width', '16');
+        vectorRoot.setAttribute('height', '16');
+        vectorRoot.setAttribute('viewBox', '0 0 24 24');
+        const circleElement = document.createElementNS('http://w3.org', 'circle');
+        circleElement.setAttribute('cx', '11');
+        circleElement.setAttribute('cy', '11');
+        circleElement.setAttribute('r', '8');
+        const lineElement = document.createElementNS('http://w3.org', 'line');
+        lineElement.setAttribute('x1', '21');
+        lineElement.setAttribute('y1', '21');
+        lineElement.setAttribute('x2', '16.65');
+        lineElement.setAttribute('y2', '16.65');
+        vectorRoot.append(circleElement, lineElement);
+        searchBox.appendChild(vectorRoot);
         const searchInput = document.createElement('input');
         searchInput.id = 'globalSearchInput';
         searchInput.type = 'text';
@@ -88,12 +98,22 @@ export class Header {
         const clearButton = document.createElement('button');
         clearButton.className = 'search-clear-btn';
         clearButton.style.display = 'none';
-        clearButton.innerHTML = `
-      <svg width="14" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--fg3); display: block;">
-        <line x1="18" y1="6" x2="6" y2="18"></line>
-        <line x1="6" y1="6" x2="18" y2="18"></line>
-      </svg>
-    `;
+        const closeVector = document.createElementNS('http://w3.org', 'svg');
+        closeVector.setAttribute('width', '14');
+        closeVector.setAttribute('height', '16');
+        closeVector.setAttribute('viewBox', '0 0 24 24');
+        const firstLine = document.createElementNS('http://w3.org', 'line');
+        firstLine.setAttribute('x1', '18');
+        firstLine.setAttribute('y1', '6');
+        firstLine.setAttribute('x2', '6');
+        firstLine.setAttribute('y2', '18');
+        const secondLine = document.createElementNS('http://w3.org', 'line');
+        secondLine.setAttribute('x1', '6');
+        secondLine.setAttribute('y1', '6');
+        secondLine.setAttribute('x2', '18');
+        secondLine.setAttribute('y2', '18');
+        closeVector.append(firstLine, secondLine);
+        clearButton.appendChild(closeVector);
         searchBox.appendChild(clearButton);
         searchWrapper.appendChild(searchBox);
         return searchWrapper;
