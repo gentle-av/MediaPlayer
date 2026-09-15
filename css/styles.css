@@ -15,6 +15,7 @@
 @import 'players/playlist-viewer.css';
 @import 'video/video-explorer.css';
 @import 'video/video-library.css';
+@import 'video/video-grid-dynamic.css';
 @import 'players/universal-player.css';
 @import 'players/streams.css';
 @import 'players/power-management.css';
