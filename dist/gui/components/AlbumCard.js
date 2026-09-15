@@ -42,19 +42,16 @@ export class AlbumCard {
                 if (blob && blob.size > 0) {
                     const objectUrl = URL.createObjectURL(blob);
                     imgElement.src = objectUrl;
-                    placeholderIcon.classList.add('hidden-placeholder');
-                    imgElement.classList.add('visible-img');
-                    imgElement.onload = () => {
-                        URL.revokeObjectURL(objectUrl);
-                    };
+                    placeholderIcon.style.display = 'none';
+                    imgElement.style.display = 'block';
                 }
                 else {
-                    placeholderIcon.classList.remove('hidden-placeholder');
+                    placeholderIcon.style.display = 'flex';
                     imgElement.remove();
                 }
             })
                 .catch(() => {
-                placeholderIcon.classList.remove('hidden-placeholder');
+                placeholderIcon.style.display = 'flex';
                 imgElement.remove();
             });
             artContainer.appendChild(imgElement);

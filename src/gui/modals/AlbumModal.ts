@@ -75,8 +75,8 @@ export class AlbumModal {
           if (blob && blob.size > 0) {
             const url = URL.createObjectURL(blob);
             imgElement.src = url;
-            placeholderIcon.classList.add('hidden-placeholder');
-            imgElement.classList.add('visible-img');
+            placeholderIcon.style.display = 'none';
+            imgElement.style.display = 'block';
           }
         })
         .catch(() => {});

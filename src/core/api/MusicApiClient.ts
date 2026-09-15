@@ -306,14 +306,21 @@ export class MusicApiClient extends BaseApiClient<unknown> {
     artist: string,
   ): Promise<Blob | null> {
     try {
-      const url = this.buildUrl('api/music/albumart/by-album');
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ album, artist }),
+      const baseUrl = this.buildUrl('api/music/albumart/by-album');
+      const query = `?album=${encodeURIComponent(album)}&artist=${encodeURIComponent(artist)}`;
+      const response = await fetch(`${baseUrl}${query}`, {
+        method: 'GET',
       });
       if (!response.ok) return null;
-      return await response.blob();
+      const jsonResult = await response.json();
+      if (!jsonResult || !jsonResult.imageData) return null;
+      const binaryString = window.atob(jsonResult.imageData);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      return new Blob([bytes], { type: jsonResult.mimeType || 'image/jpeg' });
     } catch (error) {
       console.error(error);
       return null;

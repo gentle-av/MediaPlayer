@@ -57,14 +57,14 @@ export class Header {
         searchInput.addEventListener('input', (event) => {
             const currentTerm = event.target.value;
             if (clearButton) {
-                clearButton.style.setProperty('display', currentTerm.length > 0 ? 'flex' : 'none', 'important');
+                clearButton.style.display = currentTerm.length > 0 ? 'flex' : 'none';
             }
             onSearch(currentTerm);
         });
         if (clearButton) {
             clearButton.addEventListener('click', () => {
                 searchInput.value = '';
-                clearButton.style.setProperty('display', 'none', 'important');
+                clearButton.style.display = 'none';
                 onSearch('');
             });
         }
