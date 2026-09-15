@@ -71,15 +71,15 @@ export class AlbumTagEditorModal {
     coverContainer.appendChild(placeholderIcon);
     if (this.albumName && this.artistName) {
       const imgElement = document.createElement('img');
-      imgElement.style.display = 'none';
+      imgElement.className = 'tag-editor-dynamic-img';
       this.musicStore
         .getAlbumArtBlob(this.albumName, this.artistName)
         .then((blob) => {
           if (blob && blob.size > 0) {
             const url = URL.createObjectURL(blob);
             imgElement.src = url;
-            placeholderIcon.style.display = 'none';
-            imgElement.style.display = 'block';
+            placeholderIcon.classList.add('hidden-placeholder');
+            imgElement.classList.add('visible-img');
           }
         })
         .catch(() => {});

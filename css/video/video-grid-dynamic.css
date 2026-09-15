@@ -1,0 +1,55 @@
+.dynamic-video-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 120px));
+  gap: 16px;
+  padding: 20px;
+  justify-content: start;
+}
+
+.dynamic-video-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 10px;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background var(--transition-fast) ease;
+  width: 120px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.dynamic-video-card:hover {
+  background: var(--bg2);
+}
+
+.video-card-icon-wrapper {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.video-card-caption {
+  margin: 0;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--fg1);
+  line-height: 1.3;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  width: 100%;
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}

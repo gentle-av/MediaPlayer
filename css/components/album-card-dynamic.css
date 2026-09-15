@@ -1,0 +1,11 @@
+.album-card-dynamic-img {
+  display: none;
+}
+
+.album-card-dynamic-img.visible-img {
+  display: block;
+}
+
+.album-card-placeholder.hidden-placeholder {
+  display: none;
+}

@@ -1,7 +1,7 @@
 import { IMediaPlayer } from '../core/player/IMediaPlayer.js';
-import { PlayerMetadata } from '.player/PlayerMetadata.js';
-import { PlayerTimeline } from '.player/PlayerTimeline.js';
-import { PlayerControls } from '.player/PlayerControls.js';
+import { PlayerMetadata } from './player/PlayerMetadata.js';
+import { PlayerTimeline } from './player/PlayerTimeline.js';
+import { PlayerControls } from './player/PlayerControls.js';
 
 export class Player implements IMediaPlayer {
   private playerElement: HTMLElement | null = null;

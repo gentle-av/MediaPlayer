@@ -148,11 +148,9 @@ export class PlaylistModal {
     const footerElement = document.createElement('div');
     footerElement.className = 'modal-album-actions album-modal-custom-footer';
     const clearAllBtn = document.createElement('button');
-    clearAllBtn.className = 'modal-delete-album-btn';
+    clearAllBtn.className = 'modal-delete-album-btn dynamic-clear-playlist-btn';
     clearAllBtn.innerHTML =
       '<i class="fas fa-minus-circle"></i> <span>Очистить</span>';
-    clearAllBtn.style.setProperty('background', 'var(--red)', 'important');
-    clearAllBtn.style.setProperty('color', 'var(--bg0)', 'important');
     clearAllBtn.addEventListener('click', async () => {
       if (confirm('Очистить текущий список воспроизведения?')) {
         const names = this.playlistStore.getPlaylistNames();

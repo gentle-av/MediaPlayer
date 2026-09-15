@@ -35,26 +35,26 @@ export class AlbumCard {
         if (this.albumName && this.artistName) {
             const imgElement = document.createElement('img');
             imgElement.alt = this.albumName;
-            imgElement.style.display = 'none';
+            imgElement.className = 'album-card-dynamic-img';
             this.musicStore
                 .getAlbumArtBlob(this.albumName, this.artistName)
                 .then((blob) => {
                 if (blob && blob.size > 0) {
                     const objectUrl = URL.createObjectURL(blob);
                     imgElement.src = objectUrl;
-                    placeholderIcon.style.display = 'none';
-                    imgElement.style.display = 'block';
+                    placeholderIcon.classList.add('hidden-placeholder');
+                    imgElement.classList.add('visible-img');
                     imgElement.onload = () => {
                         URL.revokeObjectURL(objectUrl);
                     };
                 }
                 else {
-                    placeholderIcon.style.display = 'flex';
+                    placeholderIcon.classList.remove('hidden-placeholder');
                     imgElement.remove();
                 }
             })
                 .catch(() => {
-                placeholderIcon.style.display = 'flex';
+                placeholderIcon.classList.remove('hidden-placeholder');
                 imgElement.remove();
             });
             artContainer.appendChild(imgElement);

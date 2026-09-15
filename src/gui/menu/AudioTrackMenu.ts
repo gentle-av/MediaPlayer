@@ -18,13 +18,10 @@ export class AudioTrackMenu {
     clickEvent.stopPropagation();
     this.close();
     this.menuElement = document.createElement('div');
-    this.menuElement.className = 'audio-stream-popup visible';
-    Object.assign(this.menuElement.style, {
-      position: 'fixed',
-      bottom: `${window.innerHeight - clickEvent.clientY + 10}px`,
-      left: `${Math.max(10, clickEvent.clientX - 150)}px`,
-      display: 'block',
-    });
+    this.menuElement.className =
+      'audio-stream-popup visible dynamic-audio-track-menu';
+    this.menuElement.style.bottom = `${window.innerHeight - clickEvent.clientY + 10}px`;
+    this.menuElement.style.left = `${Math.max(10, clickEvent.clientX - 150)}px`;
     const headerElement = document.createElement('div');
     headerElement.className = 'audio-stream-popup-header';
     headerElement.textContent = 'Аудиодорожки';

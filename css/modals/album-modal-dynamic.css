@@ -1,0 +1,7 @@
+.album-modal-dynamic-cover-img {
+  display: none;
+}
+
+.album-modal-dynamic-cover-img.visible-img {
+  display: block;
+}

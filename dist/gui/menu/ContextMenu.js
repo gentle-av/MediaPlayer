@@ -12,38 +12,13 @@ export class ContextMenu {
         this.currentEvent = e;
         this.close();
         this.element = document.createElement('div');
-        this.element.className = 'context-menu';
-        Object.assign(this.element.style, {
-            position: 'fixed',
-            zIndex: '10005',
-            background: 'var(--bg1)',
-            border: '1px solid var(--bg3)',
-            borderRadius: '12px',
-            boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
-            overflow: 'hidden',
-            minWidth: '180px',
-        });
+        this.element.className = 'context-menu dynamic-context-menu';
         items.forEach((item) => {
             const itemElement = document.createElement('div');
             itemElement.className = item.isDanger
-                ? 'context-menu-item danger'
-                : 'context-menu-item';
+                ? 'context-menu-item danger dynamic-context-menu-item-danger'
+                : 'context-menu-item dynamic-context-menu-item';
             itemElement.textContent = item.label;
-            Object.assign(itemElement.style, {
-                padding: '10px 16px',
-                cursor: 'pointer',
-                color: item.isDanger ? 'var(--red)' : 'var(--fg1)',
-                fontSize: '0.85rem',
-                transition: 'all 0.15s ease',
-            });
-            itemElement.addEventListener('mouseenter', () => {
-                itemElement.style.background = item.isDanger
-                    ? 'rgba(251, 73, 52, 0.15)'
-                    : 'var(--bg2)';
-            });
-            itemElement.addEventListener('mouseleave', () => {
-                itemElement.style.background = 'transparent';
-            });
             itemElement.addEventListener('click', async (clickEvent) => {
                 clickEvent.stopPropagation();
                 this.close();

@@ -1,0 +1,25 @@
+.tag-editor-dynamic-img {
+  display: none;
+}
+
+.tag-editor-dynamic-img.visible-img {
+  display: block;
+}
+
+.tag-editor-content-container {
+  max-width: 550px;
+  background: var(--bg1);
+  border: 1px solid var(--bg3);
+}
+
+.tag-editor-custom-body {
+  padding: 16px 24px;
+  max-height: 40vh;
+  overflow-y: auto;
+}
+
+.tag-editor-custom-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--bg3);
+  background: var(--bg2);
+}

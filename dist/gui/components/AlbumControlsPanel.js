@@ -73,11 +73,9 @@ export class AlbumControlsPanel {
             }
         });
         const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'modal-delete-album-btn';
+        deleteBtn.className = 'modal-delete-album-btn dynamic-delete-album-btn';
         deleteBtn.innerHTML =
             '<i class="fas fa-trash-alt"></i> <span>Удалить</span>';
-        deleteBtn.style.setProperty('background', 'var(--red)', 'important');
-        deleteBtn.style.setProperty('color', 'var(--bg0)', 'important');
         deleteBtn.addEventListener('click', () => {
             if (confirm('Вы уверены, что хотите удалить весь альбом с диска?')) {
                 this.onCloseParent();

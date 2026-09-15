@@ -34,20 +34,12 @@ export class PlayerControls {
     if (videoPath) {
       this.activeVideoPath = videoPath;
       if (this.audioStreamButton) {
-        this.audioStreamButton.style.setProperty(
-          'display',
-          'flex',
-          'important',
-        );
+        this.audioStreamButton.style.display = 'flex';
       }
     } else {
       this.activeVideoPath = '';
       if (this.audioStreamButton) {
-        this.audioStreamButton.style.setProperty(
-          'display',
-          'none',
-          'important',
-        );
+        this.audioStreamButton.style.display = 'none';
       }
     }
   }

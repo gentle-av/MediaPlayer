@@ -1,0 +1,34 @@
+.dynamic-context-menu {
+  position: fixed;
+  z-index: 10005;
+  background: var(--bg1);
+  border: 1px solid var(--bg3);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  min-width: 180px;
+}
+
+.dynamic-context-menu-item,
+.dynamic-context-menu-item-danger {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.15s ease;
+}
+
+.dynamic-context-menu-item {
+  color: var(--fg1);
+}
+
+.dynamic-context-menu-item:hover {
+  background: var(--bg2);
+}
+
+.dynamic-context-menu-item-danger {
+  color: var(--red);
+}
+
+.dynamic-context-menu-item-danger:hover {
+  background: rgba(251, 73, 52, 0.15);
+}

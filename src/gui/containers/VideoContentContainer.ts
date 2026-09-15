@@ -46,14 +46,7 @@ export class VideoContentContainer implements Component {
       return null;
     }
     const gridElement = document.createElement('div');
-    gridElement.className = 'video-content';
-    Object.assign(gridElement.style, {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fill, minmax(120px, 120px))',
-      gap: '16px',
-      padding: '20px',
-      justifyContent: 'start',
-    });
+    gridElement.className = 'video-content dynamic-video-grid';
     allItems.forEach((item) => {
       const videoCardElement = this.createVideoCardElement(item);
       videoCardElement.addEventListener('click', async (e) => {
@@ -106,38 +99,9 @@ export class VideoContentContainer implements Component {
 
   private createVideoCardElement(videoItem: VideoItem): HTMLElement {
     const cardElement = document.createElement('figure');
-    cardElement.className = 'video-card';
-    Object.assign(cardElement.style, {
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '8px',
-      padding: '12px 10px',
-      background: 'transparent',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'background 0.2s ease',
-      width: '120px',
-      boxSizing: 'border-box',
-      overflow: 'hidden',
-    });
-    cardElement.addEventListener(
-      'mouseenter',
-      () => (cardElement.style.background = 'var(--bg2)'),
-    );
-    cardElement.addEventListener(
-      'mouseleave',
-      () => (cardElement.style.background = 'transparent'),
-    );
+    cardElement.className = 'video-card dynamic-video-card';
     const iconContainer = document.createElement('div');
-    Object.assign(iconContainer.style, {
-      width: '48px',
-      height: '48px',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      flexShrink: '0',
-    });
+    iconContainer.className = 'video-card-icon-wrapper';
     if (videoItem.isDirectory) {
       iconContainer.innerHTML = `
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
@@ -174,26 +138,8 @@ export class VideoContentContainer implements Component {
 
   private createTitleElement(title: string): HTMLElement {
     const captionElement = document.createElement('figcaption');
+    captionElement.className = 'video-card-caption';
     captionElement.textContent = title;
-    Object.assign(captionElement.style, {
-      margin: '0',
-      fontSize: '0.8rem',
-      fontWeight: '500',
-      color: 'var(--fg1)',
-      lineHeight: '1.3',
-      textAlign: 'center',
-      display: '-webkit-box',
-      webkitLineClamp: '3',
-      webkitBoxOrient: 'vertical',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      wordBreak: 'break-word',
-      width: '100%',
-      userSelect: 'none',
-      webkitUserSelect: 'none',
-      mozUserSelect: 'none',
-      msUserSelect: 'none',
-    });
     return captionElement;
   }
 }
