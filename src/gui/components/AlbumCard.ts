@@ -59,8 +59,6 @@ export class AlbumCard {
           imgElement.src = safeObjectUrl;
           placeholderIcon.classList.add('hidden-placeholder');
           imgElement.classList.add('visible-img');
-        } else {
-          imgElement.remove();
         }
       });
       artContainer.appendChild(imgElement);

@@ -10,7 +10,6 @@ export class AlbumImageSafetyProvider {
     uniqueCardUid: string,
   ): Promise<string | null> {
     try {
-      this.revokeUrlByKey(uniqueCardUid);
       const trackBlob = await musicStore.getAlbumArtBlob(albumName, artistName);
       if (!trackBlob || trackBlob.size <= 0) {
         return null;

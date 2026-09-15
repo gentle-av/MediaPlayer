@@ -15,11 +15,6 @@
     "allowImportingTsExtensions": false,
     "noEmit": false,
     "verbatimModuleSyntax": false,
-    "paths": {
-      "@api/*": ["api/*"],
-      "@core/*": ["core/*"],
-      "@gui/*": ["gui/*"]
-    }
   },
   "include": ["src/**/*.ts"],
   "exclude": ["node_modules", "dist"]

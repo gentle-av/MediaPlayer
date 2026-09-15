@@ -1,7 +1,6 @@
 export class AlbumImageSafetyProvider {
     static async getSafeArtUrl(musicStore, albumName, artistName, uniqueCardUid) {
         try {
-            this.revokeUrlByKey(uniqueCardUid);
             const trackBlob = await musicStore.getAlbumArtBlob(albumName, artistName);
             if (!trackBlob || trackBlob.size <= 0) {
                 return null;
