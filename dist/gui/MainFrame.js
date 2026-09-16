@@ -46,7 +46,6 @@ export class MainFrame {
         mainContent.appendChild(this.contentArea);
         bodyWrapper.appendChild(mainContent);
         const renderedPlayer = this.player.render();
-        renderedPlayer.classList.add('visible');
         bodyWrapper.appendChild(renderedPlayer);
         appContainer.appendChild(bodyWrapper);
         UiStateStore.getInstance().subscribe(async (state) => {
