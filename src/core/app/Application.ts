@@ -6,6 +6,8 @@ import { PlaybackManager } from '../player/PlaybackManager.js';
 import { Player } from '../../gui/Player.js';
 import { HashRouter } from '../player/HashRouter.js';
 import { InitialPlaybackSyncService } from '../player/InitialPlaybackSyncService.js';
+import { TvApiClient } from '../api/TvApiClient.js';
+import { TvPlaybackManager } from '../../gui/managers/TvPlaybackManager.js';
 
 export class Application {
   private mainContainer: HTMLElement | null;
@@ -17,6 +19,7 @@ export class Application {
   private player: Player;
   private hashRouter: HashRouter;
   private initialPlaybackSyncService: InitialPlaybackSyncService;
+  private tvPlaybackManager: TvPlaybackManager;
 
   constructor() {
     console.log('🚀 [Application] Инициализация конструктора...');
@@ -31,12 +34,14 @@ export class Application {
       this.musicStore,
       this.videoStore,
     );
+    this.tvPlaybackManager = new TvPlaybackManager(new TvApiClient());
     this.mainFrame = new MainFrame(
       this.musicStore,
       this.videoStore,
       this.playlistStore,
       this.playbackManager,
       this.player,
+      this.tvPlaybackManager,
     );
     this.initialPlaybackSyncService = new InitialPlaybackSyncService(
       this.playbackManager,

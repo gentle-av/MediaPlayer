@@ -6,16 +6,17 @@ import { MusicContentContainer } from './containers/MusicContentContainer.js';
 import { ComponentFactory } from './components/ComponentFactory.js';
 import { UiStateStore } from '../core/store/UiStateStore.js';
 export class MainFrame {
-    constructor(musicStore, videoStore, playlistStore, playbackManager, player) {
+    constructor(musicStore, videoStore, playlistStore, playbackManager, player, tvPlaybackManager) {
         this.musicStore = musicStore;
         this.videoStore = videoStore;
         this.playlistStore = playlistStore;
         this.playbackManager = playbackManager;
         this.player = player;
+        this.tvPlaybackManager = tvPlaybackManager;
         this.currentTab = 'video';
         this.contentArea = null;
         this.currentLiveComponent = null;
-        this.settings = new Settings();
+        this.settings = new Settings(this.tvPlaybackManager);
         this.componentFactory = new ComponentFactory();
         this.initFactory();
         this.header = new Header(this.musicStore, this.playlistStore, this.playbackManager);
@@ -51,7 +52,7 @@ export class MainFrame {
         UiStateStore.getInstance().subscribe(async (state) => {
             if (this.currentTab !== state.currentTab) {
                 this.currentTab = state.currentTab;
-                this.updateContent(state.currentTab);
+                await this.updateContent(state.currentTab);
             }
         });
         this.updateContent(this.currentTab);
@@ -68,14 +69,13 @@ export class MainFrame {
         this.componentFactory.register('settings', () => this.settings);
     }
     async switchTab(targetTab) {
+        console.log('🔀 [MainFrame] switchTab:', targetTab);
         const searchInput = document.getElementById('globalSearchInput');
         const clearButton = document.querySelector('.search-clear-btn');
-        if (searchInput) {
+        if (searchInput)
             searchInput.value = '';
-        }
-        if (clearButton) {
+        if (clearButton)
             clearButton.style.display = 'none';
-        }
         const tabConfigs = {
             video: { icon: 'fa-film', text: 'Видео' },
             audio: { icon: 'fa-music', text: 'Аудио' },
@@ -85,16 +85,23 @@ export class MainFrame {
         this.header.setTitle(config.icon, config.text);
         this.header.togglePlaylistButtonVisibility(targetTab === 'audio');
         UiStateStore.getInstance().setTab(targetTab);
+        if (this.currentTab !== targetTab) {
+            this.currentTab = targetTab;
+            await this.updateContent(targetTab);
+        }
     }
     async updateContent(activeTab) {
-        if (!this.contentArea) {
+        console.log('📦 [MainFrame] updateContent:', activeTab);
+        if (!this.contentArea)
             return;
-        }
         if (this.currentLiveComponent) {
             this.currentLiveComponent.dispose();
         }
         this.currentLiveComponent = this.componentFactory.create(activeTab);
         await this.currentLiveComponent.render(this.contentArea);
+        if (this.currentLiveComponent.onActivate) {
+            await this.currentLiveComponent.onActivate();
+        }
     }
     bindPlayerControls() {
         this.player.bindControls(() => {

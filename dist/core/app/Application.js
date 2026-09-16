@@ -6,6 +6,8 @@ import { PlaybackManager } from '../player/PlaybackManager.js';
 import { Player } from '../../gui/Player.js';
 import { HashRouter } from '../player/HashRouter.js';
 import { InitialPlaybackSyncService } from '../player/InitialPlaybackSyncService.js';
+import { TvApiClient } from '../api/TvApiClient.js';
+import { TvPlaybackManager } from '../../gui/managers/TvPlaybackManager.js';
 export class Application {
     constructor() {
         console.log('🚀 [Application] Инициализация конструктора...');
@@ -16,7 +18,8 @@ export class Application {
         this.playlistStore = new PlaylistStore(this.musicStore);
         this.player = new Player();
         this.playbackManager = new PlaybackManager(this.player, this.musicStore, this.videoStore);
-        this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager, this.player);
+        this.tvPlaybackManager = new TvPlaybackManager(new TvApiClient());
+        this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager, this.player, this.tvPlaybackManager);
         this.initialPlaybackSyncService = new InitialPlaybackSyncService(this.playbackManager, this.musicStore);
         this.hashRouter = new HashRouter();
         this.render();

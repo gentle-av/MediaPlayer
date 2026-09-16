@@ -11,6 +11,7 @@ import { MusicContentContainer } from './containers/MusicContentContainer.js';
 import { ComponentFactory, TabType } from './components/ComponentFactory.js';
 import { Component } from './components/Component.js';
 import { UiStateStore, UiState } from '../core/store/UiStateStore.js';
+import { TvPlaybackManager } from './managers/TvPlaybackManager.js';
 
 export class MainFrame {
   private header: Header;
@@ -27,8 +28,9 @@ export class MainFrame {
     private playlistStore: PlaylistStore,
     private playbackManager: PlaybackManager,
     private player: Player,
+    private tvPlaybackManager: TvPlaybackManager,
   ) {
-    this.settings = new Settings();
+    this.settings = new Settings(this.tvPlaybackManager);
     this.componentFactory = new ComponentFactory();
     this.initFactory();
     this.header = new Header(
@@ -69,7 +71,7 @@ export class MainFrame {
     UiStateStore.getInstance().subscribe(async (state: UiState) => {
       if (this.currentTab !== state.currentTab) {
         this.currentTab = state.currentTab;
-        this.updateContent(state.currentTab);
+        await this.updateContent(state.currentTab);
       }
     });
     this.updateContent(this.currentTab);
@@ -99,18 +101,15 @@ export class MainFrame {
   }
 
   private async switchTab(targetTab: TabType): Promise<void> {
+    console.log('🔀 [MainFrame] switchTab:', targetTab);
     const searchInput = document.getElementById(
       'globalSearchInput',
     ) as HTMLInputElement;
     const clearButton = document.querySelector(
       '.search-clear-btn',
     ) as HTMLElement;
-    if (searchInput) {
-      searchInput.value = '';
-    }
-    if (clearButton) {
-      clearButton.style.display = 'none';
-    }
+    if (searchInput) searchInput.value = '';
+    if (clearButton) clearButton.style.display = 'none';
     const tabConfigs = {
       video: { icon: 'fa-film', text: 'Видео' },
       audio: { icon: 'fa-music', text: 'Аудио' },
@@ -120,17 +119,23 @@ export class MainFrame {
     this.header.setTitle(config.icon, config.text);
     this.header.togglePlaylistButtonVisibility(targetTab === 'audio');
     UiStateStore.getInstance().setTab(targetTab);
+    if (this.currentTab !== targetTab) {
+      this.currentTab = targetTab;
+      await this.updateContent(targetTab);
+    }
   }
 
   private async updateContent(activeTab: TabType): Promise<void> {
-    if (!this.contentArea) {
-      return;
-    }
+    console.log('📦 [MainFrame] updateContent:', activeTab);
+    if (!this.contentArea) return;
     if (this.currentLiveComponent) {
       this.currentLiveComponent.dispose();
     }
     this.currentLiveComponent = this.componentFactory.create(activeTab);
     await this.currentLiveComponent.render(this.contentArea);
+    if (this.currentLiveComponent.onActivate) {
+      await this.currentLiveComponent.onActivate();
+    }
   }
 
   private bindPlayerControls(): void {
