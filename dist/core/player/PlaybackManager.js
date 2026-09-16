@@ -15,6 +15,15 @@ export class PlaybackManager {
         this.musicApiClient = new MusicApiClient();
         this.videoApiClient = new VideoApiClient();
     }
+    syncInitialType(type) {
+        this.currentType = type;
+        if (type !== 'none') {
+            this.mediaPlayer.setVisibility(true);
+        }
+    }
+    syncInitialVideoPath(path) {
+        this.currentVideoPath = path;
+    }
     async seek(seconds) {
         if (this.currentType === 'music') {
             await this.musicApiClient.seekAudioPlayback(seconds);
@@ -37,13 +46,12 @@ export class PlaybackManager {
         this.currentType = 'video';
         this.currentVideoPath = videoItem.path;
         this.mediaPlayer.setVisibility(true);
-        this.mediaPlayer.updateMediaInfo(videoItem.name, 'Видео-трансляция', videoItem.path);
+        this.mediaPlayer.updateMediaInfo(videoItem.name, 'Video-translation', videoItem.path);
         this.mediaPlayer.setPlayState(true);
         await this.videoStore.openVideo(videoItem);
         this.startPolling(videoItem.path);
     }
     async playMusic(track, playlistContext = []) {
-        // Исправлено сравнение контекстов: проверяем длину и путь первого трека, чтобы понять, тот же ли это альбом
         const isSameContext = playlistContext.length > 0 &&
             this.currentPlaylist.length === playlistContext.length &&
             this.currentPlaylist[0]?.filePath === playlistContext[0]?.filePath;
@@ -75,7 +83,6 @@ export class PlaybackManager {
             }
         }
         else {
-            // Контекст тот же (тот же альбом), просто переключаем индекс на бэкенде
             this.currentTrackIndex = this.currentPlaylist.findIndex((t) => t.filePath === track.filePath);
             this.mediaPlayer.updateMediaInfo(track.title, track.artist);
             if (this.musicStore.getCurrentTrack() !== track) {
@@ -85,7 +92,6 @@ export class PlaybackManager {
             if (success) {
                 this.isAudioPaused = false;
                 this.mediaPlayer.setPlayState(true);
-                // Перезапускаем поллинг под путь нового трека, чтобы статус запрашивался корректно
                 this.startPolling(track.filePath);
             }
         }
@@ -172,7 +178,6 @@ export class PlaybackManager {
                     }
                     if (current !== undefined && total !== undefined) {
                         this.mediaPlayer.updateProgress(current, total);
-                        // Если трек завершается (осталась 1 секунда или меньше), переключаем на следующий
                         if (total > 0 && current >= total - 1) {
                             this.playNextTrack();
                             return;
