@@ -27,22 +27,39 @@ export class Settings {
             return null;
         const element = document.createElement('div');
         element.className = 'settings-page';
-        element.style.padding = '20px';
-        element.style.display = 'flex';
-        element.style.flexDirection = 'column';
-        element.style.gap = '16px';
         const title = document.createElement('h2');
         title.textContent = 'Настройки';
-        title.style.color = 'var(--yellow)';
         element.appendChild(title);
-        element.appendChild(this.renderTvCard());
-        element.appendChild(this.renderAudioCard());
+        const cardsGrid = document.createElement('div');
+        cardsGrid.className = 'settings-cards-grid';
+        cardsGrid.appendChild(this.renderTvCard());
+        cardsGrid.appendChild(this.renderAudioCard());
+        element.appendChild(cardsGrid);
         while (targetElement.firstChild) {
             targetElement.removeChild(targetElement.firstChild);
         }
         targetElement.appendChild(element);
         void this.refreshAll();
         return element;
+    }
+    renderTvCard() {
+        const tvCard = document.createElement('div');
+        tvCard.className = 'settings-tv-card';
+        const iconContainer = document.createElement('div');
+        iconContainer.className = 'settings-tv-icon';
+        iconContainer.innerHTML = this.svgTv(48);
+        const tvTitle = document.createElement('div');
+        tvTitle.className = 'settings-tv-title';
+        tvTitle.textContent = 'Телевизор';
+        this.tvStatusLabel = document.createElement('div');
+        this.tvStatusLabel.className = 'settings-tv-status';
+        this.tvToggleButton = document.createElement('button');
+        this.tvToggleButton.className = 'settings-tv-toggle-btn';
+        this.tvToggleButton.addEventListener('click', () => {
+            void this.handleTvToggle();
+        });
+        tvCard.append(iconContainer, tvTitle, this.tvStatusLabel, this.tvToggleButton);
+        return tvCard;
     }
     async onActivate() {
         console.log('⚙️ [Settings] activated, refreshing state');
@@ -59,64 +76,17 @@ export class Settings {
         this.outputValueLabel = null;
         this.outputButtons.clear();
     }
-    renderTvCard() {
-        const tvCard = document.createElement('div');
-        tvCard.style.cssText = `
-      background: var(--bg1);
-      border: 1px solid var(--bg3);
-      border-radius: 16px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      max-width: 320px;
-    `;
-        const icon = document.createElement('div');
-        icon.style.cssText = 'font-size:48px;color:var(--yellow);';
-        icon.innerHTML = this.svgTv(48);
-        const tvTitle = document.createElement('div');
-        tvTitle.textContent = 'Телевизор';
-        tvTitle.style.cssText = 'color:var(--fg0);font-size:18px;font-weight:600;';
-        this.tvStatusLabel = document.createElement('div');
-        this.tvStatusLabel.style.cssText = 'font-size:14px;';
-        this.tvToggleButton = document.createElement('button');
-        this.tvToggleButton.className =
-            'refresh-confirm-btn refresh-confirm-confirm';
-        this.tvToggleButton.style.cssText = `
-      margin-top: 8px;
-      padding: 10px 24px; border: none; border-radius: 8px;
-      background: var(--yellow); color: var(--bg0);
-      font-weight: 600; cursor: pointer; transition: all 0.2s;
-    `;
-        this.tvToggleButton.addEventListener('click', () => {
-            void this.handleTvToggle();
-        });
-        tvCard.append(icon, tvTitle, this.tvStatusLabel, this.tvToggleButton);
-        return tvCard;
-    }
     renderAudioCard() {
         const audioCard = document.createElement('div');
-        audioCard.style.cssText = `
-      background: var(--bg1);
-      border: 1px solid var(--bg3);
-      border-radius: 16px;
-      padding: 24px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      max-width: 480px;
-      width: 100%;
-    `;
+        audioCard.className = 'settings-audio-card';
         const header = document.createElement('div');
-        header.style.cssText = 'display:flex;align-items:center;gap:12px;';
+        header.className = 'settings-audio-header';
         const audioIcon = document.createElement('div');
-        audioIcon.style.cssText = 'color:var(--yellow);display:flex;';
+        audioIcon.className = 'settings-audio-icon';
         audioIcon.innerHTML = this.svgVolumeUp(20);
         const audioTitle = document.createElement('div');
+        audioTitle.className = 'settings-audio-title';
         audioTitle.textContent = 'Звук';
-        audioTitle.style.cssText =
-            'color:var(--fg0);font-size:18px;font-weight:600;';
         header.append(audioIcon, audioTitle);
         audioCard.appendChild(header);
         audioCard.appendChild(this.renderVolumeRow());
@@ -128,14 +98,9 @@ export class Settings {
     }
     renderVolumeRow() {
         const volumeRow = document.createElement('div');
-        volumeRow.style.cssText = 'display:flex;align-items:center;gap:12px;';
+        volumeRow.className = 'settings-volume-row';
         this.volumeDownButton = document.createElement('button');
-        this.volumeDownButton.style.cssText = `
-      width:36px;height:36px;border-radius:50%;
-      background:var(--bg2);border:1px solid var(--bg3);
-      color:var(--fg1);cursor:pointer;flex-shrink:0;
-      display:flex;align-items:center;justify-content:center;
-    `;
+        this.volumeDownButton.className = 'settings-volume-down-btn';
         this.volumeDownButton.innerHTML = this.svgVolumeDown(16);
         this.volumeDownButton.addEventListener('click', () => {
             void this.handleAdjustVolume(-5);
@@ -145,10 +110,8 @@ export class Settings {
         this.volumeSlider.min = '0';
         this.volumeSlider.max = '100';
         this.volumeSlider.step = '1';
+        this.volumeSlider.className = 'settings-volume-slider';
         this.volumeSlider.value = String(this.audioOutputManager.getVolume());
-        this.volumeSlider.style.cssText = `
-      flex:1;height:4px;accent-color:var(--yellow);cursor:pointer;
-    `;
         this.volumeSlider.addEventListener('input', () => {
             if (this.volumeValueLabel && this.volumeSlider) {
                 this.volumeValueLabel.textContent = `${this.volumeSlider.value}%`;
@@ -158,30 +121,22 @@ export class Settings {
             void this.handleSetVolume(Number(this.volumeSlider?.value ?? 0));
         });
         this.volumeUpButton = document.createElement('button');
-        this.volumeUpButton.style.cssText = this.volumeDownButton.style.cssText;
+        this.volumeUpButton.className = 'settings-volume-up-btn';
         this.volumeUpButton.innerHTML = this.svgVolumeUp(16);
         this.volumeUpButton.addEventListener('click', () => {
             void this.handleAdjustVolume(5);
         });
         this.volumeValueLabel = document.createElement('span');
+        this.volumeValueLabel.className = 'settings-volume-label';
         this.volumeValueLabel.textContent = `${this.audioOutputManager.getVolume()}%`;
-        this.volumeValueLabel.style.cssText = `
-      min-width:48px;text-align:right;font-family:monospace;
-      color:var(--yellow);font-weight:600;
-    `;
         volumeRow.append(this.volumeDownButton, this.volumeSlider, this.volumeUpButton, this.volumeValueLabel);
         return volumeRow;
     }
     renderMuteRow() {
         const muteRow = document.createElement('div');
-        muteRow.style.cssText = 'display:flex;align-items:center;gap:12px;';
+        muteRow.className = 'settings-mute-row';
         this.volumeMuteButton = document.createElement('button');
-        this.volumeMuteButton.style.cssText = `
-      padding:8px 16px;border-radius:8px;
-      background:var(--bg2);border:1px solid var(--bg3);
-      color:var(--fg1);cursor:pointer;
-      display:flex;align-items:center;gap:8px;font-size:0.9rem;
-    `;
+        this.volumeMuteButton.className = 'settings-mute-btn';
         this.volumeMuteButton.addEventListener('click', () => {
             void this.handleToggleMute();
         });
@@ -190,30 +145,20 @@ export class Settings {
     }
     renderOutputRow() {
         const row = document.createElement('div');
-        row.style.cssText = `
-      display:flex;align-items:center;gap:12px;
-      padding-top:12px;border-top:1px solid var(--bg3);
-      flex-wrap:wrap;
-    `;
+        row.className = 'settings-output-row';
         const label = document.createElement('span');
-        label.style.cssText = 'font-size:0.85rem;color:var(--fg3);';
+        label.className = 'settings-output-label';
         label.textContent = 'Выход:';
         row.appendChild(label);
         this.outputValueLabel = document.createElement('span');
-        this.outputValueLabel.style.cssText =
-            'font-size:0.85rem;color:var(--fg1);margin-right:8px;';
+        this.outputValueLabel.className = 'settings-output-value';
         row.appendChild(this.outputValueLabel);
         const available = this.audioOutputManager.getAvailableOutputs();
         available.forEach((key) => {
             const btn = document.createElement('button');
             btn.dataset.output = key;
             btn.textContent = this.formatOutputName(key);
-            btn.style.cssText = `
-        padding:6px 14px;border-radius:8px;
-        background:var(--bg2);border:1px solid var(--bg3);
-        color:var(--fg2);cursor:pointer;font-size:0.85rem;
-        transition:all 0.2s;
-      `;
+            btn.className = 'settings-output-btn';
             btn.addEventListener('click', () => {
                 void this.handleSwitchOutput(key);
             });
@@ -333,22 +278,11 @@ export class Settings {
     updateTvUi() {
         const isActive = this.tvPlaybackManager.getIsActive();
         if (this.tvStatusLabel) {
-            if (this.tvBusy) {
-                this.tvStatusLabel.textContent = 'Выполняется...';
-                this.tvStatusLabel.style.color = 'var(--orange)';
-            }
-            else {
-                this.tvStatusLabel.textContent = isActive ? 'Включён' : 'Выключен';
-                this.tvStatusLabel.style.color = isActive
-                    ? 'var(--green)'
-                    : 'var(--red)';
-            }
+            this.tvStatusLabel.textContent = isActive ? 'Включён' : 'Выключен';
         }
         if (this.tvToggleButton) {
             this.tvToggleButton.disabled = this.tvBusy;
             this.tvToggleButton.textContent = isActive ? 'Выключить' : 'Включить';
-            this.tvToggleButton.style.opacity = this.tvBusy ? '0.6' : '1';
-            this.tvToggleButton.style.cursor = this.tvBusy ? 'wait' : 'pointer';
         }
     }
     updateAudioUi() {
@@ -371,33 +305,18 @@ export class Settings {
         this.volumeMuteButton.innerHTML = muted
             ? `${this.svgVolumeMute(16)}<span>Включить звук</span>`
             : `${this.svgVolumeUp(16)}<span>Выключить звук</span>`;
-        this.volumeMuteButton.style.borderColor = muted
-            ? 'var(--red)'
-            : 'var(--bg3)';
-        this.volumeMuteButton.style.color = muted ? 'var(--red)' : 'var(--fg1)';
         this.volumeMuteButton.disabled = this.volumeBusy;
-        this.volumeMuteButton.style.opacity = this.volumeBusy ? '0.6' : '1';
-        this.volumeMuteButton.style.cursor = this.volumeBusy ? 'wait' : 'pointer';
         if (this.volumeDownButton) {
             this.volumeDownButton.disabled = this.volumeBusy;
-            this.volumeDownButton.style.opacity = this.volumeBusy ? '0.6' : '1';
         }
         if (this.volumeUpButton) {
             this.volumeUpButton.disabled = this.volumeBusy;
-            this.volumeUpButton.style.opacity = this.volumeBusy ? '0.6' : '1';
         }
     }
     updateOutputButtons() {
         const current = this.audioOutputManager.getCurrentOutput();
         this.outputButtons.forEach((btn, key) => {
-            const isActive = key === current;
-            const disabled = this.outputBusy || key === current;
-            btn.disabled = disabled;
-            btn.style.background = isActive ? 'var(--yellow)' : 'var(--bg2)';
-            btn.style.color = isActive ? 'var(--bg0)' : 'var(--fg2)';
-            btn.style.borderColor = isActive ? 'var(--yellow)' : 'var(--bg3)';
-            btn.style.opacity = this.outputBusy && !isActive ? '0.6' : '1';
-            btn.style.cursor = disabled ? 'not-allowed' : 'pointer';
+            btn.disabled = this.outputBusy || key === current;
         });
     }
     formatOutputName(key) {

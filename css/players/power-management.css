@@ -456,3 +456,180 @@
     opacity: 0.5;
   }
 }
+
+.settings-page {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.settings-page h2 {
+  color: var(--yellow);
+  margin: 0;
+}
+
+.settings-cards-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 16px;
+  width: 100%;
+}
+
+.settings-tv-card {
+  background: var(--bg1);
+  border: 1px solid var(--bg3);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  max-width: 320px;
+  width: 100%;
+}
+
+.settings-tv-icon {
+  font-size: 48px;
+  color: var(--yellow);
+}
+
+.settings-tv-title {
+  color: var(--fg0);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.settings-tv-status {
+  font-size: 14px;
+}
+
+.settings-tv-toggle-btn {
+  margin-top: 8px;
+  padding: 10px 24px;
+  border: none;
+  border-radius: 8px;
+  background: var(--yellow);
+  color: var(--bg0);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settings-audio-card {
+  background: var(--bg1);
+  border: 1px solid var(--bg3);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+  width: 100%;
+}
+
+.settings-audio-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-audio-icon {
+  color: var(--yellow);
+  display: flex;
+}
+
+.settings-audio-title {
+  color: var(--fg0);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.settings-volume-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-volume-down-btn,
+.settings-volume-up-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  color: var(--fg1);
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.settings-volume-slider {
+  flex: 1;
+  height: 4px;
+  accent-color: var(--yellow);
+  cursor: pointer;
+}
+
+.settings-volume-label {
+  min-width: 48px;
+  text-align: right;
+  font-family: monospace;
+  color: var(--yellow);
+  font-weight: 600;
+}
+
+.settings-mute-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-mute-btn {
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  color: var(--fg1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+}
+
+.settings-output-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--bg3);
+  flex-wrap: wrap;
+}
+
+.settings-output-label {
+  font-size: 0.85rem;
+  color: var(--fg3);
+}
+
+.settings-output-value {
+  font-size: 0.85rem;
+  color: var(--fg1);
+  margin-right: 8px;
+}
+
+.settings-output-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: var(--bg2);
+  border: 1px solid var(--bg3);
+  color: var(--fg2);
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
