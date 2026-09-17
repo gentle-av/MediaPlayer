@@ -12,6 +12,7 @@ import { ComponentFactory, TabType } from './components/ComponentFactory.js';
 import { Component } from './components/Component.js';
 import { UiStateStore, UiState } from '../core/store/UiStateStore.js';
 import { TvPlaybackManager } from './managers/TvPlaybackManager.js';
+import { AudioOutputManager } from './managers/AudioOutputManager.js';
 
 export class MainFrame {
   private header: Header;
@@ -29,8 +30,12 @@ export class MainFrame {
     private playbackManager: PlaybackManager,
     private player: Player,
     private tvPlaybackManager: TvPlaybackManager,
+    private audioOutputManager: AudioOutputManager,
   ) {
-    this.settings = new Settings(this.tvPlaybackManager);
+    this.settings = new Settings(
+      this.tvPlaybackManager,
+      this.audioOutputManager,
+    );
     this.componentFactory = new ComponentFactory();
     this.initFactory();
     this.header = new Header(

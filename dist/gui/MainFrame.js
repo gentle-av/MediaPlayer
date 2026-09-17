@@ -6,17 +6,18 @@ import { MusicContentContainer } from './containers/MusicContentContainer.js';
 import { ComponentFactory } from './components/ComponentFactory.js';
 import { UiStateStore } from '../core/store/UiStateStore.js';
 export class MainFrame {
-    constructor(musicStore, videoStore, playlistStore, playbackManager, player, tvPlaybackManager) {
+    constructor(musicStore, videoStore, playlistStore, playbackManager, player, tvPlaybackManager, audioOutputManager) {
         this.musicStore = musicStore;
         this.videoStore = videoStore;
         this.playlistStore = playlistStore;
         this.playbackManager = playbackManager;
         this.player = player;
         this.tvPlaybackManager = tvPlaybackManager;
+        this.audioOutputManager = audioOutputManager;
         this.currentTab = 'video';
         this.contentArea = null;
         this.currentLiveComponent = null;
-        this.settings = new Settings(this.tvPlaybackManager);
+        this.settings = new Settings(this.tvPlaybackManager, this.audioOutputManager);
         this.componentFactory = new ComponentFactory();
         this.initFactory();
         this.header = new Header(this.musicStore, this.playlistStore, this.playbackManager);
