@@ -20,10 +20,11 @@ export class HashRouter {
     const hash = window.location.hash || '#/video';
     const [rawPath, queryString] = hash.slice(1).split('?');
     const tab = rawPath.replace('/', '') as TabType;
-    const params = new URLSearchParams(queryString || '');
-    const path = params.get('path') || '/mnt/video';
-    this.isUpdatingFromStore = true;
     const store = UiStateStore.getInstance();
+    const params = new URLSearchParams(queryString || '');
+    const path =
+      params.get('path') || store.getState().currentPath || '/mnt/video';
+    this.isUpdatingFromStore = true;
     if (store.getState().currentTab !== tab) {
       store.setTab(tab);
     }

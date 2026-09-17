@@ -74,7 +74,11 @@ export class MainFrame {
     bodyWrapper.appendChild(renderedPlayer);
     appContainer.appendChild(bodyWrapper);
     UiStateStore.getInstance().subscribe(async (state: UiState) => {
-      if (this.currentTab !== state.currentTab) {
+      if (
+        this.currentTab !== state.currentTab ||
+        (state.currentTab === 'video' &&
+          this.videoStore.getCurrentPath() !== state.currentPath)
+      ) {
         this.currentTab = state.currentTab;
         await this.updateContent(state.currentTab);
       }
