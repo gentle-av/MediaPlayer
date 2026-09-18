@@ -103,7 +103,7 @@ export class Settings {
         this.volumeDownButton.className = 'settings-volume-down-btn';
         this.volumeDownButton.innerHTML = this.svgVolumeDown(16);
         this.volumeDownButton.addEventListener('click', () => {
-            void this.handleAdjustVolume(-5);
+            void this.handleAdjustVolume(-1);
         });
         this.volumeSlider = document.createElement('input');
         this.volumeSlider.type = 'range';
@@ -124,7 +124,7 @@ export class Settings {
         this.volumeUpButton.className = 'settings-volume-up-btn';
         this.volumeUpButton.innerHTML = this.svgVolumeUp(16);
         this.volumeUpButton.addEventListener('click', () => {
-            void this.handleAdjustVolume(5);
+            void this.handleAdjustVolume(1);
         });
         this.volumeValueLabel = document.createElement('span');
         this.volumeValueLabel.className = 'settings-volume-label';

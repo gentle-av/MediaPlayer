@@ -1,5 +1,6 @@
 import { MusicApiClient } from '../../core/api/MusicApiClient.js';
 import { ToastService } from '../components/ToastService.js';
+import { Config } from '../../core/config/Config.js';
 export class AlbumTagEditorModal {
     constructor(albumName, artistName, albumTracks, musicStore) {
         this.albumName = albumName;
@@ -7,6 +8,7 @@ export class AlbumTagEditorModal {
         this.albumTracks = albumTracks;
         this.musicStore = musicStore;
         this.modalElement = null;
+        this.pendingArtData = null;
         this.musicApiClient = new MusicApiClient();
     }
     open() {
@@ -33,12 +35,14 @@ export class AlbumTagEditorModal {
             existingModal.parentNode.removeChild(existingModal);
         }
         this.modalElement = null;
+        this.pendingArtData = null;
     }
     createHeader() {
         const headerElement = document.createElement('div');
         headerElement.className = 'tag-editor-custom-header';
         const coverContainer = document.createElement('div');
         coverContainer.className = 'tag-editor-cover-left';
+        coverContainer.style.cursor = 'pointer';
         const placeholderIcon = document.createElement('div');
         placeholderIcon.className = 'tag-editor-placeholder-icon';
         placeholderIcon.innerHTML = `
@@ -58,22 +62,46 @@ export class AlbumTagEditorModal {
       </svg>
     `;
         coverContainer.appendChild(placeholderIcon);
+        const imgElement = document.createElement('img');
+        imgElement.className = 'tag-editor-dynamic-img';
         if (this.albumName && this.artistName) {
-            const imgElement = document.createElement('img');
-            imgElement.className = 'tag-editor-dynamic-img';
             this.musicStore
                 .getAlbumArtBlob(this.albumName, this.artistName)
                 .then((blob) => {
                 if (blob && blob.size > 0) {
-                    const url = URL.createObjectURL(blob);
-                    imgElement.src = url;
+                    imgElement.src = URL.createObjectURL(blob);
                     placeholderIcon.classList.add('hidden-placeholder');
                     imgElement.classList.add('visible-img');
                 }
             })
                 .catch(() => { });
-            coverContainer.appendChild(imgElement);
         }
+        coverContainer.appendChild(imgElement);
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/jpeg,image/png,image/gif';
+        fileInput.style.display = 'none';
+        fileInput.addEventListener('change', (e) => {
+            const file = e.target.files?.[0];
+            if (!file)
+                return;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const rawResult = reader.result;
+                const parts = rawResult.split(',');
+                if (parts.length > 1) {
+                    this.pendingArtData = parts[1];
+                }
+                imgElement.src = rawResult;
+                placeholderIcon.classList.add('hidden-placeholder');
+                imgElement.classList.add('visible-img');
+            };
+            reader.readAsDataURL(file);
+        });
+        coverContainer.appendChild(fileInput);
+        coverContainer.addEventListener('click', () => {
+            fileInput.click();
+        });
         const inputsContainer = document.createElement('div');
         inputsContainer.className = 'tag-editor-inputs-right';
         const artistField = document.createElement('div');
@@ -160,7 +188,7 @@ export class AlbumTagEditorModal {
                 const rowElement = row;
                 const path = rowElement.dataset.filePath;
                 const nameInput = rowElement.querySelector('.tag-editor-track-name-input');
-                const numberSpan = rowElement.querySelector('.tag-editor-track-number');
+                const numberSpan = rowElement.querySelector('.track-editor-track-number');
                 if (!path || !nameInput || !numberSpan)
                     continue;
                 const trackNumber = parseInt(numberSpan.textContent || '0', 10);
@@ -173,6 +201,16 @@ export class AlbumTagEditorModal {
                 };
                 const success = await this.musicApiClient.updateTrackTags(payload);
                 if (success) {
+                    if (this.pendingArtData) {
+                        await fetch(`${Config.getConfig().baseUrl}/api/music/upload-album-art`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                path: path,
+                                image_data: this.pendingArtData,
+                            }),
+                        });
+                    }
                     totalUpdated++;
                 }
                 else {

@@ -58,7 +58,8 @@ export class AlbumModal {
                 .getAlbumArtBlob(this.albumName, this.artistName)
                 .then((blob) => {
                 if (blob && blob.size > 0) {
-                    const url = URL.createObjectURL(blob);
+                    const forcedBlob = new Blob([blob], { type: 'image/jpeg' });
+                    const url = URL.createObjectURL(forcedBlob);
                     imgElement.src = url;
                     placeholderIcon.style.display = 'none';
                     imgElement.style.display = 'block';

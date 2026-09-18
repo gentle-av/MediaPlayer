@@ -5,10 +5,8 @@ export class AlbumImageSafetyProvider {
             if (!trackBlob || trackBlob.size <= 0) {
                 return null;
             }
-            if (trackBlob.type.includes('application/json')) {
-                return null;
-            }
-            const generatedObjectUrl = URL.createObjectURL(trackBlob);
+            const forcedBlob = new Blob([trackBlob], { type: 'image/jpeg' });
+            const generatedObjectUrl = URL.createObjectURL(forcedBlob);
             this.activeCardUrls.set(uniqueCardUid, generatedObjectUrl);
             return generatedObjectUrl;
         }

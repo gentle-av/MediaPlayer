@@ -2,10 +2,12 @@ import { Metadata } from '../../core/entities/music/Metadata.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
 import { MusicApiClient } from '../../core/api/MusicApiClient.js';
 import { ToastService } from '../components/ToastService.js';
+import { Config } from '../../core/config/Config.js';
 
 export class AlbumTagEditorModal {
   private modalElement: HTMLElement | null = null;
   private readonly musicApiClient: MusicApiClient;
+  private pendingArtData: string | null = null;
 
   constructor(
     private readonly albumName: string,
@@ -43,6 +45,7 @@ export class AlbumTagEditorModal {
       existingModal.parentNode.removeChild(existingModal);
     }
     this.modalElement = null;
+    this.pendingArtData = null;
   }
 
   private createHeader(): HTMLElement {
@@ -50,6 +53,7 @@ export class AlbumTagEditorModal {
     headerElement.className = 'tag-editor-custom-header';
     const coverContainer = document.createElement('div');
     coverContainer.className = 'tag-editor-cover-left';
+    coverContainer.style.cursor = 'pointer';
     const placeholderIcon = document.createElement('div');
     placeholderIcon.className = 'tag-editor-placeholder-icon';
     placeholderIcon.innerHTML = `
@@ -69,22 +73,45 @@ export class AlbumTagEditorModal {
       </svg>
     `;
     coverContainer.appendChild(placeholderIcon);
+    const imgElement = document.createElement('img');
+    imgElement.className = 'tag-editor-dynamic-img';
     if (this.albumName && this.artistName) {
-      const imgElement = document.createElement('img');
-      imgElement.className = 'tag-editor-dynamic-img';
       this.musicStore
         .getAlbumArtBlob(this.albumName, this.artistName)
         .then((blob) => {
           if (blob && blob.size > 0) {
-            const url = URL.createObjectURL(blob);
-            imgElement.src = url;
+            imgElement.src = URL.createObjectURL(blob);
             placeholderIcon.classList.add('hidden-placeholder');
             imgElement.classList.add('visible-img');
           }
         })
         .catch(() => {});
-      coverContainer.appendChild(imgElement);
     }
+    coverContainer.appendChild(imgElement);
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/jpeg,image/png,image/gif';
+    fileInput.style.display = 'none';
+    fileInput.addEventListener('change', (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const rawResult = reader.result as string;
+        const parts = rawResult.split(',');
+        if (parts.length > 1) {
+          this.pendingArtData = parts[1];
+        }
+        imgElement.src = rawResult;
+        placeholderIcon.classList.add('hidden-placeholder');
+        imgElement.classList.add('visible-img');
+      };
+      reader.readAsDataURL(file);
+    });
+    coverContainer.appendChild(fileInput);
+    coverContainer.addEventListener('click', () => {
+      fileInput.click();
+    });
     const inputsContainer = document.createElement('div');
     inputsContainer.className = 'tag-editor-inputs-right';
     const artistField = document.createElement('div');
@@ -180,7 +207,7 @@ export class AlbumTagEditorModal {
           '.tag-editor-track-name-input',
         ) as HTMLInputElement;
         const numberSpan = rowElement.querySelector(
-          '.tag-editor-track-number',
+          '.track-editor-track-number',
         ) as HTMLElement;
         if (!path || !nameInput || !numberSpan) continue;
         const trackNumber = parseInt(numberSpan.textContent || '0', 10);
@@ -193,6 +220,19 @@ export class AlbumTagEditorModal {
         };
         const success = await this.musicApiClient.updateTrackTags(payload);
         if (success) {
+          if (this.pendingArtData) {
+            await fetch(
+              `${Config.getConfig().baseUrl}/api/music/upload-album-art`,
+              {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  path: path,
+                  image_data: this.pendingArtData,
+                }),
+              },
+            );
+          }
           totalUpdated++;
         } else {
           failedCount++;

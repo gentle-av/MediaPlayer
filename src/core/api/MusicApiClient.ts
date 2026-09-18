@@ -312,18 +312,7 @@ export class MusicApiClient extends BaseApiClient<unknown> {
         method: 'GET',
       });
       if (!response.ok) return null;
-      const jsonResult = await response.json();
-      if (!jsonResult || !jsonResult.imageData) return null;
-      const cleanBase64 = jsonResult.imageData
-        .replace(/\\/g, '')
-        .replace(/\s/g, '');
-      const binaryString = window.atob(cleanBase64);
-      const len = binaryString.length;
-      const bytes = new Uint8Array(len);
-      for (let i = 0; i < len; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      return new Blob([bytes], { type: jsonResult.mimeType || 'image/jpeg' });
+      return await response.blob();
     } catch (error) {
       console.error(error);
       return null;
