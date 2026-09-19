@@ -1,7 +1,6 @@
 .sidebar-close-mobile {
   display: none;
 }
-
 @media (max-width: 768px) {
   body {
     overflow: hidden;
@@ -10,7 +9,6 @@
     height: 100%;
     touch-action: none;
   }
-
   #main,
   .app-container {
     display: flex;
@@ -19,7 +17,6 @@
     width: 100vw;
     overflow: hidden;
   }
-
   .app-header {
     padding: 6px 12px;
     min-height: 48px;
@@ -30,11 +27,9 @@
     z-index: 210;
     flex-shrink: 0;
   }
-
   .header-title-section {
     display: none;
   }
-
   .header-controls-section {
     min-height: auto;
     gap: 8px;
@@ -43,13 +38,11 @@
     width: 100%;
     justify-content: space-between;
   }
-
   .search-wrapper {
     flex: 1;
     margin: 0;
     max-width: calc(100% - 100px);
   }
-
   #globalSearchBox {
     max-width: 100%;
     width: 100%;
@@ -57,28 +50,23 @@
     height: 32px;
     padding: 0 8px;
   }
-
   #globalSearchInput {
     font-size: 0.8rem;
     padding-right: 16px;
   }
-
   #headerPlaylistBtn {
     height: 32px;
     min-height: 32px;
     padding: 0 10px;
     font-size: 0.8rem;
   }
-
   #headerPlaylistBtn span {
     display: none;
   }
-
   #headerPlaylistBtn i {
     font-size: 1rem;
     margin: 0;
   }
-
   .body-wrapper {
     display: flex;
     flex-direction: column;
@@ -86,7 +74,6 @@
     height: calc(100vh - 48px);
     overflow: hidden;
   }
-
   .main-content {
     display: flex;
     flex-direction: column;
@@ -94,7 +81,6 @@
     overflow: hidden;
     height: auto;
   }
-
   .sidebar {
     position: static;
     transform: none;
@@ -116,11 +102,9 @@
     display: flex;
     overflow: hidden;
   }
-
   .sidebar-header {
     display: none;
   }
-
   .sidebar-nav {
     display: flex;
     flex-direction: row;
@@ -131,7 +115,6 @@
     width: 100%;
     justify-content: center;
   }
-
   .sidebar-btn {
     padding: 0;
     gap: 0;
@@ -147,12 +130,10 @@
     box-shadow: none;
     transform: none;
   }
-
   .sidebar-btn.active {
     background: var(--bg3);
     border: 1px solid var(--yellow);
   }
-
   .sidebar-icon-wrapper {
     width: 40px;
     height: 40px;
@@ -162,37 +143,33 @@
     color: var(--yellow);
     flex-shrink: 0;
   }
-
   .sidebar-btn.active .sidebar-icon-wrapper {
     color: var(--orange);
   }
-
   .sidebar-svg-icon {
     width: 22px;
     height: 22px;
     display: block;
   }
-
   .sidebar-btn-text {
     display: none;
   }
-
   .content-area {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 10px;
+    padding-bottom: calc(85px + env(safe-area-inset-bottom));
     background: var(--bg0);
     -webkit-overflow-scrolling: touch;
   }
-
   .albums-grid {
     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
     gap: 12px;
     padding: 4px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
     overflow-y: visible;
   }
-
   .album-card {
     flex-direction: column;
     align-items: stretch;
@@ -200,60 +177,51 @@
     padding: 0;
     border-radius: 8px;
   }
-
   .album-card-art {
     width: 100%;
     height: auto;
     aspect-ratio: 1 / 1;
     border-radius: 8px 8px 0 0;
   }
-
   .album-card-info {
     padding: 8px 6px;
   }
-
   .album-card-title {
     font-size: 0.8rem;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
-
   .album-card-artist {
     font-size: 0.7rem;
   }
-
   .video-content {
     grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
     gap: 12px;
     padding: 4px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
   }
-
   .video-card {
     width: auto;
     padding: 8px 4px;
   }
-
-  .universal-bottom-player {
+  .app-container .universal-bottom-player {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     width: 100%;
-    height: 72px;
-    min-height: 72px;
-    padding: 6px 12px;
+    height: calc(72px + env(safe-area-inset-bottom));
+    min-height: calc(72px + env(safe-area-inset-bottom));
+    padding: 6px 12px calc(6px + env(safe-area-inset-bottom)) 12px;
     background: var(--bg1);
     box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.5);
     z-index: 220;
-    flex-shrink: 0;
     display: none;
   }
-
-  .universal-bottom-player.visible {
+  .app-container .universal-bottom-player.visible {
     display: flex;
   }
-
   .universal-bottom-player-content {
     flex-direction: row;
     justify-content: space-between;
@@ -261,75 +229,61 @@
     gap: 12px;
     height: 100%;
   }
-
   .universal-bottom-player-info {
     min-width: auto;
     flex: 1;
     gap: 8px;
   }
-
   .universal-bottom-player-preview {
     width: 38px;
     height: 38px;
   }
-
   .universal-bottom-player-track-name {
     font-size: 0.8rem;
   }
-
   .universal-bottom-player-track-artist {
     font-size: 0.7rem;
   }
-
   .universal-bottom-player-controls {
     gap: 8px;
     flex: 0 0 auto;
   }
-
   .universal-bottom-player-btn {
     width: 36px;
     height: 36px;
     min-width: 36px;
     min-height: 36px;
   }
-
   .universal-bottom-player-play {
     width: 40px;
     height: 40px;
     min-width: 40px;
     min-height: 40px;
   }
-
   .universal-bottom-player-progress {
     display: none;
   }
 }
-
 @media (max-width: 480px) {
   .sidebar-nav {
     gap: 16px;
   }
-
   .sidebar-btn {
     width: 36px;
     height: 36px;
   }
-
   .sidebar-icon-wrapper {
     width: 36px;
     height: 36px;
   }
-
   .sidebar-svg-icon {
     width: 20px;
     height: 20px;
   }
-
   .albums-grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
-
   .video-content {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
