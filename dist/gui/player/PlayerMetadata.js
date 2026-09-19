@@ -2,21 +2,45 @@ export class PlayerMetadata {
     constructor() {
         this.trackNameElement = null;
         this.trackArtistElement = null;
+        this.previewArtElement = null;
     }
-    update(mediaTitle, mediaArtist) {
+    update(mediaTitle, mediaArtist, playbackType) {
         if (this.trackNameElement) {
             this.trackNameElement.textContent = mediaTitle;
         }
         if (this.trackArtistElement) {
             this.trackArtistElement.textContent = mediaArtist;
         }
+        if (this.previewArtElement) {
+            if (playbackType === 'video') {
+                this.previewArtElement.innerHTML = `
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M23 7l-7 5 7 5V7z"></path>
+            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+          </svg>
+        `;
+            }
+            else {
+                this.previewArtElement.innerHTML = `
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round">
+            <path d="M9 18V5l12-2v13"></path>
+            <circle cx="6" cy="18" r="3"></circle>
+            <circle cx="18" cy="16" r="3"></circle>
+          </svg>
+        `;
+            }
+        }
     }
     render() {
         const metadataContainer = document.createElement('div');
         metadataContainer.className = 'universal-bottom-player-info';
-        const previewArt = document.createElement('div');
-        previewArt.className = 'universal-bottom-player-preview';
-        previewArt.innerHTML = `
+        this.previewArtElement = document.createElement('div');
+        this.previewArtElement.className = 'universal-bottom-player-preview';
+        this.previewArtElement.innerHTML = `
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
         stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
         stroke-linejoin="round">
@@ -25,7 +49,7 @@ export class PlayerMetadata {
         <circle cx="18" cy="16" r="3"></circle>
       </svg>
     `;
-        metadataContainer.appendChild(previewArt);
+        metadataContainer.appendChild(this.previewArtElement);
         const trackInfoContainer = document.createElement('div');
         trackInfoContainer.className = 'universal-bottom-player-track-info';
         this.trackNameElement = document.createElement('div');

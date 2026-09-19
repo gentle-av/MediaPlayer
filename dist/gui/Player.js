@@ -29,8 +29,8 @@ export class Player {
             this.onSeekCallback = onSeek;
         }
     }
-    updateMediaInfo(mediaTitle, mediaArtist, videoPath) {
-        this.metadata.update(mediaTitle, mediaArtist);
+    updateMediaInfo(mediaTitle, mediaArtist, videoPath, playbackType) {
+        this.metadata.update(mediaTitle, mediaArtist, playbackType);
         this.controls.updateStreamButton(videoPath);
         this.updateProgress(0, 0);
     }

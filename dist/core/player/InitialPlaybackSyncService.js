@@ -20,7 +20,7 @@ export class InitialPlaybackSyncService {
                 console.log('🎬 [SyncService] Обнаружено активное видеовещание:', videoStatus.path);
                 this.playbackManager.syncInitialType('video');
                 this.playbackManager.syncInitialVideoPath(videoStatus.path || '');
-                this.playbackManager['mediaPlayer'].updateMediaInfo(videoStatus.name || 'Видео-трансляция', 'Видео-трансляция', videoStatus.path);
+                this.playbackManager['mediaPlayer'].updateMediaInfo(videoStatus.name || 'Видео-трансляция', 'Видео-трансляция', videoStatus.path, 'video');
                 this.playbackManager['mediaPlayer'].setPlayState(true);
                 this.playbackManager.startPolling(videoStatus.path || '');
                 return;
@@ -50,7 +50,7 @@ export class InitialPlaybackSyncService {
                         this.musicStore.setCurrentTrack(track);
                         this.playbackManager['currentPlaylist'] = [track];
                         this.playbackManager['currentTrackIndex'] = 0;
-                        this.playbackManager['mediaPlayer'].updateMediaInfo(track.title, track.artist);
+                        this.playbackManager['mediaPlayer'].updateMediaInfo(track.title, track.artist, undefined, 'music');
                         this.playbackManager['mediaPlayer'].setPlayState(audioMetrics.isPlaying ?? true);
                         this.playbackManager['mediaPlayer'].updateProgress(audioMetrics.currentTime, audioMetrics.duration);
                         this.playbackManager.startPolling(track.filePath);
@@ -58,7 +58,7 @@ export class InitialPlaybackSyncService {
                     }
                 }
                 console.warn('⚠️ [SyncService] Путь к файлу трека не определен, инициализируем плеер в базовом режиме.');
-                this.playbackManager['mediaPlayer'].updateMediaInfo('Активное воспроизведение', 'Аудио-поток');
+                this.playbackManager['mediaPlayer'].updateMediaInfo('Активное воспроизведение', 'Аудио-поток', undefined, 'music');
                 this.playbackManager['mediaPlayer'].updateProgress(audioMetrics.currentTime, audioMetrics.duration);
                 this.playbackManager.startPolling('');
             }

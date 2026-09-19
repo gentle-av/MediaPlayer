@@ -64,6 +64,7 @@ export class PlaybackManager {
       videoItem.name,
       'Video-translation',
       videoItem.path,
+      'video',
     );
     this.mediaPlayer.setPlayState(true);
     await this.videoStore.openVideo(videoItem);
@@ -92,7 +93,7 @@ export class PlaybackManager {
         this.currentTrackIndex = 0;
       }
       this.mediaPlayer.setVisibility(true);
-      this.mediaPlayer.updateMediaInfo(track.title, track.artist);
+      this.mediaPlayer.updateMediaInfo(track.title, track.artist, 'music');
       if (this.musicStore.getCurrentTrack() !== track) {
         this.musicStore.setCurrentTrack(track);
       }

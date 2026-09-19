@@ -46,7 +46,7 @@ export class PlaybackManager {
         this.currentType = 'video';
         this.currentVideoPath = videoItem.path;
         this.mediaPlayer.setVisibility(true);
-        this.mediaPlayer.updateMediaInfo(videoItem.name, 'Video-translation', videoItem.path);
+        this.mediaPlayer.updateMediaInfo(videoItem.name, 'Video-translation', videoItem.path, 'video');
         this.mediaPlayer.setPlayState(true);
         await this.videoStore.openVideo(videoItem);
         this.startPolling(videoItem.path);
@@ -68,7 +68,7 @@ export class PlaybackManager {
                 this.currentTrackIndex = 0;
             }
             this.mediaPlayer.setVisibility(true);
-            this.mediaPlayer.updateMediaInfo(track.title, track.artist);
+            this.mediaPlayer.updateMediaInfo(track.title, track.artist, 'music');
             if (this.musicStore.getCurrentTrack() !== track) {
                 this.musicStore.setCurrentTrack(track);
             }

@@ -34,6 +34,7 @@ export class InitialPlaybackSyncService {
           videoStatus.name || 'Видео-трансляция',
           'Видео-трансляция',
           videoStatus.path,
+          'video',
         );
         this.playbackManager['mediaPlayer'].setPlayState(true);
         this.playbackManager.startPolling(videoStatus.path || '');
@@ -75,6 +76,8 @@ export class InitialPlaybackSyncService {
             this.playbackManager['mediaPlayer'].updateMediaInfo(
               track.title,
               track.artist,
+              undefined,
+              'music',
             );
             this.playbackManager['mediaPlayer'].setPlayState(
               audioMetrics.isPlaying ?? true,
@@ -93,6 +96,8 @@ export class InitialPlaybackSyncService {
         this.playbackManager['mediaPlayer'].updateMediaInfo(
           'Активное воспроизведение',
           'Аудио-поток',
+          undefined,
+          'music',
         );
         this.playbackManager['mediaPlayer'].updateProgress(
           audioMetrics.currentTime,
