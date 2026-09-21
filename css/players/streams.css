@@ -4,9 +4,7 @@
   justify-content: center;
   width: 36px;
   height: 36px;
-  border: none;
   border-radius: 50%;
-  background: transparent;
   color: var(--fg2);
   cursor: pointer;
   transition: all 0.2s;

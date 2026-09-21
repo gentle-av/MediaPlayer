@@ -39,9 +39,12 @@ export class PlayerControls {
     this.playButtonIcon.appendChild(vectorRoot);
   }
 
-  public updateStreamButton(videoPath?: string): void {
-    if (videoPath) {
-      this.activeVideoPath = videoPath;
+  public updateStreamButton(
+    videoPath?: string,
+    playbackType?: 'music' | 'video',
+  ): void {
+    if (playbackType === 'video' || videoPath) {
+      this.activeVideoPath = videoPath || '';
       if (this.audioStreamButton) {
         this.audioStreamButton.style.display = 'flex';
       }
@@ -117,8 +120,8 @@ export class PlayerControls {
   }
 
   private createAudioStreamButton(): HTMLButtonElement {
-    const btn = document.createElement('button');
-    btn.className = 'universal-bottom-player-btn audio-stream-btn';
+    const streamButton = document.createElement('button');
+    streamButton.className = 'universal-bottom-player-btn audio-stream-btn';
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const vectorRoot = document.createElementNS(SVG_NS, 'svg');
     vectorRoot.setAttribute('width', '16');
@@ -147,43 +150,43 @@ export class PlayerControls {
     lineNode2.setAttribute('x2', '16');
     lineNode2.setAttribute('y2', '23');
     vectorRoot.append(pathNode1, pathNode2, lineNode1, lineNode2);
-    btn.appendChild(vectorRoot);
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
+    streamButton.appendChild(vectorRoot);
+    streamButton.addEventListener('click', (clickEvent) => {
+      clickEvent.preventDefault();
+      clickEvent.stopPropagation();
       if (this.activeVideoPath) {
-        this.audioTrackMenu.show(e, this.activeVideoPath);
+        this.audioTrackMenu.show(clickEvent, this.activeVideoPath);
       }
     });
-    return btn;
+    return streamButton;
   }
 
   private createControlButton(
-    type1: string,
-    attrs1: Record<string, string>,
-    type2?: string,
-    attrs2?: Record<string, string>,
+    nodeType1: string,
+    attributes1: Record<string, string>,
+    nodeType2?: string,
+    attributes2?: Record<string, string>,
   ): HTMLButtonElement {
-    const btn = document.createElement('button');
-    btn.className = 'universal-bottom-player-btn';
+    const controlButton = document.createElement('button');
+    controlButton.className = 'universal-bottom-player-btn';
     const SVG_NS = 'http://www.w3.org/2000/svg';
     const vectorRoot = document.createElementNS(SVG_NS, 'svg');
     vectorRoot.setAttribute('width', '16');
     vectorRoot.setAttribute('height', '16');
     vectorRoot.setAttribute('viewBox', '0 0 24 24');
-    const node1 = document.createElementNS(SVG_NS, type1);
-    for (const key in attrs1) {
-      node1.setAttribute(key, attrs1[key]);
+    const firstNode = document.createElementNS(SVG_NS, nodeType1);
+    for (const propertyKey in attributes1) {
+      firstNode.setAttribute(propertyKey, attributes1[propertyKey]);
     }
-    vectorRoot.appendChild(node1);
-    if (type2 && attrs2) {
-      const node2 = document.createElementNS(SVG_NS, type2);
-      for (const key in attrs2) {
-        node2.setAttribute(key, attrs2[key]);
+    vectorRoot.appendChild(firstNode);
+    if (nodeType2 && attributes2) {
+      const secondNode = document.createElementNS(SVG_NS, nodeType2);
+      for (const propertyKey in attributes2) {
+        secondNode.setAttribute(propertyKey, attributes2[propertyKey]);
       }
-      vectorRoot.appendChild(node2);
+      vectorRoot.appendChild(secondNode);
     }
-    btn.appendChild(vectorRoot);
-    return btn;
+    controlButton.appendChild(vectorRoot);
+    return controlButton;
   }
 }

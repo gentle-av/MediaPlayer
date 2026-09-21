@@ -31,7 +31,7 @@ export class Player {
     }
     updateMediaInfo(mediaTitle, mediaArtist, videoPath, playbackType) {
         this.metadata.update(mediaTitle, mediaArtist, playbackType);
-        this.controls.updateStreamButton(videoPath);
+        this.controls.updateStreamButton(videoPath, playbackType);
         this.updateProgress(0, 0);
     }
     updateProgress(elapsedSeconds, totalSeconds) {
