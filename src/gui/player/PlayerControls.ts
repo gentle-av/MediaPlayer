@@ -154,9 +154,7 @@ export class PlayerControls {
     streamButton.addEventListener('click', (clickEvent) => {
       clickEvent.preventDefault();
       clickEvent.stopPropagation();
-      if (this.activeVideoPath) {
-        this.audioTrackMenu.show(clickEvent, this.activeVideoPath);
-      }
+      this.audioTrackMenu.show(clickEvent, this.activeVideoPath);
     });
     return streamButton;
   }

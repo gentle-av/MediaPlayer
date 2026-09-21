@@ -9,27 +9,28 @@ export class InitialPlaybackSyncService {
     }
     async syncPlaybackState() {
         try {
-            console.log('🔍 [SyncService] Запрос текущего статуса плейбека с бэкенда...');
+            console.log('🔍 [SyncService] Запрос статуса плейбека...');
             const [videoStatus, musicStatus] = await Promise.all([
                 this.videoApiClient.getVideoStatus(''),
                 this.musicApiClient.getAudioTimeInfo(),
             ]);
-            console.log('📡 [SyncService] Ответ от видео-сервера:', videoStatus);
-            console.log('📡 [SyncService] Ответ от аудио-сервера:', musicStatus);
+            console.log('📡 [SyncService] Ответ видео:', videoStatus);
+            console.log('📡 [SyncService] Ответ аудио:', musicStatus);
             if (videoStatus && (videoStatus.playing || videoStatus.isPlaying)) {
-                console.log('🎬 [SyncService] Обнаружено активное видеовещание:', videoStatus.path);
+                const videoPath = videoStatus.path || videoStatus.currentFile || '';
+                console.log('🎬 [SyncService] Активное видеовещание:', videoPath);
                 this.playbackManager.syncInitialType('video');
-                this.playbackManager.syncInitialVideoPath(videoStatus.path || '');
-                this.playbackManager['mediaPlayer'].updateMediaInfo(videoStatus.name || 'Видео-трансляция', 'Видео-трансляция', videoStatus.path, 'video');
+                this.playbackManager.syncInitialVideoPath(videoPath);
+                this.playbackManager['mediaPlayer'].updateMediaInfo(videoStatus.name || 'Видео-трансляция', 'Видео-трансляция', videoPath, 'video');
                 this.playbackManager['mediaPlayer'].setPlayState(true);
-                this.playbackManager.startPolling(videoStatus.path || '');
+                this.playbackManager.startPolling(videoPath);
                 return;
             }
             const audioMetrics = musicStatus?.data || musicStatus;
             if (audioMetrics &&
                 audioMetrics.currentTime > 0 &&
                 audioMetrics.duration > 0) {
-                console.log('🎵 [SyncService] Обнаружен активный аудиопоток по метрикам времени. Текущее время:', audioMetrics.currentTime);
+                console.log('🎵 [SyncService] Активный аудиопоток:', audioMetrics);
                 this.playbackManager.syncInitialType('music');
                 let trackPath = audioMetrics.currentTrackPath;
                 if (!trackPath && musicStatus.currentTrackPath) {
@@ -45,7 +46,7 @@ export class InitialPlaybackSyncService {
                 }
                 if (trackPath) {
                     const track = this.musicStore.getTrack(trackPath);
-                    console.log('🗂️ [SyncService] Поиск метаданных трека в MusicStore:', track);
+                    console.log('🗂️ [SyncService] Поиск метаданных трека:', track);
                     if (track) {
                         this.musicStore.setCurrentTrack(track);
                         this.playbackManager['currentPlaylist'] = [track];
@@ -57,17 +58,17 @@ export class InitialPlaybackSyncService {
                         return;
                     }
                 }
-                console.warn('⚠️ [SyncService] Путь к файлу трека не определен, инициализируем плеер в базовом режиме.');
-                this.playbackManager['mediaPlayer'].updateMediaInfo('Активное воспроизведение', 'Аудио-поток', undefined, 'music');
+                console.warn('⚠️ [SyncService] Путь к треку не определен.');
+                this.playbackManager['mediaPlayer'].updateMediaInfo('Active Playback', 'Audio Stream', undefined, 'music');
                 this.playbackManager['mediaPlayer'].updateProgress(audioMetrics.currentTime, audioMetrics.duration);
                 this.playbackManager.startPolling('');
             }
             else {
-                console.log('🗒️ [SyncService] На бэкенде действительно нет активного воспроизведения. Время и длительность равны нулю.');
+                console.log('🗒️ [SyncService] Активного воспроизведения нет.');
             }
         }
         catch (error) {
-            console.error('❌ [SyncService] Ошибка при выполнении запросов синхронизации:', error);
+            console.error('❌ [SyncService] Ошибка синхронизации:', error);
         }
     }
 }

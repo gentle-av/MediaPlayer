@@ -27,12 +27,13 @@ export class AudioTrackMenu {
                 `/api/video/status?path=${encodeURIComponent(currentVideoPath)}`);
             const playbackStatus = await statusResponse.json();
             const currentTrackIndex = playbackStatus.audioTrackIndex ?? -1;
+            const finalPath = currentVideoPath || playbackStatus.currentFile || '';
             const tracksResponse = await fetch(`${Config.getConfig().baseUrl}/api/video/tracks`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ path: currentVideoPath }),
+                body: JSON.stringify({ path: finalPath }),
             });
             const trackListData = await tracksResponse.json();
             if (!trackListData.success ||
