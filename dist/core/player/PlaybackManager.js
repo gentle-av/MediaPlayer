@@ -181,12 +181,10 @@ export class PlaybackManager {
                         this.mediaPlayer.updateProgress(current, total);
                         if (total > 0 && current >= total - 1) {
                             this.playNextTrack();
-                            return;
                         }
                     }
                     if (metrics.ended || metrics.isPlaying === false) {
                         this.playNextTrack();
-                        return;
                     }
                 }
             }
