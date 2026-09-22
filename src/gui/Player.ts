@@ -44,8 +44,9 @@ export class Player implements IMediaPlayer {
     mediaArtist: string,
     videoPath?: string,
     playbackType?: 'music' | 'video',
+    albumName?: string,
   ): void {
-    this.metadata.update(mediaTitle, mediaArtist, playbackType);
+    this.metadata.update(mediaTitle, mediaArtist, playbackType, albumName);
     this.controls.updateStreamButton(videoPath, playbackType);
     this.updateProgress(0, 0);
   }

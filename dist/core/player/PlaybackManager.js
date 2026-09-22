@@ -68,7 +68,7 @@ export class PlaybackManager {
                 this.currentTrackIndex = 0;
             }
             this.mediaPlayer.setVisibility(true);
-            this.mediaPlayer.updateMediaInfo(track.title, track.artist, 'music');
+            this.mediaPlayer.updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
             if (this.musicStore.getCurrentTrack() !== track) {
                 this.musicStore.setCurrentTrack(track);
             }
@@ -84,7 +84,7 @@ export class PlaybackManager {
         }
         else {
             this.currentTrackIndex = this.currentPlaylist.findIndex((t) => t.filePath === track.filePath);
-            this.mediaPlayer.updateMediaInfo(track.title, track.artist);
+            this.mediaPlayer.updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
             if (this.musicStore.getCurrentTrack() !== track) {
                 this.musicStore.setCurrentTrack(track);
             }
@@ -181,10 +181,12 @@ export class PlaybackManager {
                         this.mediaPlayer.updateProgress(current, total);
                         if (total > 0 && current >= total - 1) {
                             this.playNextTrack();
+                            return;
                         }
                     }
                     if (metrics.ended || metrics.isPlaying === false) {
                         this.playNextTrack();
+                        return;
                     }
                 }
             }
