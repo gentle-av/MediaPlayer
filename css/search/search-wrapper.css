@@ -19,28 +19,21 @@
   outline: none;
 }
 
-.search-clear-btn {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  z-index: 105;
-  background: none;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
+#globalSearchBox .search-clear-btn svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  pointer-events: none;
 }
 
-.search-clear-btn i {
+#globalSearchBox .search-clear-btn {
   color: var(--fg3);
-  font-size: 0.9rem;
 }
 
-.search-clear-btn:hover {
+#globalSearchBox .search-clear-btn:hover {
   color: var(--fg1);
-  background: var(--bg3);
+}
+
+#globalSearchBox .search-clear-btn.visible {
+  display: flex;
 }

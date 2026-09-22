@@ -1,14 +1,13 @@
 import { PlaylistModal } from './modals/PlaylistModal.js';
-import { MusicStore } from '../core/store/MusicStore.js';
 import { PlaylistStore } from '../core/store/PlaylistStore.js';
 import { PlaybackManager } from '../core/player/PlaybackManager.js';
+import { UiStateStore } from '../core/store/UiStateStore.js';
 
 export class Header {
   private pageTitleElement: HTMLElement | null = null;
   private titleIconElement: HTMLElement | null = null;
 
   constructor(
-    private musicStore: MusicStore,
     private playlistStore: PlaylistStore,
     private playbackManager: PlaybackManager,
   ) {}
@@ -67,25 +66,31 @@ export class Header {
       '#globalSearchInput',
     ) as HTMLInputElement;
     const clearButton = containerElement.querySelector(
-      '#globalSearchBox .search-clear-btn',
+      '.search-clear-btn',
     ) as HTMLElement;
-    if (!searchInput) {
+    if (!searchInput || !clearButton) {
       return;
+    }
+    const currentQuery = UiStateStore.getInstance().getState().searchQuery;
+    if (currentQuery) {
+      searchInput.value = currentQuery;
+      clearButton.classList.add('visible');
     }
     searchInput.addEventListener('input', (event) => {
       const currentTerm = (event.target as HTMLInputElement).value;
-      if (clearButton) {
-        clearButton.style.display = currentTerm.length > 0 ? 'flex' : 'none';
+      if (currentTerm.length > 0) {
+        clearButton.classList.add('visible');
+      } else {
+        clearButton.classList.remove('visible');
       }
       onSearch(currentTerm);
     });
-    if (clearButton) {
-      clearButton.addEventListener('click', () => {
-        searchInput.value = '';
-        clearButton.style.display = 'none';
-        onSearch('');
-      });
-    }
+    clearButton.addEventListener('click', () => {
+      searchInput.value = '';
+      clearButton.classList.remove('visible');
+      onSearch('');
+      searchInput.focus();
+    });
   }
 
   private createSearch(): HTMLElement {
@@ -93,16 +98,30 @@ export class Header {
     searchWrapper.className = 'search-wrapper';
     const searchBox = document.createElement('div');
     searchBox.id = 'globalSearchBox';
-    const vectorRoot = document.createElementNS('http://w3.org', 'svg');
+    const vectorRoot = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg',
+    );
     vectorRoot.setAttribute('class', 'search-icon');
     vectorRoot.setAttribute('width', '16');
     vectorRoot.setAttribute('height', '16');
     vectorRoot.setAttribute('viewBox', '0 0 24 24');
-    const circleElement = document.createElementNS('http://w3.org', 'circle');
+    vectorRoot.setAttribute('fill', 'none');
+    vectorRoot.setAttribute('stroke', 'currentColor');
+    vectorRoot.setAttribute('stroke-width', '2');
+    vectorRoot.setAttribute('stroke-linecap', 'round');
+    vectorRoot.setAttribute('stroke-linejoin', 'round');
+    const circleElement = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'circle',
+    );
     circleElement.setAttribute('cx', '11');
     circleElement.setAttribute('cy', '11');
     circleElement.setAttribute('r', '8');
-    const lineElement = document.createElementNS('http://w3.org', 'line');
+    const lineElement = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'line',
+    );
     lineElement.setAttribute('x1', '21');
     lineElement.setAttribute('y1', '21');
     lineElement.setAttribute('x2', '16.65');
@@ -116,17 +135,30 @@ export class Header {
     searchBox.appendChild(searchInput);
     const clearButton = document.createElement('button');
     clearButton.className = 'search-clear-btn';
-    clearButton.style.display = 'none';
-    const closeVector = document.createElementNS('http://w3.org', 'svg');
+    const closeVector = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'svg',
+    );
     closeVector.setAttribute('width', '14');
-    closeVector.setAttribute('height', '16');
+    closeVector.setAttribute('height', '14');
     closeVector.setAttribute('viewBox', '0 0 24 24');
-    const firstLine = document.createElementNS('http://w3.org', 'line');
+    closeVector.setAttribute('fill', 'none');
+    closeVector.setAttribute('stroke', 'currentColor');
+    closeVector.setAttribute('stroke-width', '2');
+    closeVector.setAttribute('stroke-linecap', 'round');
+    closeVector.setAttribute('stroke-linejoin', 'round');
+    const firstLine = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'line',
+    );
     firstLine.setAttribute('x1', '18');
     firstLine.setAttribute('y1', '6');
     firstLine.setAttribute('x2', '6');
     firstLine.setAttribute('y2', '18');
-    const secondLine = document.createElementNS('http://w3.org', 'line');
+    const secondLine = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'line',
+    );
     secondLine.setAttribute('x1', '6');
     secondLine.setAttribute('y1', '6');
     secondLine.setAttribute('x2', '18');

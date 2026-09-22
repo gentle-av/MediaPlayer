@@ -38,11 +38,7 @@ export class MainFrame {
     );
     this.componentFactory = new ComponentFactory();
     this.initFactory();
-    this.header = new Header(
-      this.musicStore,
-      this.playlistStore,
-      this.playbackManager,
-    );
+    this.header = new Header(this.playlistStore, this.playbackManager);
     this.sidebar = new Sidebar((selectedTab: TabType) => {
       this.switchTab(selectedTab);
     });
@@ -117,11 +113,18 @@ export class MainFrame {
     const searchInput = document.getElementById(
       'globalSearchInput',
     ) as HTMLInputElement;
-    const clearButton = document.querySelector(
-      '.search-clear-btn',
-    ) as HTMLElement;
-    if (searchInput) searchInput.value = '';
-    if (clearButton) clearButton.style.display = 'none';
+    if (searchInput) {
+      searchInput.value = '';
+    }
+    const headerElement = document.querySelector('.app-header');
+    if (headerElement) {
+      const clearBtn = headerElement.querySelector(
+        '.search-clear-btn',
+      ) as HTMLElement;
+      if (clearBtn) {
+        clearBtn.classList.remove('visible');
+      }
+    }
     const tabConfigs = {
       video: { icon: 'fa-film', text: 'Видео' },
       audio: { icon: 'fa-music', text: 'Аудио' },
