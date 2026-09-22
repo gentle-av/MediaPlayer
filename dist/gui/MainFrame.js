@@ -51,11 +51,16 @@ export class MainFrame {
         bodyWrapper.appendChild(renderedPlayer);
         appContainer.appendChild(bodyWrapper);
         UiStateStore.getInstance().subscribe(async (state) => {
-            if (this.currentTab !== state.currentTab ||
-                (state.currentTab === 'video' &&
-                    this.videoStore.getCurrentPath() !== state.currentPath)) {
+            const isTabChanged = this.currentTab !== state.currentTab;
+            const isPathChanged = state.currentTab === 'video' &&
+                this.videoStore.getCurrentPath() !== state.currentPath;
+            const currentRenderedQuery = this.contentArea?.dataset?.lastQuery || '';
+            if (isTabChanged || isPathChanged) {
                 this.currentTab = state.currentTab;
                 await this.updateContent(state.currentTab);
+            }
+            else if (currentRenderedQuery !== state.searchQuery) {
+                await this.updateContent(this.currentTab);
             }
         });
         this.updateContent(this.currentTab);
@@ -100,6 +105,8 @@ export class MainFrame {
         if (this.currentLiveComponent) {
             this.currentLiveComponent.dispose();
         }
+        const currentQuery = UiStateStore.getInstance().getState().searchQuery;
+        this.contentArea.dataset.lastQuery = currentQuery;
         this.currentLiveComponent = this.componentFactory.create(activeTab);
         await this.currentLiveComponent.render(this.contentArea);
         if (this.currentLiveComponent.onActivate) {
