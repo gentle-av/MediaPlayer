@@ -12,10 +12,10 @@ export type PlaybackType = 'none' | 'video' | 'music';
 export class PlaybackManager {
   private currentType: PlaybackType = 'none';
   private pollingIntervalId: number | null = null;
-  private isAudioPaused: boolean = false;
-  private currentVideoPath: string = '';
+  private isAudioPaused = false;
+  private currentVideoPath = '';
   private currentPlaylist: Metadata[] = [];
-  private currentTrackIndex: number = -1;
+  private currentTrackIndex = -1;
   private readonly musicApiClient: MusicApiClient;
   private readonly videoApiClient: VideoApiClient;
 
@@ -195,7 +195,9 @@ export class PlaybackManager {
       this.pollingIntervalId = null;
     }
     const executePollTick = async () => {
-      if (this.currentType === 'none') return;
+      if (this.currentType === 'none') {
+        return;
+      }
       try {
         const response =
           this.currentType === 'video'

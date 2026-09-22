@@ -158,8 +158,9 @@ export class PlaybackManager {
             this.pollingIntervalId = null;
         }
         const executePollTick = async () => {
-            if (this.currentType === 'none')
+            if (this.currentType === 'none') {
                 return;
+            }
             try {
                 const response = this.currentType === 'video'
                     ? await this.videoApiClient.getVideoStatus(targetPath)
