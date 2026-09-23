@@ -3,6 +3,7 @@ import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
 import { PlaylistStore } from '../../core/store/PlaylistStore.js';
 import { AlbumControlsPanel } from '../components/AlbumControlsPanel.js';
+import { AlbumDeleteConfirmModal } from './AlbumDeleteConfirmModal.js';
 
 export class AlbumModal {
   private modalElement: HTMLElement | null = null;
@@ -16,6 +17,7 @@ export class AlbumModal {
     private readonly playbackManager: PlaybackManager,
     private readonly musicStore: MusicStore,
     private readonly playlistStore: PlaylistStore,
+    private readonly deleteAlbumModal: AlbumDeleteConfirmModal,
   ) {}
 
   public open(): void {
@@ -31,6 +33,7 @@ export class AlbumModal {
       this.playbackManager,
       this.playlistStore,
       this.musicStore,
+      this.deleteAlbumModal,
       () => this.close(),
     );
     const footer = controlsPanel.render();

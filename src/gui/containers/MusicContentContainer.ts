@@ -7,23 +7,22 @@ import { Component } from '../components/Component.js';
 import { UiStateStore } from '../../core/store/UiStateStore.js';
 import { MusicBackgroundMenu } from '../menu/MusicBackgroundMenu.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
-import { ConfirmModal } from '../menu/ConfirmModal.js';
 import { ToastService } from '../components/ToastService.js';
 import { AlbumImageSafetyProvider } from '../components/AlbumImageSafetyProvider.js';
+import { AlbumDeleteConfirmModal } from '../modals/AlbumDeleteConfirmModal.js';
 
 export class MusicContentContainer implements Component {
   private readonly backgroundMenu: MusicBackgroundMenu;
   private readonly contextMenu: ContextMenu;
-  private readonly confirmModal: ConfirmModal;
 
   constructor(
     private readonly musicStore: MusicStore,
     private readonly playlistStore: PlaylistStore,
     private readonly playbackManager: PlaybackManager,
+    private readonly deleteAlbumModal: AlbumDeleteConfirmModal,
   ) {
     this.backgroundMenu = new MusicBackgroundMenu(this.musicStore);
     this.contextMenu = new ContextMenu();
-    this.confirmModal = new ConfirmModal();
   }
 
   public async render(
@@ -60,6 +59,7 @@ export class MusicContentContainer implements Component {
         this.playbackManager,
         this.musicStore,
         this.playlistStore,
+        this.deleteAlbumModal,
       );
       const renderedCard = albumCard.render();
       renderedCard.dataset.albumName = firstTrack.album;
@@ -80,11 +80,7 @@ export class MusicContentContainer implements Component {
           label: 'Удалить альбом',
           isDanger: true,
           action: async () => {
-            const confirmDelete = await this.confirmModal.show(
-              'Подтверждение удаления',
-              `Вы уверены, что хотите удалить альбом "${album}"?`,
-              true,
-            );
+            const confirmDelete = await this.deleteAlbumModal.show(album);
             if (confirmDelete) {
               ToastService.getInstance().show(
                 'Запрос на удаление альбома отправлен',

@@ -6,7 +6,7 @@ import { MusicContentContainer } from './containers/MusicContentContainer.js';
 import { ComponentFactory } from './components/ComponentFactory.js';
 import { UiStateStore } from '../core/store/UiStateStore.js';
 export class MainFrame {
-    constructor(musicStore, videoStore, playlistStore, playbackManager, player, tvPlaybackManager, audioOutputManager) {
+    constructor(musicStore, videoStore, playlistStore, playbackManager, player, tvPlaybackManager, audioOutputManager, clearModal, deleteAlbumModal) {
         this.musicStore = musicStore;
         this.videoStore = videoStore;
         this.playlistStore = playlistStore;
@@ -14,6 +14,8 @@ export class MainFrame {
         this.player = player;
         this.tvPlaybackManager = tvPlaybackManager;
         this.audioOutputManager = audioOutputManager;
+        this.clearModal = clearModal;
+        this.deleteAlbumModal = deleteAlbumModal;
         this.currentTab = 'video';
         this.contentArea = null;
         this.currentLiveComponent = null;
@@ -73,7 +75,7 @@ export class MainFrame {
     }
     initFactory() {
         this.componentFactory.register('video', () => new VideoContentContainer(this.videoStore, this.playbackManager));
-        this.componentFactory.register('audio', () => new MusicContentContainer(this.musicStore, this.playlistStore, this.playbackManager));
+        this.componentFactory.register('audio', () => new MusicContentContainer(this.musicStore, this.playlistStore, this.playbackManager, this.deleteAlbumModal));
         this.componentFactory.register('settings', () => this.settings);
     }
     async switchTab(targetTab) {

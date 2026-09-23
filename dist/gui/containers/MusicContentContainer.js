@@ -2,17 +2,16 @@ import { AlbumCard } from '../components/AlbumCard.js';
 import { UiStateStore } from '../../core/store/UiStateStore.js';
 import { MusicBackgroundMenu } from '../menu/MusicBackgroundMenu.js';
 import { ContextMenu } from '../menu/ContextMenu.js';
-import { ConfirmModal } from '../menu/ConfirmModal.js';
 import { ToastService } from '../components/ToastService.js';
 import { AlbumImageSafetyProvider } from '../components/AlbumImageSafetyProvider.js';
 export class MusicContentContainer {
-    constructor(musicStore, playlistStore, playbackManager) {
+    constructor(musicStore, playlistStore, playbackManager, deleteAlbumModal) {
         this.musicStore = musicStore;
         this.playlistStore = playlistStore;
         this.playbackManager = playbackManager;
+        this.deleteAlbumModal = deleteAlbumModal;
         this.backgroundMenu = new MusicBackgroundMenu(this.musicStore);
         this.contextMenu = new ContextMenu();
-        this.confirmModal = new ConfirmModal();
     }
     async render(targetElement) {
         if (!targetElement)
@@ -40,7 +39,7 @@ export class MusicContentContainer {
         const groupedAlbums = this.groupTracksByAlbum(activeTracks);
         groupedAlbums.forEach((albumTracks) => {
             const firstTrack = albumTracks[0];
-            const albumCard = new AlbumCard(firstTrack.album, firstTrack.artist, albumTracks, this.playbackManager, this.musicStore, this.playlistStore);
+            const albumCard = new AlbumCard(firstTrack.album, firstTrack.artist, albumTracks, this.playbackManager, this.musicStore, this.playlistStore, this.deleteAlbumModal);
             const renderedCard = albumCard.render();
             renderedCard.dataset.albumName = firstTrack.album;
             renderedCard.dataset.artistName = firstTrack.artist;
@@ -61,7 +60,7 @@ export class MusicContentContainer {
                     label: 'Удалить альбом',
                     isDanger: true,
                     action: async () => {
-                        const confirmDelete = await this.confirmModal.show('Подтверждение удаления', `Вы уверены, что хотите удалить альбом "${album}"?`, true);
+                        const confirmDelete = await this.deleteAlbumModal.show(album);
                         if (confirmDelete) {
                             ToastService.getInstance().show('Запрос на удаление альбома отправлен', 'info');
                             this.render(targetElement);

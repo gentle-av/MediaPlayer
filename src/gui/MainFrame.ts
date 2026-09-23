@@ -13,6 +13,8 @@ import { Component } from './components/Component.js';
 import { UiStateStore, UiState } from '../core/store/UiStateStore.js';
 import { TvPlaybackManager } from './managers/TvPlaybackManager.js';
 import { AudioOutputManager } from './managers/AudioOutputManager.js';
+import { PlaylistClearConfirmModal } from './modals/PlaylistClearConfirmModal.js';
+import { AlbumDeleteConfirmModal } from './modals/AlbumDeleteConfirmModal.js';
 
 export class MainFrame {
   private header: Header;
@@ -31,6 +33,8 @@ export class MainFrame {
     private player: Player,
     private tvPlaybackManager: TvPlaybackManager,
     private audioOutputManager: AudioOutputManager,
+    private readonly clearModal: PlaylistClearConfirmModal,
+    private readonly deleteAlbumModal: AlbumDeleteConfirmModal,
   ) {
     this.settings = new Settings(
       this.tvPlaybackManager,
@@ -103,6 +107,7 @@ export class MainFrame {
           this.musicStore,
           this.playlistStore,
           this.playbackManager,
+          this.deleteAlbumModal,
         ),
     );
     this.componentFactory.register('settings', () => this.settings);

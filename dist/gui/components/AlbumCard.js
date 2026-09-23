@@ -1,13 +1,14 @@
 import { AlbumModal } from '../modals/AlbumModal.js';
 import { AlbumImageSafetyProvider } from './AlbumImageSafetyProvider.js';
 export class AlbumCard {
-    constructor(albumName, artistName, albumTracks, playbackManager, musicStore, playlistStore) {
+    constructor(albumName, artistName, albumTracks, playbackManager, musicStore, playlistStore, deleteAlbumModal) {
         this.albumName = albumName;
         this.artistName = artistName;
         this.albumTracks = albumTracks;
         this.playbackManager = playbackManager;
         this.musicStore = musicStore;
         this.playlistStore = playlistStore;
+        this.deleteAlbumModal = deleteAlbumModal;
         const rawUidString = `${this.artistName}_${this.albumName}`;
         const encodedHash = window.btoa(encodeURIComponent(rawUidString));
         this.uniqueCardUid = `card_${encodedHash.replace(/=/g, '')}`;
@@ -65,7 +66,7 @@ export class AlbumCard {
         infoContainer.append(titleElement, artistElement, metaContainer);
         cardElement.append(artContainer, infoContainer);
         cardElement.addEventListener('click', () => {
-            const modal = new AlbumModal(this.albumName, this.artistName, this.albumTracks, this.playbackManager, this.musicStore, this.playlistStore);
+            const modal = new AlbumModal(this.albumName, this.artistName, this.albumTracks, this.playbackManager, this.musicStore, this.playlistStore, this.deleteAlbumModal);
             modal.open();
         });
         return cardElement;

@@ -1,12 +1,13 @@
 import { AlbumControlsPanel } from '../components/AlbumControlsPanel.js';
 export class AlbumModal {
-    constructor(albumName, artistName, albumTracks, playbackManager, musicStore, playlistStore) {
+    constructor(albumName, artistName, albumTracks, playbackManager, musicStore, playlistStore, deleteAlbumModal) {
         this.albumName = albumName;
         this.artistName = artistName;
         this.albumTracks = albumTracks;
         this.playbackManager = playbackManager;
         this.musicStore = musicStore;
         this.playlistStore = playlistStore;
+        this.deleteAlbumModal = deleteAlbumModal;
         this.modalElement = null;
         this.draggedRow = null;
         this.currentGeneratedCoverUrl = null;
@@ -19,7 +20,7 @@ export class AlbumModal {
         modalContent.className = 'modal-content';
         const header = this.createHeader();
         const body = this.createBody();
-        const controlsPanel = new AlbumControlsPanel(this.albumTracks, this.playbackManager, this.playlistStore, this.musicStore, () => this.close());
+        const controlsPanel = new AlbumControlsPanel(this.albumTracks, this.playbackManager, this.playlistStore, this.musicStore, this.deleteAlbumModal, () => this.close());
         const footer = controlsPanel.render();
         modalContent.append(header, body, footer);
         this.modalElement.appendChild(modalContent);

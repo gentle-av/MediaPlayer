@@ -4,6 +4,7 @@ import { Metadata } from '../../core/entities/music/Metadata.js';
 import { MusicStore } from '../../core/store/MusicStore.js';
 import { AlbumModal } from '../modals/AlbumModal.js';
 import { AlbumImageSafetyProvider } from './AlbumImageSafetyProvider.js';
+import { AlbumDeleteConfirmModal } from '../modals/AlbumDeleteConfirmModal.js';
 
 export class AlbumCard {
   private readonly uniqueCardUid: string;
@@ -15,6 +16,7 @@ export class AlbumCard {
     private readonly playbackManager: PlaybackManager,
     private readonly musicStore: MusicStore,
     private readonly playlistStore: PlaylistStore,
+    private readonly deleteAlbumModal: AlbumDeleteConfirmModal,
   ) {
     const rawUidString = `${this.artistName}_${this.albumName}`;
     const encodedHash = window.btoa(encodeURIComponent(rawUidString));
@@ -86,6 +88,7 @@ export class AlbumCard {
         this.playbackManager,
         this.musicStore,
         this.playlistStore,
+        this.deleteAlbumModal,
       );
       modal.open();
     });

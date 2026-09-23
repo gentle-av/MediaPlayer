@@ -5,7 +5,7 @@ import { MusicStore } from '../../core/store/MusicStore.js';
 import { AlbumTagEditorModal } from '../modals/AlbumTagEditorModal.js';
 import { PlaylistModal } from '../modals/PlaylistModal.js';
 import { ToastService } from './ToastService.js';
-import { PlaylistClearConfirmModal } from '../modals/PlaylistClearConfirmModal.js';
+import { AlbumDeleteConfirmModal } from '../modals/AlbumDeleteConfirmModal.js';
 
 export class AlbumControlsPanel {
   constructor(
@@ -13,6 +13,7 @@ export class AlbumControlsPanel {
     private readonly playbackManager: PlaybackManager,
     private readonly playlistStore: PlaylistStore,
     private readonly musicStore: MusicStore,
+    private readonly deleteAlbumModal: AlbumDeleteConfirmModal,
     private readonly onCloseParent: () => void,
   ) {}
 
@@ -92,12 +93,11 @@ export class AlbumControlsPanel {
         this.onCloseParent();
         const currentTracks =
           this.playlistStore.getPlaylistTracks(activePlaylistName);
-        const confirmModal = new PlaylistClearConfirmModal();
         const modal = new PlaylistModal(
           currentTracks,
           this.playbackManager,
           this.playlistStore,
-          confirmModal,
+          (window as any).app?.clearModal,
         );
         modal.open();
       }
@@ -134,13 +134,17 @@ export class AlbumControlsPanel {
       </svg>
       <span>Удалить</span>
     `;
-    deleteBtn.addEventListener('click', () => {
-      if (confirm('Вы уверены, что хотите удалить весь альбом с диска?')) {
-        this.onCloseParent();
-        ToastService.getInstance().show(
-          'Запрос на удаление альбома отправлен',
-          'info',
-        );
+    deleteBtn.addEventListener('click', async () => {
+      if (this.albumTracks.length > 0) {
+        const album = this.albumTracks[0].album;
+        const confirmed = await this.deleteAlbumModal.show(album);
+        if (confirmed) {
+          this.onCloseParent();
+          ToastService.getInstance().show(
+            'Запрос на удаление альбома отправлен',
+            'success',
+          );
+        }
       }
     });
     footerElement.append(playBtn, addBtn, editBtn, deleteBtn);

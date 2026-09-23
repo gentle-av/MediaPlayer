@@ -10,6 +10,8 @@ import { TvApiClient } from '../api/TvApiClient.js';
 import { AudioOutputApiClient } from '../api/AudioOutputApiClient.js';
 import { TvPlaybackManager } from '../../gui/managers/TvPlaybackManager.js';
 import { AudioOutputManager } from '../../gui/managers/AudioOutputManager.js';
+import { PlaylistClearConfirmModal } from '../../gui/modals/PlaylistClearConfirmModal.js';
+import { AlbumDeleteConfirmModal } from '../../gui/modals/AlbumDeleteConfirmModal.js';
 export class Application {
     constructor() {
         console.log('🚀 [Application] Инициализация конструктора...');
@@ -22,7 +24,9 @@ export class Application {
         this.playbackManager = new PlaybackManager(this.player, this.musicStore, this.videoStore);
         this.tvPlaybackManager = new TvPlaybackManager(new TvApiClient());
         this.audioOutputManager = new AudioOutputManager(new AudioOutputApiClient());
-        this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager, this.player, this.tvPlaybackManager, this.audioOutputManager);
+        this.clearModal = new PlaylistClearConfirmModal();
+        this.deleteAlbumModal = new AlbumDeleteConfirmModal();
+        this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager, this.player, this.tvPlaybackManager, this.audioOutputManager, this.clearModal, this.deleteAlbumModal);
         this.initialPlaybackSyncService = new InitialPlaybackSyncService(this.playbackManager, this.musicStore, this.playlistStore);
         this.hashRouter = new HashRouter();
         this.render();
