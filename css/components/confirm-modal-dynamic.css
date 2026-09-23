@@ -1,88 +1,86 @@
-.dynamic-confirm-modal-overlay {
+div.dynamic-confirm-modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(4px);
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(6px);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 10015;
-  animation: fadeIn 0.2s ease;
+  z-index: 200000;
 }
 
-.dynamic-confirm-dialog-panel {
-  background: var(--bg1);
-  border-radius: 16px;
-  padding: 24px;
-  min-width: 320px;
-  max-width: 480px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
-  border: 1px solid var(--bg3);
+div.dynamic-confirm-modal-overlay .dynamic-confirm-dialog-panel {
+  background: #3c3836;
+  border: 1px solid #665c54;
+  border-radius: 14px;
+  padding: 20px 24px;
+  min-width: 300px;
+  max-width: 400px;
+  width: 85%;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.6);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
+  box-sizing: border-box;
 }
 
-.dynamic-confirm-header-danger {
+.dynamic-confirm-dialog-panel .dynamic-confirm-header-danger {
   margin: 0;
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   font-weight: 600;
-  color: var(--red);
+  color: #fb4934;
+  line-height: 1.2;
 }
 
-.dynamic-confirm-header-warning {
+.dynamic-confirm-dialog-panel .dynamic-confirm-body-text {
   margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
-  color: var(--yellow);
+  font-size: 0.9rem;
+  line-height: 1.4;
+  color: #ebdbb2;
 }
 
-.dynamic-confirm-body-text {
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
-  color: var(--fg1);
-}
-
-.dynamic-confirm-footer-actions {
+.dynamic-confirm-dialog-panel .dynamic-confirm-footer-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 6px;
+  width: 100%;
 }
 
-.dynamic-confirm-btn-cancel {
-  padding: 10px 20px;
-  border: 1px solid var(--bg3);
+.dynamic-confirm-footer-actions button.dynamic-confirm-btn-cancel {
+  padding: 8px 16px;
+  border: 1px solid #665c54;
   border-radius: 8px;
-  background: var(--bg2);
-  color: var(--fg2);
-  font-size: 0.9rem;
+  background: #504945;
+  color: #d5c4a1;
+  font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    background 0.15s,
+    color 0.15s;
 }
 
-.dynamic-confirm-btn-cancel:hover {
-  background: var(--bg3);
-  color: var(--fg0);
+.dynamic-confirm-footer-actions button.dynamic-confirm-btn-cancel:hover {
+  background: #665c54;
+  color: #fbf1c7;
 }
 
-.dynamic-confirm-btn-confirm {
-  padding: 10px 20px;
+.dynamic-confirm-footer-actions button.dynamic-confirm-btn-confirm {
+  padding: 8px 16px;
   border: none;
   border-radius: 8px;
   background: var(--confirm-btn-bg);
-  color: var(--bg0);
-  font-size: 0.9rem;
+  color: #282828;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: background 0.15s;
 }
 
-.dynamic-confirm-btn-confirm:hover {
+.dynamic-confirm-footer-actions button.dynamic-confirm-btn-confirm:hover {
   background: var(--confirm-btn-hover-bg);
 }

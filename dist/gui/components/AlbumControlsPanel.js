@@ -1,6 +1,7 @@
 import { AlbumTagEditorModal } from '../modals/AlbumTagEditorModal.js';
 import { PlaylistModal } from '../modals/PlaylistModal.js';
 import { ToastService } from './ToastService.js';
+import { PlaylistClearConfirmModal } from '../modals/PlaylistClearConfirmModal.js';
 export class AlbumControlsPanel {
     constructor(albumTracks, playbackManager, playlistStore, musicStore, onCloseParent) {
         this.albumTracks = albumTracks;
@@ -66,7 +67,8 @@ export class AlbumControlsPanel {
                 }
                 this.onCloseParent();
                 const currentTracks = this.playlistStore.getPlaylistTracks(activePlaylistName);
-                const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+                const confirmModal = new PlaylistClearConfirmModal();
+                const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore, confirmModal);
                 modal.open();
             }
         });

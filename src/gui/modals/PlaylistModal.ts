@@ -1,6 +1,7 @@
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { PlaylistStore } from '../../core/store/PlaylistStore.js';
+import { PlaylistClearConfirmModal } from './PlaylistClearConfirmModal.js';
 
 export class PlaylistModal {
   private modalElement: HTMLElement | null = null;
@@ -10,6 +11,7 @@ export class PlaylistModal {
     private readonly playlistTracks: Metadata[],
     private readonly playbackManager: PlaybackManager,
     private readonly playlistStore: PlaylistStore,
+    private readonly clearModal: PlaylistClearConfirmModal,
   ) {}
 
   public open(): void {
@@ -103,20 +105,30 @@ export class PlaylistModal {
         leftSection.className = 'track-row-left';
         const dragMarker = document.createElement('span');
         dragMarker.className = 'track-drag-marker';
-        dragMarker.innerHTML = `
-<svg
-    width="14"
-    height="14"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    stroke-width="2"
-  >
-  <circle cx="9" cy="5" r="1"></circle> <circle cx="15" cy="5" r="1"></circle>
-  <circle cx="9" cy="12" r="1"></circle> <circle cx="15" cy="12" r="1"></circle>
-  <circle cx="9" cy="19" r="1"></circle> <circle cx="15" cy="19" r="1"></circle>
-</svg>
-        `;
+        const svgNs = 'http://w3.org';
+        const vectorRoot = document.createElementNS(svgNs, 'svg');
+        vectorRoot.setAttribute('width', '14');
+        vectorRoot.setAttribute('height', '14');
+        vectorRoot.setAttribute('viewBox', '0 0 24 24');
+        vectorRoot.setAttribute('fill', 'none');
+        vectorRoot.setAttribute('stroke', 'currentColor');
+        vectorRoot.setAttribute('stroke-width', '2');
+        const points = [
+          { cx: 9, cy: 5 },
+          { cx: 15, cy: 5 },
+          { cx: 9, cy: 12 },
+          { cx: 15, cy: 12 },
+          { cx: 9, cy: 19 },
+          { cx: 15, cy: 19 },
+        ];
+        points.forEach((p) => {
+          const circle = document.createElementNS(svgNs, 'circle');
+          circle.setAttribute('cx', String(p.cx));
+          circle.setAttribute('cy', String(p.cy));
+          circle.setAttribute('r', '1');
+          vectorRoot.appendChild(circle);
+        });
+        dragMarker.appendChild(vectorRoot);
         const numberElement = document.createElement('span');
         numberElement.className = 'track-table-number';
         numberElement.textContent = String(globalIndex + 1);
@@ -149,10 +161,16 @@ export class PlaylistModal {
     footerElement.className = 'modal-album-actions album-modal-custom-footer';
     const clearAllBtn = document.createElement('button');
     clearAllBtn.className = 'modal-delete-album-btn dynamic-clear-playlist-btn';
-    clearAllBtn.innerHTML =
-      '<i class="fas fa-minus-circle"></i> <span>Очистить</span>';
+    clearAllBtn.innerHTML = `
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; display: inline-block; vertical-align: middle;">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+      </svg>
+      <span>Очистить</span>
+    `;
     clearAllBtn.addEventListener('click', async () => {
-      if (confirm('Очистить текущий список воспроизведения?')) {
+      const confirmed = await this.clearModal.show();
+      if (confirmed) {
         const names = this.playlistStore.getPlaylistNames();
         const activeName = names && names.length > 0 ? names[0] : 'Избранное';
         this.playlistStore.clearPlaylist(activeName);

@@ -2,6 +2,7 @@ import { PlaylistModal } from './modals/PlaylistModal.js';
 import { PlaylistStore } from '../core/store/PlaylistStore.js';
 import { PlaybackManager } from '../core/player/PlaybackManager.js';
 import { UiStateStore } from '../core/store/UiStateStore.js';
+import { PlaylistClearConfirmModal } from './modals/PlaylistClearConfirmModal.js';
 
 export class Header {
   private pageTitleElement: HTMLElement | null = null;
@@ -203,10 +204,12 @@ export class Header {
         }
       }
       const currentTracks = this.playlistStore.getPlaylistTracks(activeName);
+      const confirmModal = new PlaylistClearConfirmModal();
       const modal = new PlaylistModal(
         currentTracks,
         this.playbackManager,
         this.playlistStore,
+        confirmModal,
       );
       modal.open();
     });

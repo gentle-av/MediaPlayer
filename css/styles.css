@@ -13,6 +13,7 @@
 @import 'components/album-card.css';
 @import 'components/album-svg.css';
 @import 'components/modal.css';
+@import 'components/confirm-modal-dynamic.css';
 @import 'players/playlist-viewer.css';
 @import 'video/video-explorer.css';
 @import 'video/video-library.css';

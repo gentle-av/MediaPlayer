@@ -1,5 +1,6 @@
 import { PlaylistModal } from './modals/PlaylistModal.js';
 import { UiStateStore } from '../core/store/UiStateStore.js';
+import { PlaylistClearConfirmModal } from './modals/PlaylistClearConfirmModal.js';
 export class Header {
     constructor(playlistStore, playbackManager) {
         this.playlistStore = playlistStore;
@@ -167,7 +168,8 @@ export class Header {
                 }
             }
             const currentTracks = this.playlistStore.getPlaylistTracks(activeName);
-            const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore);
+            const confirmModal = new PlaylistClearConfirmModal();
+            const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore, confirmModal);
             modal.open();
         });
         return playlistBtn;
