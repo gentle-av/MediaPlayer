@@ -23,7 +23,7 @@ export class Application {
         this.tvPlaybackManager = new TvPlaybackManager(new TvApiClient());
         this.audioOutputManager = new AudioOutputManager(new AudioOutputApiClient());
         this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager, this.player, this.tvPlaybackManager, this.audioOutputManager);
-        this.initialPlaybackSyncService = new InitialPlaybackSyncService(this.playbackManager, this.musicStore);
+        this.initialPlaybackSyncService = new InitialPlaybackSyncService(this.playbackManager, this.musicStore, this.playlistStore);
         this.hashRouter = new HashRouter();
         this.render();
         this.initialize().catch((error) => console.error('❌ [Application] Ошибка инициализации:', error));

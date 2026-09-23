@@ -53,6 +53,7 @@ export class Application {
     this.initialPlaybackSyncService = new InitialPlaybackSyncService(
       this.playbackManager,
       this.musicStore,
+      this.playlistStore,
     );
     this.hashRouter = new HashRouter();
     this.render();

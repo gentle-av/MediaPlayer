@@ -774,3 +774,20 @@
 .playlist-tracks-grouped-table .track-table-row {
   margin-left: 8px;
 }
+
+.modal-play-btn,
+.modal-add-btn,
+.modal-edit-album-btn,
+.modal-close,
+.track-drag-marker {
+  transform: translateZ(0);
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.modal-play-btn svg,
+.modal-add-btn svg,
+.modal-edit-album-btn svg,
+.modal-delete-album-btn svg {
+  flex-shrink: 0;
+}

@@ -1,15 +1,31 @@
+import { Config } from '../config/Config.js';
 import { MusicApiClient } from '../api/MusicApiClient.js';
 import { VideoApiClient } from '../api/VideoApiClient.js';
 export class InitialPlaybackSyncService {
-    constructor(playbackManager, musicStore) {
+    constructor(playbackManager, musicStore, playlistStore) {
         this.playbackManager = playbackManager;
         this.musicStore = musicStore;
+        this.playlistStore = playlistStore;
         this.musicApiClient = new MusicApiClient();
         this.videoApiClient = new VideoApiClient();
     }
     async syncPlaybackState() {
         try {
             console.log('🔍 [SyncService] Запрос статуса плейбека...');
+            try {
+                const response = await fetch(`${Config.getConfig().baseUrl}/api/playlists/Избранное`);
+                const result = await response.json();
+                if (result && result.success && result.playlist) {
+                    this.playlistStore.clearPlaylist('Избранное');
+                    const paths = result.playlist.tracks.map((t) => t.file_path);
+                    this.playlistStore.addTracksToPlaylist('Избранное', paths);
+                    const metadataTracks = this.playlistStore.getPlaylistTracks('Избранное');
+                    this.playbackManager['currentPlaylist'] = metadataTracks;
+                }
+            }
+            catch (playlistError) {
+                console.warn('⚠️ [SyncService] No initial playlist found:', playlistError);
+            }
             const [videoStatus, musicStatus] = await Promise.all([
                 this.videoApiClient.getVideoStatus(''),
                 this.musicApiClient.getAudioTimeInfo(),
@@ -49,9 +65,16 @@ export class InitialPlaybackSyncService {
                     console.log('🗂️ [SyncService] Поиск метаданных трека:', track);
                     if (track) {
                         this.musicStore.setCurrentTrack(track);
-                        this.playbackManager['currentPlaylist'] = [track];
-                        this.playbackManager['currentTrackIndex'] = 0;
-                        this.playbackManager['mediaPlayer'].updateMediaInfo(track.title, track.artist, undefined, 'music');
+                        if (this.playbackManager['currentPlaylist'].length === 0) {
+                            this.playbackManager['currentPlaylist'] = [track];
+                            this.playbackManager['currentTrackIndex'] = 0;
+                        }
+                        else {
+                            const matchedIndex = this.playbackManager['currentPlaylist'].findIndex((t) => t.filePath === track.filePath);
+                            this.playbackManager['currentTrackIndex'] =
+                                matchedIndex >= 0 ? matchedIndex : 0;
+                        }
+                        this.playbackManager['mediaPlayer'].updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
                         this.playbackManager['mediaPlayer'].setPlayState(audioMetrics.isPlaying ?? true);
                         this.playbackManager['mediaPlayer'].updateProgress(audioMetrics.currentTime, audioMetrics.duration);
                         this.playbackManager.startPolling(track.filePath);

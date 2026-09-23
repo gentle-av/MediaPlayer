@@ -9,6 +9,7 @@ export class AlbumModal {
         this.playlistStore = playlistStore;
         this.modalElement = null;
         this.draggedRow = null;
+        this.currentGeneratedCoverUrl = null;
     }
     open() {
         this.close();
@@ -30,6 +31,10 @@ export class AlbumModal {
         });
     }
     close() {
+        if (this.currentGeneratedCoverUrl) {
+            URL.revokeObjectURL(this.currentGeneratedCoverUrl);
+            this.currentGeneratedCoverUrl = null;
+        }
         const existingModal = document.querySelector('.album-details-modal');
         if (existingModal && existingModal.parentNode) {
             existingModal.parentNode.removeChild(existingModal);
@@ -60,6 +65,7 @@ export class AlbumModal {
                 if (blob && blob.size > 0) {
                     const forcedBlob = new Blob([blob], { type: 'image/jpeg' });
                     const url = URL.createObjectURL(forcedBlob);
+                    this.currentGeneratedCoverUrl = url;
                     imgElement.src = url;
                     placeholderIcon.style.display = 'none';
                     imgElement.style.display = 'block';
@@ -98,13 +104,30 @@ export class AlbumModal {
             leftSection.className = 'track-row-left';
             const dragMarker = document.createElement('span');
             dragMarker.className = 'track-drag-marker';
-            dragMarker.innerHTML = `
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="9" cy="5" r="1"></circle> <circle cx="15" cy="5" r="1"></circle>
-          <circle cx="9" cy="12" r="1"></circle> <circle cx="15" cy="12" r="1"></circle>
-          <circle cx="9" cy="19" r="1"></circle> <circle cx="15" cy="19" r="1"></circle>
-        </svg>
-      `;
+            const svgNs = 'http://w3.org';
+            const vectorRoot = document.createElementNS(svgNs, 'svg');
+            vectorRoot.setAttribute('width', '14');
+            vectorRoot.setAttribute('height', '14');
+            vectorRoot.setAttribute('viewBox', '0 0 24 24');
+            vectorRoot.setAttribute('fill', 'none');
+            vectorRoot.setAttribute('stroke', 'currentColor');
+            vectorRoot.setAttribute('stroke-width', '2');
+            const points = [
+                { cx: 9, cy: 5 },
+                { cx: 15, cy: 5 },
+                { cx: 9, cy: 12 },
+                { cx: 15, cy: 12 },
+                { cx: 9, cy: 19 },
+                { cx: 15, cy: 19 },
+            ];
+            points.forEach((p) => {
+                const circle = document.createElementNS(svgNs, 'circle');
+                circle.setAttribute('cx', String(p.cx));
+                circle.setAttribute('cy', String(p.cy));
+                circle.setAttribute('r', '1');
+                vectorRoot.appendChild(circle);
+            });
+            dragMarker.appendChild(vectorRoot);
             const numberElement = document.createElement('span');
             numberElement.className = 'track-table-number';
             numberElement.textContent = String(track.track || index + 1);
