@@ -266,6 +266,18 @@ export class MusicApiClient extends BaseApiClient {
             return null;
         }
     }
+    async getPlaybackState() {
+        try {
+            const response = await this.request('api/audio/state', {
+                method: 'GET',
+            });
+            return response.data;
+        }
+        catch (error) {
+            console.error(error);
+            return null;
+        }
+    }
     async seekAudioPlayback(position) {
         try {
             const response = await this.request('api/audio/seek', {
@@ -297,6 +309,74 @@ export class MusicApiClient extends BaseApiClient {
         }
         catch (error) {
             console.error(error);
+            return false;
+        }
+    }
+    async getPlaylists() {
+        try {
+            const url = this.buildUrl('api/playlists');
+            const response = await fetch(url, { method: 'GET' });
+            if (!response.ok)
+                return [];
+            const data = await response.json();
+            return data?.playlists || [];
+        }
+        catch (error) {
+            console.warn('Failed to fetch playlists:', error);
+            return [];
+        }
+    }
+    async getPlaylist(name) {
+        try {
+            const url = this.buildUrl(`api/playlists/${encodeURIComponent(name)}`);
+            const response = await fetch(url, { method: 'GET' });
+            if (response.status === 404)
+                return null;
+            if (!response.ok)
+                return null;
+            const data = await response.json();
+            return data?.playlist || null;
+        }
+        catch (error) {
+            console.warn(`Failed to fetch playlist "${name}":`, error);
+            return null;
+        }
+    }
+    async savePlaylist(name, tracks) {
+        try {
+            const cleanPaths = tracks.map((path) => path.replace(/\\/g, '/'));
+            const encodedName = encodeURIComponent(name);
+            const updateResponse = await fetch(this.buildUrl(`api/playlists/${encodedName}`), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tracks: cleanPaths }),
+            });
+            if (updateResponse.ok) {
+                return true;
+            }
+            if (updateResponse.status === 404) {
+                const createResponse = await fetch(this.buildUrl('api/playlists'), {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, tracks: cleanPaths }),
+                });
+                return createResponse.ok;
+            }
+            return false;
+        }
+        catch (error) {
+            console.error(`Failed to save playlist "${name}":`, error);
+            return false;
+        }
+    }
+    async deletePlaylist(name) {
+        try {
+            const url = this.buildUrl(`api/playlists/${encodeURIComponent(name)}`);
+            const response = await fetch(url, { method: 'DELETE' });
+            return response.ok;
+        }
+        catch (error) {
+            console.error(`Failed to delete playlist "${name}":`, error);
             return false;
         }
     }

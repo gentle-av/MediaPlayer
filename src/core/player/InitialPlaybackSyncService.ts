@@ -1,9 +1,9 @@
-import { Config } from '../config/Config.js';
 import { MusicApiClient } from '../api/MusicApiClient.js';
 import { VideoApiClient } from '../api/VideoApiClient.js';
 import { PlaybackManager } from './PlaybackManager.js';
 import { MusicStore } from '../store/MusicStore.js';
 import { PlaylistStore } from '../store/PlaylistStore.js';
+import { Metadata } from '../entities/music/Metadata.js';
 
 export class InitialPlaybackSyncService {
   private readonly musicApiClient = new MusicApiClient();
@@ -18,25 +18,7 @@ export class InitialPlaybackSyncService {
   public async syncPlaybackState(): Promise<void> {
     try {
       console.log('🔍 [SyncService] Запрос статуса плейбека...');
-      try {
-        const response = await fetch(
-          `${Config.getConfig().baseUrl}/api/playlists/Избранное`,
-        );
-        const result = await response.json();
-        if (result && result.success && result.playlist) {
-          this.playlistStore.clearPlaylist('Избранное');
-          const paths = result.playlist.tracks.map((t: any) => t.file_path);
-          this.playlistStore.addTracksToPlaylist('Избранное', paths);
-          const metadataTracks =
-            this.playlistStore.getPlaylistTracks('Избранное');
-          this.playbackManager['currentPlaylist'] = metadataTracks;
-        }
-      } catch (playlistError) {
-        console.warn(
-          '⚠️ [SyncService] No initial playlist found:',
-          playlistError,
-        );
-      }
+      await this.loadPlaylistsFromServer();
       const [videoStatus, musicStatus] = await Promise.all([
         this.videoApiClient.getVideoStatus(''),
         this.musicApiClient.getAudioTimeInfo(),
@@ -79,20 +61,11 @@ export class InitialPlaybackSyncService {
           }
         }
         if (trackPath) {
-          const track = this.musicStore.getTrack(trackPath);
+          const track = this.findTrackByNormalizedPath(trackPath);
           console.log('🗂️ [SyncService] Поиск метаданных трека:', track);
           if (track) {
             this.musicStore.setCurrentTrack(track);
-            if (this.playbackManager['currentPlaylist'].length === 0) {
-              this.playbackManager['currentPlaylist'] = [track];
-              this.playbackManager['currentTrackIndex'] = 0;
-            } else {
-              const matchedIndex = this.playbackManager[
-                'currentPlaylist'
-              ].findIndex((t) => t.filePath === track.filePath);
-              this.playbackManager['currentTrackIndex'] =
-                matchedIndex >= 0 ? matchedIndex : 0;
-            }
+            await this.hydratePlaylistForTrack(track);
             this.playbackManager['mediaPlayer'].updateMediaInfo(
               track.title,
               track.artist,
@@ -128,6 +101,120 @@ export class InitialPlaybackSyncService {
       }
     } catch (error) {
       console.error('❌ [SyncService] Ошибка синхронизации:', error);
+    }
+  }
+
+  private normalizePath(p: string): string {
+    return p.replace(/\\/g, '/').replace(/\/+/g, '/').toLowerCase();
+  }
+
+  private findTrackByNormalizedPath(path: string): Metadata | undefined {
+    const target = this.normalizePath(path);
+    return this.musicStore
+      .getAllTracks()
+      .find((t) => this.normalizePath(t.filePath) === target);
+  }
+
+  private async loadPlaylistsFromServer(): Promise<void> {
+    try {
+      const playlists = await this.musicApiClient.getPlaylists();
+      console.log(
+        '📚 [SyncService] Получено плейлистов с сервера:',
+        playlists.length,
+      );
+      for (const pl of playlists) {
+        if (!this.playlistStore.getPlaylist(pl.name)) {
+          try {
+            this.playlistStore.createPlaylist(pl.name);
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+        const full = await this.musicApiClient.getPlaylist(pl.name);
+        if (!full?.tracks) continue;
+        const paths: string[] = full.tracks.map((t: any) => t.file_path);
+        if (paths.length === 0) continue;
+        try {
+          this.playlistStore.clearPlaylist(pl.name);
+        } catch (e) {
+          console.warn(e);
+        }
+        const validPaths: string[] = [];
+        for (const p of paths) {
+          const track = this.findTrackByNormalizedPath(p);
+          if (track) {
+            validPaths.push(track.filePath);
+          }
+        }
+        if (validPaths.length > 0) {
+          try {
+            this.playlistStore.addTracksToPlaylist(pl.name, validPaths);
+          } catch (e) {
+            console.warn(e);
+          }
+        }
+      }
+    } catch (error) {
+      console.warn('⚠️ [SyncService] Ошибка загрузки плейлистов:', error);
+    }
+  }
+
+  private async hydratePlaylistForTrack(track: Metadata): Promise<void> {
+    try {
+      const playlists = await this.musicApiClient.getPlaylists();
+      for (const pl of playlists) {
+        const full = await this.musicApiClient.getPlaylist(pl.name);
+        if (!full?.tracks) continue;
+        const paths: string[] = full.tracks.map((t: any) => t.file_path);
+        const target = this.normalizePath(track.filePath);
+        const idx = paths.findIndex(
+          (p: string) => this.normalizePath(p) === target,
+        );
+        if (idx < 0) continue;
+        const tracks: Metadata[] = [];
+        for (const p of paths) {
+          const meta = this.findTrackByNormalizedPath(p);
+          if (meta) tracks.push(meta);
+        }
+        if (tracks.length === 0) continue;
+        const realIndex = tracks.findIndex(
+          (t) => this.normalizePath(t.filePath) === target,
+        );
+        if (realIndex < 0) continue;
+        const backendState = await this.musicApiClient.getPlaybackState();
+        const backendData = backendState?.data || backendState;
+        const backendTrack = backendData?.currentTrack || '';
+        const backendTotal = backendData?.totalTracks || 0;
+        const needsSync =
+          backendTotal !== tracks.length ||
+          this.normalizePath(backendTrack) !== target;
+        if (needsSync) {
+          console.log(
+            '🔄 [SyncService] Синхронизация плейлиста с mpv:',
+            pl.name,
+          );
+          const pathsToSend = tracks.map((t) => t.filePath);
+          const ok = await this.musicApiClient.playAudioPlaylist(pathsToSend);
+          if (ok && realIndex > 0) {
+            await this.musicApiClient.changeAudioTrackByIndex(realIndex);
+          }
+        }
+        this.playbackManager['currentPlaylist'] = tracks;
+        this.playbackManager['currentTrackIndex'] = realIndex;
+        console.log(
+          '📚 [SyncService] Плейлист восстановлен:',
+          pl.name,
+          'индекс',
+          realIndex,
+        );
+        return;
+      }
+      console.log(
+        '🗒️ [SyncService] Активный трек не найден ни в одном плейлисте:',
+        track.filePath,
+      );
+    } catch (e) {
+      console.warn('⚠️ [SyncService] Не удалось восстановить плейлист:', e);
     }
   }
 }

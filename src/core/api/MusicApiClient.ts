@@ -356,6 +356,18 @@ export class MusicApiClient extends BaseApiClient<unknown> {
     }
   }
 
+  public async getPlaybackState(): Promise<any> {
+    try {
+      const response = await this.request<any>('api/audio/state', {
+        method: 'GET',
+      });
+      return response.data;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  }
+
   public async seekAudioPlayback(position: number): Promise<boolean> {
     try {
       const response = await this.request<any>('api/audio/seek', {
@@ -386,6 +398,76 @@ export class MusicApiClient extends BaseApiClient<unknown> {
       return true;
     } catch (error) {
       console.error(error);
+      return false;
+    }
+  }
+
+  public async getPlaylists(): Promise<
+    Array<{ name: string; track_count: number }>
+  > {
+    try {
+      const url = this.buildUrl('api/playlists');
+      const response = await fetch(url, { method: 'GET' });
+      if (!response.ok) return [];
+      const data = await response.json();
+      return data?.playlists || [];
+    } catch (error) {
+      console.warn('Failed to fetch playlists:', error);
+      return [];
+    }
+  }
+
+  public async getPlaylist(name: string): Promise<any | null> {
+    try {
+      const url = this.buildUrl(`api/playlists/${encodeURIComponent(name)}`);
+      const response = await fetch(url, { method: 'GET' });
+      if (response.status === 404) return null;
+      if (!response.ok) return null;
+      const data = await response.json();
+      return data?.playlist || null;
+    } catch (error) {
+      console.warn(`Failed to fetch playlist "${name}":`, error);
+      return null;
+    }
+  }
+
+  public async savePlaylist(name: string, tracks: string[]): Promise<boolean> {
+    try {
+      const cleanPaths = tracks.map((path) => path.replace(/\\/g, '/'));
+      const encodedName = encodeURIComponent(name);
+      const updateResponse = await fetch(
+        this.buildUrl(`api/playlists/${encodedName}`),
+        {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tracks: cleanPaths }),
+        },
+      );
+      if (updateResponse.ok) {
+        return true;
+      }
+      if (updateResponse.status === 404) {
+        const createResponse = await fetch(this.buildUrl('api/playlists'), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, tracks: cleanPaths }),
+        });
+        return createResponse.ok;
+      }
+      return false;
+    } catch (error) {
+      console.error(`Failed to save playlist "${name}":`, error);
+      return false;
+    }
+  }
+
+  public async deletePlaylist(name: string): Promise<boolean> {
+    try {
+      const url = this.buildUrl(`api/playlists/${encodeURIComponent(name)}`);
+      const response = await fetch(url, { method: 'DELETE' });
+      return response.ok;
+    } catch (error) {
+      console.error(`Failed to delete playlist "${name}":`, error);
       return false;
     }
   }

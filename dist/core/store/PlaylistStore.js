@@ -231,5 +231,12 @@ export class PlaylistStore {
             playlists: Array.from(this.playlists.values()).map((playlist) => playlist.toJSON()),
         };
     }
+    async syncWithServer(playlistName) {
+        const playlist = this.playlists.get(playlistName);
+        if (!playlist)
+            return;
+        const paths = playlist.getTrackPaths();
+        await this.musicStore.apiClient.savePlaylist(playlistName, paths);
+    }
 }
 //# sourceMappingURL=PlaylistStore.js.map

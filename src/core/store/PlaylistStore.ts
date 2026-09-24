@@ -273,4 +273,11 @@ export class PlaylistStore {
       ),
     };
   }
+
+  public async syncWithServer(playlistName: string): Promise<void> {
+    const playlist = this.playlists.get(playlistName);
+    if (!playlist) return;
+    const paths = playlist.getTrackPaths();
+    await this.musicStore.apiClient.savePlaylist(playlistName, paths);
+  }
 }

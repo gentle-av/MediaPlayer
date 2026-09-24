@@ -28,7 +28,7 @@ export class AlbumControlsPanel {
       </svg>
       <span>Воспроизвести</span>
     `;
-    playBtn.addEventListener('click', () => {
+    playBtn.addEventListener('click', async () => {
       if (this.albumTracks.length > 0) {
         const names = this.playlistStore.getPlaylistNames();
         const activePlaylistName =
@@ -39,6 +39,7 @@ export class AlbumControlsPanel {
         this.playlistStore.clearPlaylist(activePlaylistName);
         const filePaths = this.albumTracks.map((track) => track.filePath);
         this.playlistStore.addTracksToPlaylist(activePlaylistName, filePaths);
+        await this.playlistStore.syncWithServer(activePlaylistName);
         this.onCloseParent();
         this.playbackManager.playMusic(this.albumTracks[0], this.albumTracks);
         ToastService.getInstance().show(
@@ -56,7 +57,7 @@ export class AlbumControlsPanel {
       </svg>
       <span>Добавить в плейлист</span>
     `;
-    addBtn.addEventListener('click', () => {
+    addBtn.addEventListener('click', async () => {
       if (this.albumTracks.length > 0) {
         const names = this.playlistStore.getPlaylistNames();
         const activePlaylistName =
@@ -80,6 +81,7 @@ export class AlbumControlsPanel {
             activePlaylistName,
             filePathsToPush,
           );
+          await this.playlistStore.syncWithServer(activePlaylistName);
           ToastService.getInstance().show(
             `Добавлено треков: ${filePathsToPush.length}`,
             'success',

@@ -5,7 +5,7 @@ import { MusicApiClient } from '../api/MusicApiClient.js';
 export class MusicStore {
   private library: MusicLibrary;
   private listeners: (() => void)[];
-  private apiClient: MusicApiClient;
+  public readonly apiClient: MusicApiClient;
   private currentTrack: Metadata | null = null;
 
   constructor() {
