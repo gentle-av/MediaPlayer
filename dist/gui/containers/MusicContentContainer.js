@@ -54,17 +54,26 @@ export class MusicContentContainer {
             e.stopPropagation();
             this.backgroundMenu.close();
             const cardElement = targetCard;
-            const album = cardElement.dataset.albumName || '';
+            const albumName = cardElement.dataset.albumName || '';
+            const artistName = cardElement.dataset.artistName || '';
             this.contextMenu.show(e, [
                 {
                     label: 'Удалить альбом',
                     isDanger: true,
                     action: async () => {
-                        const confirmDelete = await this.deleteAlbumModal.show(album);
-                        if (confirmDelete) {
-                            ToastService.getInstance().show('Запрос на удаление альбома отправлен', 'info');
-                            this.render(targetElement);
+                        const confirmed = await this.deleteAlbumModal.show(albumName);
+                        if (!confirmed)
+                            return;
+                        ToastService.getInstance().show('Удаление альбома...', 'info');
+                        const apiClient = this.musicStore.apiClient;
+                        const success = await apiClient.deleteAlbum(albumName, artistName);
+                        if (!success) {
+                            ToastService.getInstance().show('Ошибка удаления альбома', 'error');
+                            return;
                         }
+                        await this.musicStore.loadTracksFromServer();
+                        await this.render(targetElement);
+                        ToastService.getInstance().show('Альбом успешно удалён', 'success');
                     },
                 },
             ]);

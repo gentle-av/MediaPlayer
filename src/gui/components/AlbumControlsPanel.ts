@@ -135,16 +135,40 @@ export class AlbumControlsPanel {
       <span>Удалить</span>
     `;
     deleteBtn.addEventListener('click', async () => {
-      if (this.albumTracks.length > 0) {
-        const album = this.albumTracks[0].album;
-        const confirmed = await this.deleteAlbumModal.show(album);
-        if (confirmed) {
-          this.onCloseParent();
+      if (this.albumTracks.length === 0) return;
+      const albumName = this.albumTracks[0].album;
+      const artistName = this.albumTracks[0].artist;
+      const confirmed = await this.deleteAlbumModal.show(albumName);
+      if (!confirmed) return;
+      ToastService.getInstance().show('Удаление альбома...', 'info');
+      try {
+        const apiBase = (this.musicStore as any).apiClient.baseUrl;
+        const response = await fetch(`${apiBase}/api/music/delete-album`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ album: albumName, artist: artistName }),
+        });
+        if (!response.ok) {
           ToastService.getInstance().show(
-            'Запрос на удаление альбома отправлен',
-            'success',
+            `Ошибка сервера: ${response.status}`,
+            'error',
           );
+          return;
         }
+        const result = await response.json();
+        if (!result.success) {
+          ToastService.getInstance().show(
+            result.error || 'Ошибка удаления',
+            'error',
+          );
+          return;
+        }
+        await this.musicStore.loadTracksFromServer();
+        this.onCloseParent();
+        ToastService.getInstance().show('Альбом успешно удалён', 'success');
+      } catch (error) {
+        console.error(error);
+        ToastService.getInstance().show('Сетевая ошибка при удалении', 'error');
       }
     });
     footerElement.append(playBtn, addBtn, editBtn, deleteBtn);

@@ -368,4 +368,25 @@ export class MusicApiClient extends BaseApiClient<unknown> {
       return false;
     }
   }
+
+  public async deleteAlbum(album: string, artist: string): Promise<boolean> {
+    try {
+      const response = await this.request<any>('api/music/delete-album', {
+        method: 'POST',
+        body: JSON.stringify({ album, artist }),
+      });
+      if (!response || !response.data) return false;
+      if (response.data.success === false) return false;
+      if (
+        response.data.errorCount !== undefined &&
+        response.data.errorCount > 0
+      ) {
+        return false;
+      }
+      return true;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
 }

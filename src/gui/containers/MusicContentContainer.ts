@@ -74,20 +74,28 @@ export class MusicContentContainer implements Component {
       e.stopPropagation();
       this.backgroundMenu.close();
       const cardElement = targetCard as HTMLElement;
-      const album = cardElement.dataset.albumName || '';
+      const albumName = cardElement.dataset.albumName || '';
+      const artistName = cardElement.dataset.artistName || '';
       this.contextMenu.show(e, [
         {
           label: 'Удалить альбом',
           isDanger: true,
           action: async () => {
-            const confirmDelete = await this.deleteAlbumModal.show(album);
-            if (confirmDelete) {
+            const confirmed = await this.deleteAlbumModal.show(albumName);
+            if (!confirmed) return;
+            ToastService.getInstance().show('Удаление альбома...', 'info');
+            const apiClient = (this.musicStore as any).apiClient;
+            const success = await apiClient.deleteAlbum(albumName, artistName);
+            if (!success) {
               ToastService.getInstance().show(
-                'Запрос на удаление альбома отправлен',
-                'info',
+                'Ошибка удаления альбома',
+                'error',
               );
-              this.render(targetElement);
+              return;
             }
+            await this.musicStore.loadTracksFromServer();
+            await this.render(targetElement);
+            ToastService.getInstance().show('Альбом успешно удалён', 'success');
           },
         },
       ]);
