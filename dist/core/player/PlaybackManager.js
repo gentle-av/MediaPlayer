@@ -12,6 +12,7 @@ export class PlaybackManager {
         this.currentVideoPath = '';
         this.currentPlaylist = [];
         this.currentTrackIndex = -1;
+        this.isAdvancing = false;
         this.musicApiClient = new MusicApiClient();
         this.videoApiClient = new VideoApiClient();
     }
@@ -79,8 +80,8 @@ export class PlaybackManager {
                     await this.musicApiClient.changeAudioTrackByIndex(this.currentTrackIndex);
                 }
                 this.mediaPlayer.setPlayState(true);
-                this.startPolling(track.filePath);
             }
+            this.startPolling(track.filePath);
         }
         else {
             this.currentTrackIndex = this.currentPlaylist.findIndex((t) => t.filePath === track.filePath);
@@ -92,8 +93,8 @@ export class PlaybackManager {
             if (success) {
                 this.isAudioPaused = false;
                 this.mediaPlayer.setPlayState(true);
-                this.startPolling(track.filePath);
             }
+            this.startPolling(track.filePath);
         }
     }
     async togglePlay() {
@@ -118,12 +119,22 @@ export class PlaybackManager {
         this.stopCurrentPlayback();
     }
     playNextTrack() {
+        if (this.isAdvancing) {
+            return;
+        }
         if (this.currentType !== 'music' || this.currentPlaylist.length === 0) {
             return;
         }
         const nextIndex = this.currentTrackIndex + 1;
         if (nextIndex < this.currentPlaylist.length) {
-            this.playMusic(this.currentPlaylist[nextIndex], this.currentPlaylist);
+            this.isAdvancing = true;
+            this.playMusic(this.currentPlaylist[nextIndex], this.currentPlaylist)
+                .catch((error) => {
+                console.warn(error);
+            })
+                .finally(() => {
+                this.isAdvancing = false;
+            });
         }
     }
     playPreviousTrack() {
@@ -169,24 +180,41 @@ export class PlaybackManager {
                     const metrics = response.data || response;
                     let current;
                     let total;
+                    let isPlaying;
+                    let ended;
                     if (metrics.currentTime !== undefined) {
                         current = metrics.currentTime;
                         total = metrics.duration;
+                        isPlaying = metrics.isPlaying;
+                        ended = metrics.ended;
                     }
                     else if (metrics.data && metrics.data.currentTime !== undefined) {
                         current = metrics.data.currentTime;
                         total = metrics.data.duration;
+                        isPlaying = metrics.data.isPlaying;
+                        ended = metrics.data.ended;
                     }
                     if (current !== undefined && total !== undefined) {
                         this.mediaPlayer.updateProgress(current, total);
-                        if (total > 0 && current >= total - 1) {
+                        const reachedEnd = total > 0 && current >= total - 1;
+                        if (this.currentType === 'music' &&
+                            (ended === true || isPlaying === false || reachedEnd)) {
                             this.playNextTrack();
+                        }
+                        else if (this.currentType === 'video' &&
+                            (ended === true || isPlaying === false)) {
+                            this.stopCurrentPlayback();
                             return;
                         }
                     }
-                    if (metrics.ended || metrics.isPlaying === false) {
-                        this.playNextTrack();
-                        return;
+                    else if (ended === true || isPlaying === false) {
+                        if (this.currentType === 'music') {
+                            this.playNextTrack();
+                        }
+                        else if (this.currentType === 'video') {
+                            this.stopCurrentPlayback();
+                            return;
+                        }
                     }
                 }
             }

@@ -16,6 +16,7 @@ export class PlaybackManager {
   private currentVideoPath = '';
   private currentPlaylist: Metadata[] = [];
   private currentTrackIndex = -1;
+  private isAdvancing = false;
   private readonly musicApiClient: MusicApiClient;
   private readonly videoApiClient: VideoApiClient;
 
@@ -112,8 +113,8 @@ export class PlaybackManager {
           );
         }
         this.mediaPlayer.setPlayState(true);
-        this.startPolling(track.filePath);
       }
+      this.startPolling(track.filePath);
     } else {
       this.currentTrackIndex = this.currentPlaylist.findIndex(
         (t) => t.filePath === track.filePath,
@@ -134,8 +135,8 @@ export class PlaybackManager {
       if (success) {
         this.isAudioPaused = false;
         this.mediaPlayer.setPlayState(true);
-        this.startPolling(track.filePath);
       }
+      this.startPolling(track.filePath);
     }
   }
 
@@ -163,12 +164,22 @@ export class PlaybackManager {
   }
 
   public playNextTrack(): void {
+    if (this.isAdvancing) {
+      return;
+    }
     if (this.currentType !== 'music' || this.currentPlaylist.length === 0) {
       return;
     }
     const nextIndex = this.currentTrackIndex + 1;
     if (nextIndex < this.currentPlaylist.length) {
-      this.playMusic(this.currentPlaylist[nextIndex], this.currentPlaylist);
+      this.isAdvancing = true;
+      this.playMusic(this.currentPlaylist[nextIndex], this.currentPlaylist)
+        .catch((error) => {
+          console.warn(error);
+        })
+        .finally(() => {
+          this.isAdvancing = false;
+        });
     }
   }
 
@@ -219,23 +230,41 @@ export class PlaybackManager {
           const metrics = response.data || response;
           let current: number | undefined;
           let total: number | undefined;
+          let isPlaying: boolean | undefined;
+          let ended: boolean | undefined;
           if (metrics.currentTime !== undefined) {
             current = metrics.currentTime;
             total = metrics.duration;
+            isPlaying = metrics.isPlaying;
+            ended = metrics.ended;
           } else if (metrics.data && metrics.data.currentTime !== undefined) {
             current = metrics.data.currentTime;
             total = metrics.data.duration;
+            isPlaying = metrics.data.isPlaying;
+            ended = metrics.data.ended;
           }
           if (current !== undefined && total !== undefined) {
             this.mediaPlayer.updateProgress(current, total);
-            if (total > 0 && current >= total - 1) {
+            const reachedEnd = total > 0 && current >= total - 1;
+            if (
+              this.currentType === 'music' &&
+              (ended === true || isPlaying === false || reachedEnd)
+            ) {
               this.playNextTrack();
+            } else if (
+              this.currentType === 'video' &&
+              (ended === true || isPlaying === false)
+            ) {
+              this.stopCurrentPlayback();
               return;
             }
-          }
-          if (metrics.ended || metrics.isPlaying === false) {
-            this.playNextTrack();
-            return;
+          } else if (ended === true || isPlaying === false) {
+            if (this.currentType === 'music') {
+              this.playNextTrack();
+            } else if (this.currentType === 'video') {
+              this.stopCurrentPlayback();
+              return;
+            }
           }
         }
       } catch (error) {
