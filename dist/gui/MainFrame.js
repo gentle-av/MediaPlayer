@@ -125,6 +125,10 @@ export class MainFrame {
             this.playbackManager.togglePlay();
         }, () => {
             this.playbackManager.stop();
+        }, () => {
+            this.playbackManager.playNextTrack();
+        }, () => {
+            this.playbackManager.playPreviousTrack();
         }, (seconds) => {
             this.playbackManager.seek(seconds);
         });

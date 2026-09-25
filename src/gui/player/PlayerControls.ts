@@ -56,7 +56,12 @@ export class PlayerControls {
     }
   }
 
-  public render(onPlayPause: () => void, onStop: () => void): HTMLElement {
+  public render(
+    onPlayPause: () => void,
+    onStop: () => void,
+    onNext: () => void,
+    onPrevious: () => void,
+  ): HTMLElement {
     const controlsContainer = document.createElement('div');
     controlsContainer.className = 'universal-bottom-player-controls';
     this.audioStreamButton = this.createAudioStreamButton();
@@ -73,6 +78,9 @@ export class PlayerControls {
         'stroke-width': '2',
       },
     );
+    skipBackwardBtn.addEventListener('click', () => {
+      onPrevious();
+    });
     const standardPlayBtn = document.createElement('button');
     standardPlayBtn.className =
       'universal-bottom-player-btn universal-bottom-player-play';
@@ -109,6 +117,9 @@ export class PlayerControls {
         'stroke-width': '2',
       },
     );
+    skipForwardBtn.addEventListener('click', () => {
+      onNext();
+    });
     controlsContainer.append(
       this.audioStreamButton,
       skipBackwardBtn,

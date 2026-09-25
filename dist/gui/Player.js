@@ -9,6 +9,8 @@ export class Player {
         this.controls = new PlayerControls();
         this.onPlayPauseCallback = null;
         this.onStopCallback = null;
+        this.onNextTrackCallback = null;
+        this.onPreviousTrackCallback = null;
         this.onSeekCallback = null;
         this.audioEngine = new Audio();
     }
@@ -22,9 +24,11 @@ export class Player {
             }
         }
     }
-    bindControls(onPlayPause, onStop, onSeek) {
+    bindControls(onPlayPause, onStop, onNext, onPrevious, onSeek) {
         this.onPlayPauseCallback = onPlayPause;
         this.onStopCallback = onStop;
+        this.onNextTrackCallback = onNext;
+        this.onPreviousTrackCallback = onPrevious;
         if (onSeek) {
             this.onSeekCallback = onSeek;
         }
@@ -80,6 +84,14 @@ export class Player {
         }, () => {
             if (this.onStopCallback) {
                 this.onStopCallback();
+            }
+        }, () => {
+            if (this.onNextTrackCallback) {
+                this.onNextTrackCallback();
+            }
+        }, () => {
+            if (this.onPreviousTrackCallback) {
+                this.onPreviousTrackCallback();
             }
         });
         contentWrapperElement.append(metadataContainer, timelineContainer, controlsContainer);

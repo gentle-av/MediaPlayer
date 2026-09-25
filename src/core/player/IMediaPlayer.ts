@@ -13,6 +13,8 @@ export interface IMediaPlayer {
   bindControls(
     onPlayPause: () => void,
     onStop: () => void,
+    onNext: () => void,
+    onPrevious: () => void,
     onSeek?: (seconds: number) => void,
   ): void;
 }

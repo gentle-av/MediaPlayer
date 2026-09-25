@@ -168,6 +168,12 @@ export class MainFrame {
       () => {
         this.playbackManager.stop();
       },
+      () => {
+        this.playbackManager.playNextTrack();
+      },
+      () => {
+        this.playbackManager.playPreviousTrack();
+      },
       (seconds: number) => {
         this.playbackManager.seek(seconds);
       },

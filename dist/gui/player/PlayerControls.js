@@ -53,7 +53,7 @@ export class PlayerControls {
             }
         }
     }
-    render(onPlayPause, onStop) {
+    render(onPlayPause, onStop, onNext, onPrevious) {
         const controlsContainer = document.createElement('div');
         controlsContainer.className = 'universal-bottom-player-controls';
         this.audioStreamButton = this.createAudioStreamButton();
@@ -64,6 +64,9 @@ export class PlayerControls {
             y2: '5',
             stroke: 'currentColor',
             'stroke-width': '2',
+        });
+        skipBackwardBtn.addEventListener('click', () => {
+            onPrevious();
         });
         const standardPlayBtn = document.createElement('button');
         standardPlayBtn.className =
@@ -95,6 +98,9 @@ export class PlayerControls {
             y2: '19',
             stroke: 'currentColor',
             'stroke-width': '2',
+        });
+        skipForwardBtn.addEventListener('click', () => {
+            onNext();
         });
         controlsContainer.append(this.audioStreamButton, skipBackwardBtn, standardPlayBtn, stopBtn, skipForwardBtn);
         return controlsContainer;

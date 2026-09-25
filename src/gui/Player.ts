@@ -11,6 +11,8 @@ export class Player implements IMediaPlayer {
   private audioEngine: HTMLAudioElement;
   private onPlayPauseCallback: (() => void) | null = null;
   private onStopCallback: (() => void) | null = null;
+  private onNextTrackCallback: (() => void) | null = null;
+  private onPreviousTrackCallback: (() => void) | null = null;
   private onSeekCallback: ((seconds: number) => void) | null = null;
 
   constructor() {
@@ -30,10 +32,14 @@ export class Player implements IMediaPlayer {
   public bindControls(
     onPlayPause: () => void,
     onStop: () => void,
+    onNext: () => void,
+    onPrevious: () => void,
     onSeek?: (seconds: number) => void,
   ): void {
     this.onPlayPauseCallback = onPlayPause;
     this.onStopCallback = onStop;
+    this.onNextTrackCallback = onNext;
+    this.onPreviousTrackCallback = onPrevious;
     if (onSeek) {
       this.onSeekCallback = onSeek;
     }
@@ -110,6 +116,16 @@ export class Player implements IMediaPlayer {
       () => {
         if (this.onStopCallback) {
           this.onStopCallback();
+        }
+      },
+      () => {
+        if (this.onNextTrackCallback) {
+          this.onNextTrackCallback();
+        }
+      },
+      () => {
+        if (this.onPreviousTrackCallback) {
+          this.onPreviousTrackCallback();
         }
       },
     );
