@@ -42,7 +42,11 @@ export class MainFrame {
     );
     this.componentFactory = new ComponentFactory();
     this.initFactory();
-    this.header = new Header(this.playlistStore, this.playbackManager);
+    this.header = new Header(
+      this.musicStore,
+      this.playlistStore,
+      this.playbackManager,
+    );
     this.sidebar = new Sidebar((selectedTab: TabType) => {
       this.switchTab(selectedTab);
     });

@@ -1,16 +1,19 @@
 import { Metadata } from '../../core/entities/music/Metadata.js';
 import { PlaybackManager } from '../../core/player/PlaybackManager.js';
 import { PlaylistStore } from '../../core/store/PlaylistStore.js';
+import { MusicStore } from '../../core/store/MusicStore.js';
 import { PlaylistClearConfirmModal } from './PlaylistClearConfirmModal.js';
 
 export class PlaylistModal {
   private modalElement: HTMLElement | null = null;
   private draggedRow: HTMLElement | null = null;
+  private unsubscribeFromStore: (() => void) | null = null;
 
   constructor(
     private readonly playlistTracks: Metadata[],
     private readonly playbackManager: PlaybackManager,
     private readonly playlistStore: PlaylistStore,
+    private readonly musicStore: MusicStore,
     private readonly clearModal: PlaylistClearConfirmModal,
   ) {}
 
@@ -22,11 +25,19 @@ export class PlaylistModal {
     const modalContent = document.createElement('div');
     modalContent.className = 'modal-content';
     const header = this.createHeader();
-    const body = this.createBody();
+    const body = document.createElement('div');
+    body.className = 'modal-body';
+    body.appendChild(this.createBodyContent());
     const footer = this.createFooter();
     modalContent.append(header, body, footer);
     this.modalElement.appendChild(modalContent);
     document.body.appendChild(this.modalElement);
+    this.unsubscribeFromStore = this.musicStore.subscribe(() => {
+      const bodyContainer = this.modalElement?.querySelector('.modal-body');
+      if (bodyContainer) {
+        bodyContainer.replaceChildren(this.createBodyContent());
+      }
+    });
     this.modalElement.addEventListener('click', (e) => {
       if (e.target === this.modalElement) {
         this.close();
@@ -35,6 +46,10 @@ export class PlaylistModal {
   }
 
   public close(): void {
+    if (this.unsubscribeFromStore) {
+      this.unsubscribeFromStore();
+      this.unsubscribeFromStore = null;
+    }
     const existingModal = document.querySelector('.playlist-modal-custom');
     if (existingModal && existingModal.parentNode) {
       existingModal.parentNode.removeChild(existingModal);
@@ -48,16 +63,9 @@ export class PlaylistModal {
     const leftIconContainer = document.createElement('div');
     leftIconContainer.className = 'album-modal-cover-left';
     leftIconContainer.innerHTML = `
-      <svg
-          width="32"
-          height="32"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="var(--yellow)"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
+        stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
         <line x1="8" y1="6" x2="21" y2="6"></line>
         <line x1="8" y1="12" x2="21" y2="12"></line>
         <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -83,13 +91,12 @@ export class PlaylistModal {
     return headerElement;
   }
 
-  private createBody(): HTMLElement {
-    const bodyElement = document.createElement('div');
-    bodyElement.className = 'modal-body';
+  private createBodyContent(): HTMLElement {
     const tableContainer = document.createElement('div');
     tableContainer.className =
       'album-tracks-table playlist-tracks-grouped-table';
     const tracksByArtist = this.groupTracksByArtist(this.playlistTracks);
+    const currentTrack = this.musicStore.getCurrentTrack();
     let globalIndex = 0;
     tracksByArtist.forEach((tracks, artist) => {
       const artistHeaderRow = document.createElement('div');
@@ -99,6 +106,9 @@ export class PlaylistModal {
       tracks.forEach((track) => {
         const row = document.createElement('div');
         row.className = 'track-table-row';
+        if (currentTrack && currentTrack.filePath === track.filePath) {
+          row.classList.add('current');
+        }
         row.draggable = true;
         row.dataset.index = String(globalIndex);
         const leftSection = document.createElement('div');
@@ -152,8 +162,7 @@ export class PlaylistModal {
         globalIndex++;
       });
     });
-    bodyElement.appendChild(tableContainer);
-    return bodyElement;
+    return tableContainer;
   }
 
   private createFooter(): HTMLElement {
@@ -162,7 +171,9 @@ export class PlaylistModal {
     const clearAllBtn = document.createElement('button');
     clearAllBtn.className = 'modal-delete-album-btn dynamic-clear-playlist-btn';
     clearAllBtn.innerHTML = `
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; display: inline-block; vertical-align: middle;">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" style="margin-right: 6px; display: inline-block; vertical-align: middle;">
         <circle cx="12" cy="12" r="10"></circle>
         <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
       </svg>
@@ -253,7 +264,7 @@ export class PlaylistModal {
       this.playlistStore.addTracksToPlaylist(activeName, paths);
       const contentWrapper = container.parentNode as HTMLElement;
       if (contentWrapper) {
-        contentWrapper.replaceChildren(this.createBody());
+        contentWrapper.replaceChildren(this.createBodyContent());
       }
     });
   }
@@ -264,6 +275,6 @@ export class PlaylistModal {
     }
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    return mins + ':' + (secs < 10 ? '0' : '') + secs;
   }
 }

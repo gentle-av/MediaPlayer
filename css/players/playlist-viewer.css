@@ -278,3 +278,14 @@
     padding: 4px 8px;
   }
 }
+
+.playlist-tracks-grouped-table .track-table-row.current {
+  background: var(--yellow) !important;
+}
+
+.playlist-tracks-grouped-table .track-table-row.current .track-table-name,
+.playlist-tracks-grouped-table .track-table-row.current .track-table-number,
+.playlist-tracks-grouped-table .track-table-row.current .track-table-duration,
+.playlist-tracks-grouped-table .track-table-row.current .track-drag-marker {
+  color: var(--bg0) !important;
+}

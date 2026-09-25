@@ -99,6 +99,7 @@ export class AlbumControlsPanel {
           currentTracks,
           this.playbackManager,
           this.playlistStore,
+          this.musicStore,
           (window as any).app?.clearModal,
         );
         modal.open();

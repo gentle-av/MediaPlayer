@@ -22,7 +22,7 @@ export class MainFrame {
         this.settings = new Settings(this.tvPlaybackManager, this.audioOutputManager);
         this.componentFactory = new ComponentFactory();
         this.initFactory();
-        this.header = new Header(this.playlistStore, this.playbackManager);
+        this.header = new Header(this.musicStore, this.playlistStore, this.playbackManager);
         this.sidebar = new Sidebar((selectedTab) => {
             this.switchTab(selectedTab);
         });

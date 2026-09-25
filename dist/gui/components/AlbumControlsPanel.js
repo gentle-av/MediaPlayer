@@ -69,7 +69,7 @@ export class AlbumControlsPanel {
                 }
                 this.onCloseParent();
                 const currentTracks = this.playlistStore.getPlaylistTracks(activePlaylistName);
-                const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore, window.app?.clearModal);
+                const modal = new PlaylistModal(currentTracks, this.playbackManager, this.playlistStore, this.musicStore, window.app?.clearModal);
                 modal.open();
             }
         });

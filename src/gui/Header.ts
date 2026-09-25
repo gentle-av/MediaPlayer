@@ -3,12 +3,14 @@ import { PlaylistStore } from '../core/store/PlaylistStore.js';
 import { PlaybackManager } from '../core/player/PlaybackManager.js';
 import { UiStateStore } from '../core/store/UiStateStore.js';
 import { PlaylistClearConfirmModal } from './modals/PlaylistClearConfirmModal.js';
+import { MusicStore } from '../core/store/MusicStore.js';
 
 export class Header {
   private pageTitleElement: HTMLElement | null = null;
   private titleIconElement: HTMLElement | null = null;
 
   constructor(
+    private musicStore: MusicStore,
     private playlistStore: PlaylistStore,
     private playbackManager: PlaybackManager,
   ) {}
@@ -209,6 +211,7 @@ export class Header {
         currentTracks,
         this.playbackManager,
         this.playlistStore,
+        this.musicStore,
         confirmModal,
       );
       modal.open();
