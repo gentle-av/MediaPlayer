@@ -38,13 +38,17 @@ export class AudioOutputManager {
         }
     }
     async setVolume(volume) {
-        return this.enqueue(async () => {
+        try {
             const ok = await this.apiClient.setVolume(volume);
             if (ok) {
                 this.volume = Math.max(0, Math.min(100, Math.round(volume)));
             }
             return ok;
-        });
+        }
+        catch (error) {
+            console.error('[AudioOutputManager] Ошибка при изменении громкости:', error);
+            return false;
+        }
     }
     async adjustVolume(delta) {
         const next = Math.max(0, Math.min(100, this.volume + delta));

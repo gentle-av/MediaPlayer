@@ -243,6 +243,7 @@ export class Settings implements Component {
   private async handleSetVolume(value: number): Promise<void> {
     if (this.volumeBusy) return;
     this.volumeBusy = true;
+    this.updateMuteButton();
     try {
       const ok = await this.audioOutputManager.setVolume(value);
       if (!ok) {
@@ -251,9 +252,9 @@ export class Settings implements Component {
           'error',
         );
       }
-      this.updateAudioUi();
     } finally {
       this.volumeBusy = false;
+      this.updateAudioUi();
     }
   }
 
@@ -273,14 +274,15 @@ export class Settings implements Component {
   private async handleToggleMute(): Promise<void> {
     if (this.volumeBusy) return;
     this.volumeBusy = true;
+    this.updateMuteButton();
     try {
       const ok = await this.audioOutputManager.toggleMute();
       if (!ok) {
         ToastService.getInstance().show('Не удалось переключить mute', 'error');
       }
-      this.updateMuteButton();
     } finally {
       this.volumeBusy = false;
+      this.updateMuteButton();
     }
   }
 
@@ -305,10 +307,10 @@ export class Settings implements Component {
           'error',
         );
       }
-      this.updateAudioUi();
     } finally {
       this.outputBusy = false;
       this.updateOutputButtons();
+      this.updateAudioUi();
     }
   }
 

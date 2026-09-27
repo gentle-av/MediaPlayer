@@ -213,15 +213,16 @@ export class Settings {
         if (this.volumeBusy)
             return;
         this.volumeBusy = true;
+        this.updateMuteButton();
         try {
             const ok = await this.audioOutputManager.setVolume(value);
             if (!ok) {
                 ToastService.getInstance().show('Не удалось изменить громкость', 'error');
             }
-            this.updateAudioUi();
         }
         finally {
             this.volumeBusy = false;
+            this.updateAudioUi();
         }
     }
     async handleAdjustVolume(delta) {
@@ -239,15 +240,16 @@ export class Settings {
         if (this.volumeBusy)
             return;
         this.volumeBusy = true;
+        this.updateMuteButton();
         try {
             const ok = await this.audioOutputManager.toggleMute();
             if (!ok) {
                 ToastService.getInstance().show('Не удалось переключить mute', 'error');
             }
-            this.updateMuteButton();
         }
         finally {
             this.volumeBusy = false;
+            this.updateMuteButton();
         }
     }
     async handleSwitchOutput(target) {
@@ -268,11 +270,11 @@ export class Settings {
             else {
                 ToastService.getInstance().show('Не удалось переключить выход', 'error');
             }
-            this.updateAudioUi();
         }
         finally {
             this.outputBusy = false;
             this.updateOutputButtons();
+            this.updateAudioUi();
         }
     }
     updateTvUi() {

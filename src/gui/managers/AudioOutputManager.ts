@@ -48,13 +48,19 @@ export class AudioOutputManager {
   }
 
   public async setVolume(volume: number): Promise<boolean> {
-    return this.enqueue(async () => {
+    try {
       const ok = await this.apiClient.setVolume(volume);
       if (ok) {
         this.volume = Math.max(0, Math.min(100, Math.round(volume)));
       }
       return ok;
-    });
+    } catch (error) {
+      console.error(
+        '[AudioOutputManager] Ошибка при изменении громкости:',
+        error,
+      );
+      return false;
+    }
   }
 
   public async adjustVolume(delta: number): Promise<boolean> {
