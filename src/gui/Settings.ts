@@ -16,6 +16,7 @@ export class Settings implements Component {
   private outputValueLabel: HTMLElement | null = null;
   private outputButtons: Map<string, HTMLButtonElement> = new Map();
   private outputBusy = false;
+  private computerBusy = false;
 
   constructor(
     private readonly tvPlaybackManager: TvPlaybackManager,
@@ -227,13 +228,11 @@ export class Settings implements Component {
     if (!targetElement) return null;
     const element = document.createElement('div');
     element.className = 'settings-page';
-    const title = document.createElement('h2');
-    title.textContent = 'Настройки';
-    element.appendChild(title);
     const cardsGrid = document.createElement('div');
     cardsGrid.className = 'settings-cards-grid';
-    cardsGrid.appendChild(this.renderTvCard());
     cardsGrid.appendChild(this.renderAudioCard());
+    cardsGrid.appendChild(this.renderTvCard());
+    cardsGrid.appendChild(this.renderComputerCard());
     element.appendChild(cardsGrid);
     while (targetElement.firstChild) {
       targetElement.removeChild(targetElement.firstChild);
@@ -404,5 +403,56 @@ export class Settings implements Component {
       <line x1="23" y1="9" x2="17" y2="15"></line>
       <line x1="17" y1="9" x2="23" y2="15"></line>
     </svg>`;
+  }
+
+  private async handleComputerSleep(): Promise<void> {
+    if (this.computerBusy) return;
+    this.computerBusy = true;
+    const sleepBtn = document.querySelector(
+      '.settings-computer-sleep-btn',
+    ) as HTMLButtonElement;
+    if (sleepBtn) sleepBtn.disabled = true;
+    try {
+      const success = await this.tvPlaybackManager['tvApiClient'].systemSleep();
+      if (success) {
+        ToastService.getInstance().show(
+          'Запрос на отправку компьютера в сон отправлен',
+          'success',
+        );
+      } else {
+        ToastService.getInstance().show(
+          'Не удалось отправить компьютер в сон',
+          'error',
+        );
+      }
+    } finally {
+      this.computerBusy = false;
+      if (sleepBtn) sleepBtn.disabled = false;
+    }
+  }
+
+  private renderComputerCard(): HTMLElement {
+    const compCard = document.createElement('div');
+    compCard.className = 'settings-tv-card settings-computer-card';
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'settings-tv-icon';
+    iconContainer.style.color = 'var(--green)';
+    iconContainer.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>`;
+    const compTitle = document.createElement('div');
+    compTitle.className = 'settings-tv-title';
+    compTitle.textContent = 'Компьютер (Хост)';
+    const compStatus = document.createElement('div');
+    compStatus.className = 'settings-tv-status';
+    compStatus.textContent = 'Система управления';
+    const sleepButton = document.createElement('button');
+    sleepButton.className =
+      'settings-tv-toggle-btn settings-computer-sleep-btn';
+    sleepButton.style.background = 'var(--red)';
+    sleepButton.textContent = 'Режим сна';
+    sleepButton.addEventListener('click', () => {
+      void this.handleComputerSleep();
+    });
+    compCard.append(iconContainer, compTitle, compStatus, sleepButton);
+    return compCard;
   }
 }
