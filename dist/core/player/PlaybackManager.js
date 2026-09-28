@@ -53,6 +53,11 @@ export class PlaybackManager {
         this.startPolling(videoItem.path);
     }
     async playMusic(track, playlistContext = []) {
+        if (playlistContext.length === 0 &&
+            this.currentType === 'music' &&
+            this.currentPlaylist.some((t) => t.filePath === track.filePath)) {
+            playlistContext = this.currentPlaylist;
+        }
         const isSameContext = playlistContext.length > 0 &&
             this.currentPlaylist.length === playlistContext.length &&
             this.currentPlaylist[0]?.filePath === playlistContext[0]?.filePath;
@@ -70,25 +75,23 @@ export class PlaybackManager {
             }
             this.mediaPlayer.setVisibility(true);
             this.mediaPlayer.updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
-            if (this.musicStore.getCurrentTrack() !== track) {
-                this.musicStore.setCurrentTrack(track);
-            }
+            this.musicStore.setCurrentTrack(track);
             const paths = this.currentPlaylist.map((t) => t.filePath);
-            const success = await this.musicApiClient.playAudioPlaylist(paths);
+            const success = await this.musicApiClient.playAudioPlaylist(paths, this.currentTrackIndex);
             if (success) {
-                if (this.currentTrackIndex > 0) {
-                    await this.musicApiClient.changeAudioTrackByIndex(this.currentTrackIndex);
-                }
                 this.mediaPlayer.setPlayState(true);
             }
             this.startPolling(track.filePath);
         }
         else {
-            this.currentTrackIndex = this.currentPlaylist.findIndex((t) => t.filePath === track.filePath);
-            this.mediaPlayer.updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
-            if (this.musicStore.getCurrentTrack() !== track) {
-                this.musicStore.setCurrentTrack(track);
+            const newIndex = this.currentPlaylist.findIndex((t) => t.filePath === track.filePath);
+            if (newIndex < 0) {
+                console.warn('[PlaybackManager] Track not found in current playlist:', track.filePath);
+                return this.playMusic(track, []);
             }
+            this.currentTrackIndex = newIndex;
+            this.mediaPlayer.updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
+            this.musicStore.setCurrentTrack(track);
             const success = await this.musicApiClient.changeAudioTrackByIndex(this.currentTrackIndex);
             if (success) {
                 this.isAudioPaused = false;

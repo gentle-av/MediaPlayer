@@ -76,6 +76,13 @@ export class PlaybackManager {
     track: Metadata,
     playlistContext: Metadata[] = [],
   ): Promise<void> {
+    if (
+      playlistContext.length === 0 &&
+      this.currentType === 'music' &&
+      this.currentPlaylist.some((t) => t.filePath === track.filePath)
+    ) {
+      playlistContext = this.currentPlaylist;
+    }
     const isSameContext =
       playlistContext.length > 0 &&
       this.currentPlaylist.length === playlistContext.length &&
@@ -101,24 +108,28 @@ export class PlaybackManager {
         'music',
         track.album,
       );
-      if (this.musicStore.getCurrentTrack() !== track) {
-        this.musicStore.setCurrentTrack(track);
-      }
+      this.musicStore.setCurrentTrack(track);
       const paths = this.currentPlaylist.map((t) => t.filePath);
-      const success = await this.musicApiClient.playAudioPlaylist(paths);
+      const success = await this.musicApiClient.playAudioPlaylist(
+        paths,
+        this.currentTrackIndex,
+      );
       if (success) {
-        if (this.currentTrackIndex > 0) {
-          await this.musicApiClient.changeAudioTrackByIndex(
-            this.currentTrackIndex,
-          );
-        }
         this.mediaPlayer.setPlayState(true);
       }
       this.startPolling(track.filePath);
     } else {
-      this.currentTrackIndex = this.currentPlaylist.findIndex(
+      const newIndex = this.currentPlaylist.findIndex(
         (t) => t.filePath === track.filePath,
       );
+      if (newIndex < 0) {
+        console.warn(
+          '[PlaybackManager] Track not found in current playlist:',
+          track.filePath,
+        );
+        return this.playMusic(track, []);
+      }
+      this.currentTrackIndex = newIndex;
       this.mediaPlayer.updateMediaInfo(
         track.title,
         track.artist,
@@ -126,9 +137,7 @@ export class PlaybackManager {
         'music',
         track.album,
       );
-      if (this.musicStore.getCurrentTrack() !== track) {
-        this.musicStore.setCurrentTrack(track);
-      }
+      this.musicStore.setCurrentTrack(track);
       const success = await this.musicApiClient.changeAudioTrackByIndex(
         this.currentTrackIndex,
       );

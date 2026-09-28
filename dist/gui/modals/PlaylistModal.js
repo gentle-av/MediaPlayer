@@ -145,7 +145,7 @@ export class PlaylistModal {
                 row.addEventListener('click', (e) => {
                     if (e.target.closest('.track-drag-marker'))
                         return;
-                    this.playbackManager.playMusic(track);
+                    this.playbackManager.playMusic(track, this.playlistTracks);
                 });
                 this.setupDragAndDropEvents(row, tableContainer);
                 tableContainer.appendChild(row);
@@ -171,8 +171,7 @@ export class PlaylistModal {
         clearAllBtn.addEventListener('click', async () => {
             const confirmed = await this.clearModal.show();
             if (confirmed) {
-                const names = this.playlistStore.getPlaylistNames();
-                const activeName = names && names.length > 0 ? names[0] : 'Избранное';
+                const activeName = this.playlistStore.getActivePlaylistName();
                 this.playlistStore.clearPlaylist(activeName);
                 this.playlistTracks.length = 0;
                 await this.playbackManager.stop();
@@ -244,8 +243,7 @@ export class PlaylistModal {
             }
             const [movedTrack] = this.playlistTracks.splice(fromIndex, 1);
             this.playlistTracks.splice(toIndex, 0, movedTrack);
-            const names = this.playlistStore.getPlaylistNames();
-            const activeName = names && names.length > 0 ? names[0] : 'Избранное';
+            const activeName = this.playlistStore.getActivePlaylistName();
             this.playlistStore.clearPlaylist(activeName);
             const paths = this.playlistTracks.map((t) => t.filePath);
             this.playlistStore.addTracksToPlaylist(activeName, paths);

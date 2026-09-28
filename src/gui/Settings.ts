@@ -29,155 +29,9 @@ export class Settings implements Component {
     }
   }
 
-  public async render(
-    targetElement: HTMLElement | null,
-  ): Promise<HTMLElement | null> {
-    if (!targetElement) return null;
-    const element = document.createElement('div');
-    element.className = 'settings-page';
-    const title = document.createElement('h2');
-    title.textContent = 'Настройки';
-    element.appendChild(title);
-    const cardsGrid = document.createElement('div');
-    cardsGrid.className = 'settings-cards-grid';
-    cardsGrid.appendChild(this.renderTvCard());
-    cardsGrid.appendChild(this.renderAudioCard());
-    element.appendChild(cardsGrid);
-    while (targetElement.firstChild) {
-      targetElement.removeChild(targetElement.firstChild);
-    }
-    targetElement.appendChild(element);
-    void this.refreshAll();
-    return element;
-  }
-
-  private renderTvCard(): HTMLElement {
-    const tvCard = document.createElement('div');
-    tvCard.className = 'settings-tv-card';
-    const iconContainer = document.createElement('div');
-    iconContainer.className = 'settings-tv-icon';
-    iconContainer.innerHTML = this.svgTv(48);
-    const tvTitle = document.createElement('div');
-    tvTitle.className = 'settings-tv-title';
-    tvTitle.textContent = 'Телевизор';
-    this.tvStatusLabel = document.createElement('div');
-    this.tvStatusLabel.className = 'settings-tv-status';
-    this.tvToggleButton = document.createElement('button');
-    this.tvToggleButton.className = 'settings-tv-toggle-btn';
-    this.tvToggleButton.addEventListener('click', () => {
-      void this.handleTvToggle();
-    });
-    tvCard.append(
-      iconContainer,
-      tvTitle,
-      this.tvStatusLabel,
-      this.tvToggleButton,
-    );
-    return tvCard;
-  }
-
-  public async onActivate(): Promise<void> {
-    console.log('⚙️ [Settings] activated, refreshing state');
-    await this.refreshAll();
-  }
-
-  public dispose(): void {
-    this.tvStatusLabel = null;
-    this.tvToggleButton = null;
-    this.volumeSlider = null;
-    this.volumeValueLabel = null;
-    this.volumeMuteButton = null;
-    this.volumeDownButton = null;
-    this.volumeUpButton = null;
-    this.outputValueLabel = null;
-    this.outputButtons.clear();
-  }
-
-  private renderAudioCard(): HTMLElement {
-    const audioCard = document.createElement('div');
-    audioCard.className = 'settings-audio-card';
-    const header = document.createElement('div');
-    header.className = 'settings-audio-header';
-    const audioIcon = document.createElement('div');
-    audioIcon.className = 'settings-audio-icon';
-    audioIcon.innerHTML = this.svgVolumeUp(20);
-    const audioTitle = document.createElement('div');
-    audioTitle.className = 'settings-audio-title';
-    audioTitle.textContent = 'Звук';
-    header.append(audioIcon, audioTitle);
-    audioCard.appendChild(header);
-    audioCard.appendChild(this.renderVolumeRow());
-    audioCard.appendChild(this.renderMuteRow());
-    audioCard.appendChild(this.renderOutputRow());
-    this.updateMuteButton();
-    this.updateOutputButtons();
-    return audioCard;
-  }
-
-  private renderVolumeRow(): HTMLElement {
-    const volumeRow = document.createElement('div');
-    volumeRow.className = 'settings-volume-row';
-    this.volumeDownButton = document.createElement('button');
-    this.volumeDownButton.className = 'settings-volume-down-btn';
-    this.volumeDownButton.innerHTML = this.svgVolumeDown(16);
-    this.volumeDownButton.addEventListener('click', () => {
-      void this.handleAdjustVolume(-1);
-    });
-    this.volumeSlider = document.createElement('input');
-    this.volumeSlider.type = 'range';
-    this.volumeSlider.min = '0';
-    this.volumeSlider.max = '100';
-    this.volumeSlider.step = '1';
-    this.volumeSlider.className = 'settings-volume-slider';
-    this.volumeSlider.value = String(this.audioOutputManager.getVolume());
-    this.volumeSlider.addEventListener('input', () => {
-      if (this.volumeValueLabel && this.volumeSlider) {
-        this.volumeValueLabel.textContent = `${this.volumeSlider.value}%`;
-      }
-    });
-    this.volumeSlider.addEventListener('change', () => {
-      void this.handleSetVolume(Number(this.volumeSlider?.value ?? 0));
-    });
-    this.volumeUpButton = document.createElement('button');
-    this.volumeUpButton.className = 'settings-volume-up-btn';
-    this.volumeUpButton.innerHTML = this.svgVolumeUp(16);
-    this.volumeUpButton.addEventListener('click', () => {
-      void this.handleAdjustVolume(1);
-    });
-    this.volumeValueLabel = document.createElement('span');
-    this.volumeValueLabel.className = 'settings-volume-label';
-    this.volumeValueLabel.textContent = `${this.audioOutputManager.getVolume()}%`;
-    volumeRow.append(
-      this.volumeDownButton,
-      this.volumeSlider,
-      this.volumeUpButton,
-      this.volumeValueLabel,
-    );
-    return volumeRow;
-  }
-
-  private renderMuteRow(): HTMLElement {
-    const muteRow = document.createElement('div');
-    muteRow.className = 'settings-mute-row';
-    this.volumeMuteButton = document.createElement('button');
-    this.volumeMuteButton.className = 'settings-mute-btn';
-    this.volumeMuteButton.addEventListener('click', () => {
-      void this.handleToggleMute();
-    });
-    muteRow.appendChild(this.volumeMuteButton);
-    return muteRow;
-  }
-
   private renderOutputRow(): HTMLElement {
     const row = document.createElement('div');
     row.className = 'settings-output-row';
-    const label = document.createElement('span');
-    label.className = 'settings-output-label';
-    label.textContent = 'Выход:';
-    row.appendChild(label);
-    this.outputValueLabel = document.createElement('span');
-    this.outputValueLabel.className = 'settings-output-value';
-    row.appendChild(this.outputValueLabel);
     const available = this.audioOutputManager.getAvailableOutputs();
     available.forEach((key) => {
       const btn = document.createElement('button');
@@ -358,8 +212,152 @@ export class Settings implements Component {
   private updateOutputButtons(): void {
     const current = this.audioOutputManager.getCurrentOutput();
     this.outputButtons.forEach((btn, key) => {
-      btn.disabled = this.outputBusy || key === current;
+      btn.disabled = this.outputBusy;
+      if (key === current) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
     });
+  }
+
+  public async render(
+    targetElement: HTMLElement | null,
+  ): Promise<HTMLElement | null> {
+    if (!targetElement) return null;
+    const element = document.createElement('div');
+    element.className = 'settings-page';
+    const title = document.createElement('h2');
+    title.textContent = 'Настройки';
+    element.appendChild(title);
+    const cardsGrid = document.createElement('div');
+    cardsGrid.className = 'settings-cards-grid';
+    cardsGrid.appendChild(this.renderTvCard());
+    cardsGrid.appendChild(this.renderAudioCard());
+    element.appendChild(cardsGrid);
+    while (targetElement.firstChild) {
+      targetElement.removeChild(targetElement.firstChild);
+    }
+    targetElement.appendChild(element);
+    void this.refreshAll();
+    return element;
+  }
+
+  private renderTvCard(): HTMLElement {
+    const tvCard = document.createElement('div');
+    tvCard.className = 'settings-tv-card';
+    const iconContainer = document.createElement('div');
+    iconContainer.className = 'settings-tv-icon';
+    iconContainer.innerHTML = this.svgTv(48);
+    const tvTitle = document.createElement('div');
+    tvTitle.className = 'settings-tv-title';
+    tvTitle.textContent = 'Телевизор';
+    this.tvStatusLabel = document.createElement('div');
+    this.tvStatusLabel.className = 'settings-tv-status';
+    this.tvToggleButton = document.createElement('button');
+    this.tvToggleButton.className = 'settings-tv-toggle-btn';
+    this.tvToggleButton.addEventListener('click', () => {
+      void this.handleTvToggle();
+    });
+    tvCard.append(
+      iconContainer,
+      tvTitle,
+      this.tvStatusLabel,
+      this.tvToggleButton,
+    );
+    return tvCard;
+  }
+
+  public async onActivate(): Promise<void> {
+    console.log('⚙️ [Settings] activated, refreshing state');
+    await this.refreshAll();
+  }
+
+  public dispose(): void {
+    this.tvStatusLabel = null;
+    this.tvToggleButton = null;
+    this.volumeSlider = null;
+    this.volumeValueLabel = null;
+    this.volumeMuteButton = null;
+    this.volumeDownButton = null;
+    this.volumeUpButton = null;
+    this.outputValueLabel = null;
+    this.outputButtons.clear();
+  }
+
+  private renderAudioCard(): HTMLElement {
+    const audioCard = document.createElement('div');
+    audioCard.className = 'settings-audio-card';
+    const header = document.createElement('div');
+    header.className = 'settings-audio-header';
+    const audioIcon = document.createElement('div');
+    audioIcon.className = 'settings-audio-icon';
+    audioIcon.innerHTML = this.svgVolumeUp(20);
+    const audioTitle = document.createElement('div');
+    audioTitle.className = 'settings-audio-title';
+    audioTitle.textContent = 'Звук';
+    header.append(audioIcon, audioTitle);
+    audioCard.appendChild(header);
+    audioCard.appendChild(this.renderVolumeRow());
+    audioCard.appendChild(this.renderMuteRow());
+    audioCard.appendChild(this.renderOutputRow());
+    this.updateMuteButton();
+    this.updateOutputButtons();
+    return audioCard;
+  }
+
+  private renderVolumeRow(): HTMLElement {
+    const volumeRow = document.createElement('div');
+    volumeRow.className = 'settings-volume-row';
+    this.volumeDownButton = document.createElement('button');
+    this.volumeDownButton.className = 'settings-volume-down-btn';
+    this.volumeDownButton.innerHTML = this.svgVolumeDown(16);
+    this.volumeDownButton.addEventListener('click', () => {
+      void this.handleAdjustVolume(-1);
+    });
+    this.volumeSlider = document.createElement('input');
+    this.volumeSlider.type = 'range';
+    this.volumeSlider.min = '0';
+    this.volumeSlider.max = '100';
+    this.volumeSlider.step = '1';
+    this.volumeSlider.className = 'settings-volume-slider';
+    this.volumeSlider.value = String(this.audioOutputManager.getVolume());
+    this.volumeSlider.addEventListener('input', () => {
+      if (this.volumeValueLabel && this.volumeSlider) {
+        this.volumeValueLabel.textContent = `${this.volumeSlider.value}%`;
+      }
+    });
+    this.volumeSlider.addEventListener('change', () => {
+      void this.handleSetVolume(Number(this.volumeSlider?.value ?? 0));
+    });
+    this.volumeUpButton = document.createElement('button');
+    this.volumeUpButton.className = 'settings-volume-up-btn';
+    this.volumeUpButton.innerHTML = this.svgVolumeUp(16);
+    this.volumeUpButton.addEventListener('click', () => {
+      void this.handleAdjustVolume(1);
+    });
+    this.volumeValueLabel = document.createElement('span');
+    this.volumeValueLabel.className = 'settings-volume-label';
+    this.volumeValueLabel.textContent = `${this.audioOutputManager.getVolume()}%`;
+    volumeRow.append(
+      this.volumeDownButton,
+      this.volumeSlider,
+      this.volumeUpButton,
+      this.volumeValueLabel,
+    );
+    return volumeRow;
+  }
+
+  private renderMuteRow(): HTMLElement {
+    const muteRow = document.createElement('div');
+    muteRow.className = 'settings-mute-row';
+    this.volumeMuteButton = document.createElement('button');
+    this.volumeMuteButton.className = 'settings-mute-btn';
+    this.volumeMuteButton.addEventListener('click', () => {
+      void this.handleToggleMute();
+    });
+    muteRow.appendChild(this.volumeMuteButton);
+    return muteRow;
   }
 
   private formatOutputName(key: string): string {

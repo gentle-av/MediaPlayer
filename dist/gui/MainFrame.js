@@ -64,11 +64,24 @@ export class MainFrame {
             else if (currentRenderedQuery !== state.searchQuery) {
                 await this.updateContent(this.currentTab);
             }
+            const searchWrapper = appContainer.querySelector('.search-wrapper');
+            if (searchWrapper) {
+                if (state.currentTab === 'settings') {
+                    searchWrapper.style.display = 'none';
+                }
+                else {
+                    searchWrapper.style.display = 'inline-flex';
+                }
+            }
         });
         this.updateContent(this.currentTab);
         this.bindPlayerControls();
         setTimeout(() => {
             this.header.togglePlaylistButtonVisibility(this.currentTab === 'audio');
+            const searchWrapper = appContainer.querySelector('.search-wrapper');
+            if (searchWrapper && this.currentTab === 'settings') {
+                searchWrapper.style.display = 'none';
+            }
         }, 0);
         this.bindHeaderEvents(appContainer);
         return appContainer;
@@ -89,6 +102,15 @@ export class MainFrame {
             const clearBtn = headerElement.querySelector('.search-clear-btn');
             if (clearBtn) {
                 clearBtn.classList.remove('visible');
+            }
+            const searchWrapper = headerElement.querySelector('.search-wrapper');
+            if (searchWrapper) {
+                if (targetTab === 'settings') {
+                    searchWrapper.style.display = 'none';
+                }
+                else {
+                    searchWrapper.style.display = 'inline-flex';
+                }
             }
         }
         const tabConfigs = {

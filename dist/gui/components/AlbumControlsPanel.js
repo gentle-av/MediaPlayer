@@ -23,17 +23,16 @@ export class AlbumControlsPanel {
     `;
         playBtn.addEventListener('click', async () => {
             if (this.albumTracks.length > 0) {
-                const names = this.playlistStore.getPlaylistNames();
-                const activePlaylistName = names && names.length > 0 ? names[0] : 'Избранное';
-                if (!this.playlistStore.getPlaylist(activePlaylistName)) {
-                    this.playlistStore.createPlaylist(activePlaylistName);
+                this.playlistStore.setActivePlaylistName('Избранное');
+                if (!this.playlistStore.getPlaylist('Избранное')) {
+                    this.playlistStore.createPlaylist('Избранное');
                 }
-                this.playlistStore.clearPlaylist(activePlaylistName);
+                this.playlistStore.clearPlaylist('Избранное');
                 const filePaths = this.albumTracks.map((track) => track.filePath);
-                this.playlistStore.addTracksToPlaylist(activePlaylistName, filePaths);
-                await this.playlistStore.syncWithServer(activePlaylistName);
+                this.playlistStore.addTracksToPlaylist('Избранное', filePaths);
+                await this.playlistStore.syncWithServer('Избранное');
                 this.onCloseParent();
-                this.playbackManager.playMusic(this.albumTracks[0], this.albumTracks);
+                await this.playbackManager.playMusic(this.albumTracks[0], this.albumTracks);
                 ToastService.getInstance().show('Альбом добавлен в плейлист и запущен', 'success');
             }
         });
@@ -48,8 +47,7 @@ export class AlbumControlsPanel {
     `;
         addBtn.addEventListener('click', async () => {
             if (this.albumTracks.length > 0) {
-                const names = this.playlistStore.getPlaylistNames();
-                const activePlaylistName = names && names.length > 0 ? names[0] : 'Избранное';
+                const activePlaylistName = this.playlistStore.getActivePlaylistName();
                 if (!this.playlistStore.getPlaylist(activePlaylistName)) {
                     this.playlistStore.createPlaylist(activePlaylistName);
                 }

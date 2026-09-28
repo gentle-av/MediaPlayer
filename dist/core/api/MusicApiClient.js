@@ -168,19 +168,13 @@ export class MusicApiClient extends BaseApiClient {
             return null;
         }
     }
-    async playAudioPlaylist(trackPaths) {
-        try {
-            const cleanPaths = trackPaths.map((path) => path.replace(/\\/g, '/'));
-            const response = await this.request('api/audio/playlist', {
-                method: 'POST',
-                body: JSON.stringify({ tracks: cleanPaths }),
-            });
-            return response && response.status === 200;
-        }
-        catch (error) {
-            console.error('Failed to load playlist to backend:', error);
-            return false;
-        }
+    async playAudioPlaylist(trackPaths, index = 0) {
+        const cleanPaths = trackPaths.map((path) => path.replace(/\\/g, '/'));
+        const response = await this.request('api/audio/playlist', {
+            method: 'POST',
+            body: JSON.stringify({ tracks: cleanPaths, index }),
+        });
+        return response && response.status === 200;
     }
     async changeAudioTrackByIndex(index) {
         try {

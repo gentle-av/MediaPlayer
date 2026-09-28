@@ -4,6 +4,7 @@ export class PlaylistStore {
         this.musicStore = musicStore;
         this.playlists = new Map();
         this.listeners = [];
+        this.activePlaylistName = 'Избранное';
     }
     subscribe(listener) {
         this.listeners.push(listener);
@@ -13,6 +14,18 @@ export class PlaylistStore {
     }
     notifyListeners() {
         this.listeners.forEach((listener) => listener());
+    }
+    getActivePlaylistName() {
+        return this.activePlaylistName;
+    }
+    setActivePlaylistName(name) {
+        if (!name || !name.trim())
+            return;
+        this.activePlaylistName = name.trim();
+        this.notifyListeners();
+    }
+    getActivePlaylist() {
+        return this.playlists.get(this.activePlaylistName);
     }
     createPlaylist(name) {
         if (!name || !name.trim()) {
@@ -35,6 +48,10 @@ export class PlaylistStore {
             throw new Error(`Playlist "${trimmedName}" not found`);
         }
         this.playlists.delete(trimmedName);
+        if (this.activePlaylistName === trimmedName) {
+            const remaining = Array.from(this.playlists.keys());
+            this.activePlaylistName = remaining.length > 0 ? remaining[0] : '';
+        }
         this.notifyListeners();
     }
     getPlaylist(name) {
@@ -159,6 +176,9 @@ export class PlaylistStore {
         playlist.rename(trimmedNewName);
         this.playlists.delete(trimmedOldName);
         this.playlists.set(trimmedNewName, playlist);
+        if (this.activePlaylistName === trimmedOldName) {
+            this.activePlaylistName = trimmedNewName;
+        }
         this.notifyListeners();
     }
     clearPlaylist(playlistName) {

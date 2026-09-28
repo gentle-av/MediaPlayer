@@ -14,7 +14,7 @@ export class InitialPlaybackSyncService {
             await this.loadPlaylistsFromServer();
             const [videoStatus, musicStatus] = await Promise.all([
                 this.videoApiClient.getVideoStatus(''),
-                this.musicApiClient.getAudioTimeInfo(),
+                this.musicApiClient.getPlaybackState(),
             ]);
             console.log('📡 [SyncService] Ответ видео:', videoStatus);
             console.log('📡 [SyncService] Ответ аудио:', musicStatus);
@@ -35,34 +35,31 @@ export class InitialPlaybackSyncService {
                 console.log('🎵 [SyncService] Активный аудиопоток:', audioMetrics);
                 this.playbackManager.syncInitialType('music');
                 let trackPath = audioMetrics.currentTrackPath;
+                if (!trackPath && audioMetrics.currentTrack) {
+                    trackPath = audioMetrics.currentTrack;
+                }
                 if (!trackPath && musicStatus.currentTrackPath) {
                     trackPath = musicStatus.currentTrackPath;
                 }
+                if (!trackPath && musicStatus.currentTrack) {
+                    trackPath = musicStatus.currentTrack;
+                }
                 if (!trackPath) {
-                    const matchedTrack = this.musicStore
-                        .getAllTracks()
-                        .find((t) => Math.abs(t.duration - audioMetrics.duration) < 2);
-                    if (matchedTrack) {
-                        trackPath = matchedTrack.filePath;
-                    }
+                    console.log('🗒️ [SyncService] Путь к треку отсутствует, пропуск синхронизации');
+                    return;
                 }
-                if (trackPath) {
-                    const track = this.findTrackByNormalizedPath(trackPath);
-                    console.log('🗂️ [SyncService] Поиск метаданных трека:', track);
-                    if (track) {
-                        this.musicStore.setCurrentTrack(track);
-                        await this.hydratePlaylistForTrack(track);
-                        this.playbackManager['mediaPlayer'].updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
-                        this.playbackManager['mediaPlayer'].setPlayState(audioMetrics.isPlaying ?? true);
-                        this.playbackManager['mediaPlayer'].updateProgress(audioMetrics.currentTime, audioMetrics.duration);
-                        this.playbackManager.startPolling(track.filePath);
-                        return;
-                    }
+                const track = this.findTrackByNormalizedPath(trackPath);
+                console.log('🗂️ [SyncService] Поиск метаданных трека:', track);
+                if (!track) {
+                    console.warn('⚠️ [SyncService] Метаданные трека не найдены');
+                    return;
                 }
-                console.warn('⚠️ [SyncService] Путь к треку не определен.');
-                this.playbackManager['mediaPlayer'].updateMediaInfo('Active Playback', 'Audio Stream', undefined, 'music');
+                this.musicStore.setCurrentTrack(track);
+                await this.hydratePlaylistForTrack(track);
+                this.playbackManager['mediaPlayer'].updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
+                this.playbackManager['mediaPlayer'].setPlayState(audioMetrics.isPlaying ?? true);
                 this.playbackManager['mediaPlayer'].updateProgress(audioMetrics.currentTime, audioMetrics.duration);
-                this.playbackManager.startPolling('');
+                this.playbackManager.startPolling(track.filePath);
             }
             else {
                 console.log('🗒️ [SyncService] Активного воспроизведения нет.');
@@ -150,20 +147,7 @@ export class InitialPlaybackSyncService {
                 const realIndex = tracks.findIndex((t) => this.normalizePath(t.filePath) === target);
                 if (realIndex < 0)
                     continue;
-                const backendState = await this.musicApiClient.getPlaybackState();
-                const backendData = backendState?.data || backendState;
-                const backendTrack = backendData?.currentTrack || '';
-                const backendTotal = backendData?.totalTracks || 0;
-                const needsSync = backendTotal !== tracks.length ||
-                    this.normalizePath(backendTrack) !== target;
-                if (needsSync) {
-                    console.log('🔄 [SyncService] Синхронизация плейлиста с mpv:', pl.name);
-                    const pathsToSend = tracks.map((t) => t.filePath);
-                    const ok = await this.musicApiClient.playAudioPlaylist(pathsToSend);
-                    if (ok && realIndex > 0) {
-                        await this.musicApiClient.changeAudioTrackByIndex(realIndex);
-                    }
-                }
+                this.playlistStore.setActivePlaylistName(pl.name);
                 this.playbackManager['currentPlaylist'] = tracks;
                 this.playbackManager['currentTrackIndex'] = realIndex;
                 console.log('📚 [SyncService] Плейлист восстановлен:', pl.name, 'индекс', realIndex);

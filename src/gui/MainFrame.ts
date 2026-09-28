@@ -89,11 +89,27 @@ export class MainFrame {
       } else if (currentRenderedQuery !== state.searchQuery) {
         await this.updateContent(this.currentTab);
       }
+      const searchWrapper = appContainer.querySelector(
+        '.search-wrapper',
+      ) as HTMLElement;
+      if (searchWrapper) {
+        if (state.currentTab === 'settings') {
+          searchWrapper.style.display = 'none';
+        } else {
+          searchWrapper.style.display = 'inline-flex';
+        }
+      }
     });
     this.updateContent(this.currentTab);
     this.bindPlayerControls();
     setTimeout(() => {
       this.header.togglePlaylistButtonVisibility(this.currentTab === 'audio');
+      const searchWrapper = appContainer.querySelector(
+        '.search-wrapper',
+      ) as HTMLElement;
+      if (searchWrapper && this.currentTab === 'settings') {
+        searchWrapper.style.display = 'none';
+      }
     }, 0);
     this.bindHeaderEvents(appContainer);
     return appContainer;
@@ -132,6 +148,16 @@ export class MainFrame {
       ) as HTMLElement;
       if (clearBtn) {
         clearBtn.classList.remove('visible');
+      }
+      const searchWrapper = headerElement.querySelector(
+        '.search-wrapper',
+      ) as HTMLElement;
+      if (searchWrapper) {
+        if (targetTab === 'settings') {
+          searchWrapper.style.display = 'none';
+        } else {
+          searchWrapper.style.display = 'inline-flex';
+        }
       }
     }
     const tabConfigs = {

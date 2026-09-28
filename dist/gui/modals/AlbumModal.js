@@ -146,7 +146,7 @@ export class AlbumModal {
             row.addEventListener('click', (e) => {
                 if (e.target.closest('.track-drag-marker'))
                     return;
-                this.playbackManager.playMusic(track);
+                this.playbackManager.playMusic(track, this.albumTracks);
             });
             this.setupDragAndDropEvents(row, tableContainer);
             tableContainer.appendChild(row);

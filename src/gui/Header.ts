@@ -4,6 +4,7 @@ import { PlaybackManager } from '../core/player/PlaybackManager.js';
 import { UiStateStore } from '../core/store/UiStateStore.js';
 import { PlaylistClearConfirmModal } from './modals/PlaylistClearConfirmModal.js';
 import { MusicStore } from '../core/store/MusicStore.js';
+import { ToastService } from './components/ToastService.js';
 
 export class Header {
   private pageTitleElement: HTMLElement | null = null;
@@ -196,8 +197,11 @@ export class Header {
     badge.textContent = '0';
     playlistBtn.appendChild(badge);
     playlistBtn.addEventListener('click', () => {
-      const names = this.playlistStore.getPlaylistNames();
-      const activeName = names && names.length > 0 ? names[0] : 'Избранное';
+      const activeName = this.playlistStore.getActivePlaylistName();
+      if (!activeName) {
+        ToastService.getInstance().show('Нет активного плейлиста', 'info');
+        return;
+      }
       if (!this.playlistStore.getPlaylist(activeName)) {
         try {
           this.playlistStore.createPlaylist(activeName);
