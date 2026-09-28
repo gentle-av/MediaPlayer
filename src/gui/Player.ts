@@ -129,11 +129,8 @@ export class Player implements IMediaPlayer {
         }
       },
     );
-    contentWrapperElement.append(
-      metadataContainer,
-      timelineContainer,
-      controlsContainer,
-    );
+    rootPlayerElement.appendChild(timelineContainer);
+    contentWrapperElement.append(metadataContainer, controlsContainer);
     rootPlayerElement.appendChild(contentWrapperElement);
     return rootPlayerElement;
   }
