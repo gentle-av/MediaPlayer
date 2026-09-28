@@ -178,45 +178,28 @@ export class PlaybackManager {
             try {
                 const response = this.currentType === 'video'
                     ? await this.videoApiClient.getVideoStatus(targetPath)
-                    : await this.musicApiClient.getAudioTimeInfo();
+                    : await this.musicApiClient.getPlaybackState();
                 if (response) {
                     const metrics = response.data || response;
-                    let current;
-                    let total;
-                    let isPlaying;
-                    let ended;
-                    if (metrics.currentTime !== undefined) {
-                        current = metrics.currentTime;
-                        total = metrics.duration;
-                        isPlaying = metrics.isPlaying;
-                        ended = metrics.ended;
-                    }
-                    else if (metrics.data && metrics.data.currentTime !== undefined) {
-                        current = metrics.data.currentTime;
-                        total = metrics.data.duration;
-                        isPlaying = metrics.data.isPlaying;
-                        ended = metrics.data.ended;
-                    }
+                    const current = metrics.currentTime;
+                    const total = metrics.duration;
                     if (current !== undefined && total !== undefined) {
                         this.mediaPlayer.updateProgress(current, total);
-                        const reachedEnd = total > 0 && current >= total - 1;
-                        if (this.currentType === 'music' &&
-                            (ended === true || isPlaying === false || reachedEnd)) {
+                        const reachedEnd = total > 0 && current >= total - 2;
+                        if (this.currentType === 'music' && reachedEnd) {
                             this.playNextTrack();
-                        }
-                        else if (this.currentType === 'video' &&
-                            (ended === true || isPlaying === false)) {
-                            this.stopCurrentPlayback();
-                            return;
                         }
                     }
-                    else if (ended === true || isPlaying === false) {
-                        if (this.currentType === 'music') {
-                            this.playNextTrack();
-                        }
-                        else if (this.currentType === 'video') {
-                            this.stopCurrentPlayback();
-                            return;
+                    if (this.currentType === 'music' &&
+                        typeof metrics.currentIndex === 'number' &&
+                        metrics.currentIndex !== this.currentTrackIndex &&
+                        metrics.currentIndex >= 0 &&
+                        metrics.currentIndex < this.currentPlaylist.length) {
+                        const newTrack = this.currentPlaylist[metrics.currentIndex];
+                        if (newTrack) {
+                            this.currentTrackIndex = metrics.currentIndex;
+                            this.musicStore.setCurrentTrack(newTrack);
+                            this.mediaPlayer.updateMediaInfo(newTrack.title, newTrack.artist, undefined, 'music', newTrack.album);
                         }
                     }
                 }
