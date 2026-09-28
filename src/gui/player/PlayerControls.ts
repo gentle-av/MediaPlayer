@@ -46,12 +46,14 @@ export class PlayerControls {
     if (playbackType === 'video' || videoPath) {
       this.activeVideoPath = videoPath || '';
       if (this.audioStreamButton) {
-        this.audioStreamButton.style.display = 'flex';
+        this.audioStreamButton.style.visibility = 'visible';
+        this.audioStreamButton.style.pointerEvents = 'auto';
       }
     } else {
       this.activeVideoPath = '';
       if (this.audioStreamButton) {
-        this.audioStreamButton.style.display = 'none';
+        this.audioStreamButton.style.visibility = 'hidden';
+        this.audioStreamButton.style.pointerEvents = 'none';
       }
     }
   }
