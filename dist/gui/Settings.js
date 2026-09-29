@@ -1,4 +1,5 @@
 import { ToastService } from './components/ToastService.js';
+import { Config } from '../core/config/Config.js';
 export class Settings {
     constructor(tvPlaybackManager, audioOutputManager) {
         this.tvPlaybackManager = tvPlaybackManager;
@@ -11,11 +12,13 @@ export class Settings {
         this.volumeMuteButton = null;
         this.volumeDownButton = null;
         this.volumeUpButton = null;
+        this.volumeValue = 50;
         this.volumeBusy = false;
         this.outputValueLabel = null;
         this.outputButtons = new Map();
         this.outputBusy = false;
         this.computerBusy = false;
+        this.syncMonitorPower = true;
         if (!tvPlaybackManager) {
             throw new Error('[Settings] TvPlaybackManager is required');
         }
@@ -72,6 +75,11 @@ export class Settings {
                 : await this.tvPlaybackManager.turnOn();
             if (success) {
                 ToastService.getInstance().show(isActive ? 'Телевизор выключен' : 'Телевизор включён', 'success');
+                if (!isActive && this.syncMonitorPower) {
+                    await fetch(`${Config.getConfig().baseUrl}/api/monitor/turn_off`, {
+                        method: 'POST',
+                    }).catch((err) => console.warn('[Settings] Failed to turn off monitor:', err));
+                }
             }
             else {
                 ToastService.getInstance().show('Не удалось изменить состояние телевизора', 'error');
@@ -234,7 +242,26 @@ export class Settings {
         this.tvToggleButton.addEventListener('click', () => {
             void this.handleTvToggle();
         });
-        tvCard.append(iconContainer, tvTitle, this.tvStatusLabel, this.tvToggleButton);
+        const syncRow = document.createElement('div');
+        syncRow.className = 'settings-sync-row';
+        syncRow.style.display = 'flex';
+        syncRow.style.alignItems = 'center';
+        syncRow.style.gap = '8px';
+        syncRow.style.marginTop = '8px';
+        const syncCheckbox = document.createElement('input');
+        syncCheckbox.type = 'checkbox';
+        syncCheckbox.id = 'syncMonitorCheckbox';
+        syncCheckbox.checked = this.syncMonitorPower;
+        syncCheckbox.addEventListener('change', (e) => {
+            this.syncMonitorPower = e.target.checked;
+        });
+        const syncLabel = document.createElement('label');
+        syncLabel.htmlFor = 'syncMonitorCheckbox';
+        syncLabel.textContent = 'Гасить монитор';
+        syncLabel.style.fontSize = '0.85rem';
+        syncLabel.style.cursor = 'pointer';
+        syncRow.append(syncCheckbox, syncLabel);
+        tvCard.append(iconContainer, tvTitle, this.tvStatusLabel, this.tvToggleButton, syncRow);
         return tvCard;
     }
     async onActivate() {
@@ -327,38 +354,16 @@ export class Settings {
         return labels[key] ?? key;
     }
     svgTv(size) {
-        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24"
-      fill="none" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round">
-      <rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect>
-      <polyline points="17 2 12 7 7 2"></polyline>
-    </svg>`;
+        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>`;
     }
     svgVolumeUp(size) {
-        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24"
-      fill="none" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-      <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
-    </svg>`;
+        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path><path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path></svg>`;
     }
     svgVolumeDown(size) {
-        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24"
-      fill="none" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-      <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-    </svg>`;
+        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>`;
     }
     svgVolumeMute(size) {
-        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24"
-      fill="none" stroke="currentColor" stroke-width="2"
-      stroke-linecap="round" stroke-linejoin="round">
-      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-      <line x1="23" y1="9" x2="17" y2="15"></line>
-      <line x1="17" y1="9" x2="23" y2="15"></line>
-    </svg>`;
+        return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>`;
     }
     async handleComputerSleep() {
         if (this.computerBusy)
