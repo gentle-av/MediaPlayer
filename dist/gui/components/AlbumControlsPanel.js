@@ -118,9 +118,9 @@ export class AlbumControlsPanel {
                     ToastService.getInstance().show(`Ошибка сервера: ${response.status}`, 'error');
                     return;
                 }
-                const result = await response.json();
-                if (!result.success) {
-                    ToastService.getInstance().show(result.error || 'Ошибка удаления', 'error');
+                const resultValue = await response.json();
+                if (!resultValue.success) {
+                    ToastService.getInstance().show(resultValue.error || 'Ошибка удаления', 'error');
                     return;
                 }
                 await this.musicStore.loadTracksFromServer();

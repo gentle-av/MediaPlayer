@@ -157,10 +157,10 @@ export class AlbumControlsPanel {
           );
           return;
         }
-        const result = await response.json();
-        if (!result.success) {
+        const resultValue = await response.json();
+        if (!resultValue.success) {
           ToastService.getInstance().show(
-            result.error || 'Ошибка удаления',
+            resultValue.error || 'Ошибка удаления',
             'error',
           );
           return;

@@ -110,11 +110,11 @@ export class PlaybackManager {
       );
       this.musicStore.setCurrentTrack(track);
       const paths = this.currentPlaylist.map((t) => t.filePath);
-      const success = await this.musicApiClient.playAudioPlaylist(
+      const isSuccess = await this.musicApiClient.playAudioPlaylist(
         paths,
         this.currentTrackIndex,
       );
-      if (success) {
+      if (isSuccess) {
         this.mediaPlayer.setPlayState(true);
       }
       this.startPolling(track.filePath);
@@ -138,10 +138,10 @@ export class PlaybackManager {
         track.album,
       );
       this.musicStore.setCurrentTrack(track);
-      const success = await this.musicApiClient.changeAudioTrackByIndex(
+      const isSuccess = await this.musicApiClient.changeAudioTrackByIndex(
         this.currentTrackIndex,
       );
-      if (success) {
+      if (isSuccess) {
         this.isAudioPaused = false;
         this.mediaPlayer.setPlayState(true);
       }
@@ -151,10 +151,10 @@ export class PlaybackManager {
 
   public async togglePlay(): Promise<void> {
     if (this.currentType === 'music') {
-      const success = await this.musicApiClient.toggleAudioPlayback(
+      const isSuccess = await this.musicApiClient.toggleAudioPlayback(
         this.isAudioPaused,
       );
-      if (success) {
+      if (isSuccess) {
         this.isAudioPaused = !this.isAudioPaused;
         this.mediaPlayer.setPlayState(!this.isAudioPaused);
       }
@@ -167,6 +167,20 @@ export class PlaybackManager {
     if (this.currentType === 'video') {
       await this.videoApiClient.closeVideo();
     } else if (this.currentType === 'music') {
+      const playlistStore = (window as any).app?.playlistStore;
+      if (playlistStore) {
+        const activePlaylistName = playlistStore.getActivePlaylistName();
+        if (activePlaylistName) {
+          playlistStore.clearPlaylist(activePlaylistName);
+          this.currentPlaylist = [];
+          this.currentTrackIndex = -1;
+          await playlistStore
+            .syncWithServer(activePlaylistName)
+            .catch((err: any) => {
+              console.error(err);
+            });
+        }
+      }
       await this.musicApiClient.stopAudioPlayback();
     }
     this.stopCurrentPlayback();
@@ -231,12 +245,12 @@ export class PlaybackManager {
         return;
       }
       try {
-        const response =
+        const responseData =
           this.currentType === 'video'
             ? await this.videoApiClient.getVideoStatus(targetPath)
             : await this.musicApiClient.getPlaybackState();
-        if (response) {
-          const metrics = response.data || response;
+        if (responseData) {
+          const metrics = responseData.data || responseData;
           const current = metrics.currentTime;
           const total = metrics.duration;
           if (current !== undefined && total !== undefined) {

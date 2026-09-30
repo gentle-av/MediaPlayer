@@ -77,8 +77,8 @@ export class PlaybackManager {
             this.mediaPlayer.updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
             this.musicStore.setCurrentTrack(track);
             const paths = this.currentPlaylist.map((t) => t.filePath);
-            const success = await this.musicApiClient.playAudioPlaylist(paths, this.currentTrackIndex);
-            if (success) {
+            const isSuccess = await this.musicApiClient.playAudioPlaylist(paths, this.currentTrackIndex);
+            if (isSuccess) {
                 this.mediaPlayer.setPlayState(true);
             }
             this.startPolling(track.filePath);
@@ -92,8 +92,8 @@ export class PlaybackManager {
             this.currentTrackIndex = newIndex;
             this.mediaPlayer.updateMediaInfo(track.title, track.artist, undefined, 'music', track.album);
             this.musicStore.setCurrentTrack(track);
-            const success = await this.musicApiClient.changeAudioTrackByIndex(this.currentTrackIndex);
-            if (success) {
+            const isSuccess = await this.musicApiClient.changeAudioTrackByIndex(this.currentTrackIndex);
+            if (isSuccess) {
                 this.isAudioPaused = false;
                 this.mediaPlayer.setPlayState(true);
             }
@@ -102,8 +102,8 @@ export class PlaybackManager {
     }
     async togglePlay() {
         if (this.currentType === 'music') {
-            const success = await this.musicApiClient.toggleAudioPlayback(this.isAudioPaused);
-            if (success) {
+            const isSuccess = await this.musicApiClient.toggleAudioPlayback(this.isAudioPaused);
+            if (isSuccess) {
                 this.isAudioPaused = !this.isAudioPaused;
                 this.mediaPlayer.setPlayState(!this.isAudioPaused);
             }
@@ -117,6 +117,20 @@ export class PlaybackManager {
             await this.videoApiClient.closeVideo();
         }
         else if (this.currentType === 'music') {
+            const playlistStore = window.app?.playlistStore;
+            if (playlistStore) {
+                const activePlaylistName = playlistStore.getActivePlaylistName();
+                if (activePlaylistName) {
+                    playlistStore.clearPlaylist(activePlaylistName);
+                    this.currentPlaylist = [];
+                    this.currentTrackIndex = -1;
+                    await playlistStore
+                        .syncWithServer(activePlaylistName)
+                        .catch((err) => {
+                        console.error(err);
+                    });
+                }
+            }
             await this.musicApiClient.stopAudioPlayback();
         }
         this.stopCurrentPlayback();
@@ -176,11 +190,11 @@ export class PlaybackManager {
                 return;
             }
             try {
-                const response = this.currentType === 'video'
+                const responseData = this.currentType === 'video'
                     ? await this.videoApiClient.getVideoStatus(targetPath)
                     : await this.musicApiClient.getPlaybackState();
-                if (response) {
-                    const metrics = response.data || response;
+                if (responseData) {
+                    const metrics = responseData.data || responseData;
                     const current = metrics.currentTime;
                     const total = metrics.duration;
                     if (current !== undefined && total !== undefined) {
