@@ -9,6 +9,12 @@ export class AudioOutputManager {
   private availableOutputs: string[] = ['speakers', 'headphones'];
   private pendingOperation: Promise<unknown> | null = null;
 
+  /**
+   * Флаг, что реальное состояние уже получено с сервера.
+   * Пока false — UI не должен подсвечивать ни одну кнопку выхода.
+   */
+  private stateLoaded = false;
+
   constructor(private readonly apiClient: AudioOutputApiClient) {
     if (!apiClient) {
       throw new Error('[AudioOutputManager] AudioOutputApiClient is required');
@@ -27,6 +33,10 @@ export class AudioOutputManager {
     return this.currentOutput;
   }
 
+  public isStateLoaded(): boolean {
+    return this.stateLoaded;
+  }
+
   public getAvailableOutputs(): string[] {
     return [...this.availableOutputs];
   }
@@ -36,14 +46,27 @@ export class AudioOutputManager {
       this.apiClient.getVolume(),
       this.apiClient.getOutput(),
     ]);
+
     if (volume !== null) {
       this.volume = volume;
     }
+
     if (output) {
-      this.currentOutput = output.current as AudioOutputType;
+      this.currentOutput = this.mapRawOutputId(output.current);
+
       if (output.available.length > 0) {
-        this.availableOutputs = output.available;
+        const mapped = output.available.map((id: string) =>
+          this.mapRawOutputId(id),
+        );
+        // Убираем дубликаты, сохраняя порядок.
+        this.availableOutputs = Array.from(new Set(mapped));
       }
+
+      this.stateLoaded = true;
+    } else {
+      console.warn(
+        '[AudioOutputManager] refreshState: output state unavailable',
+      );
     }
   }
 
@@ -83,9 +106,21 @@ export class AudioOutputManager {
       const ok = await this.apiClient.setOutput(target);
       if (ok) {
         this.currentOutput = target as AudioOutputType;
+        await this.refreshState().catch((error) => console.warn(error));
       }
       return ok;
     });
+  }
+
+  private mapRawOutputId(rawId: string): AudioOutputType {
+    const lower = rawId.toLowerCase();
+    if (lower === 'speakers' || lower === 'динамики') {
+      return 'speakers';
+    }
+    if (lower === 'headphones' || lower === 'наушники') {
+      return 'headphones';
+    }
+    return 'speakers';
   }
 
   private async enqueue<T>(op: () => Promise<T>): Promise<T> {

@@ -36,11 +36,15 @@ export class Settings implements Component {
   private renderOutputRow(): HTMLElement {
     const row = document.createElement('div');
     row.className = 'settings-output-row';
+    const outputLabels: Record<string, string> = {
+      speakers: 'Динамики',
+      headphones: 'Наушники',
+    };
     const available = this.audioOutputManager.getAvailableOutputs();
     available.forEach((key) => {
       const btn = document.createElement('button');
       btn.dataset.output = key;
-      btn.textContent = this.formatOutputName(key);
+      btn.textContent = outputLabels[key] ?? key;
       btn.className = 'settings-output-btn';
       btn.addEventListener('click', () => {
         void this.handleSwitchOutput(key);
@@ -52,7 +56,13 @@ export class Settings implements Component {
   }
 
   private async refreshAll(): Promise<void> {
-    await Promise.all([this.handleTvRefresh(), this.handleAudioRefresh()]);
+    try {
+      await Promise.all([this.handleTvRefresh(), this.handleAudioRefresh()]);
+    } catch (error) {
+      console.warn('[Settings] refreshAll encountered errors:', error);
+    } finally {
+      this.updateAudioUi();
+    }
   }
 
   private async handleTvRefresh(): Promise<void> {
@@ -66,9 +76,10 @@ export class Settings implements Component {
   private async handleAudioRefresh(): Promise<void> {
     try {
       await this.audioOutputManager.refreshState();
-      this.updateAudioUi();
     } catch (error) {
       console.warn('[Settings] audio refresh failed:', error);
+    } finally {
+      this.updateOutputButtons();
     }
   }
 
@@ -221,6 +232,13 @@ export class Settings implements Component {
   }
 
   private updateOutputButtons(): void {
+    if (!this.audioOutputManager.isStateLoaded()) {
+      this.outputButtons.forEach((btn) => {
+        btn.disabled = this.outputBusy;
+        btn.classList.remove('active');
+      });
+      return;
+    }
     const current = this.audioOutputManager.getCurrentOutput();
     this.outputButtons.forEach((btn, key) => {
       btn.disabled = this.outputBusy;
@@ -248,7 +266,8 @@ export class Settings implements Component {
       targetElement.removeChild(targetElement.firstChild);
     }
     targetElement.appendChild(element);
-    void this.refreshAll();
+    await this.refreshAll();
+
     return element;
   }
 
@@ -393,8 +412,10 @@ export class Settings implements Component {
     const labels: Record<string, string> = {
       speakers: 'Динамики',
       headphones: 'Наушники',
+      динамики: 'Динамики',
+      наушники: 'Наушники',
     };
-    return labels[key] ?? key;
+    return labels[key.toLowerCase()] ?? key;
   }
 
   private svgTv(size: number): string {

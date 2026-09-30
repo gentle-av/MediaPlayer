@@ -44,11 +44,19 @@ export class AudioOutputApiClient extends BaseApiClient {
     async getOutput() {
         try {
             const response = await this.request('api/audio/output', { method: 'GET' });
+            // Диагностика: покажет в консоли, что реально вернул сервер.
+            console.log('[AudioOutputApiClient] getOutput raw:', response.data);
             if (!response.data?.success)
                 return null;
+            const rawCurrent = response.data.data?.current;
+            const rawAvailable = response.data.data?.available;
+            if (!rawCurrent) {
+                console.warn('[AudioOutputApiClient] getOutput: server did not return "current"');
+                return null;
+            }
             return {
-                current: response.data.data?.current ?? 'speakers',
-                available: response.data.data?.available ?? [],
+                current: rawCurrent,
+                available: rawAvailable ?? [],
             };
         }
         catch (error) {

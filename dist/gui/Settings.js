@@ -29,11 +29,15 @@ export class Settings {
     renderOutputRow() {
         const row = document.createElement('div');
         row.className = 'settings-output-row';
+        const outputLabels = {
+            speakers: 'Динамики',
+            headphones: 'Наушники',
+        };
         const available = this.audioOutputManager.getAvailableOutputs();
         available.forEach((key) => {
             const btn = document.createElement('button');
             btn.dataset.output = key;
-            btn.textContent = this.formatOutputName(key);
+            btn.textContent = outputLabels[key] ?? key;
             btn.className = 'settings-output-btn';
             btn.addEventListener('click', () => {
                 void this.handleSwitchOutput(key);
@@ -44,7 +48,15 @@ export class Settings {
         return row;
     }
     async refreshAll() {
-        await Promise.all([this.handleTvRefresh(), this.handleAudioRefresh()]);
+        try {
+            await Promise.all([this.handleTvRefresh(), this.handleAudioRefresh()]);
+        }
+        catch (error) {
+            console.warn('[Settings] refreshAll encountered errors:', error);
+        }
+        finally {
+            this.updateAudioUi();
+        }
     }
     async handleTvRefresh() {
         try {
@@ -57,10 +69,12 @@ export class Settings {
     async handleAudioRefresh() {
         try {
             await this.audioOutputManager.refreshState();
-            this.updateAudioUi();
         }
         catch (error) {
             console.warn('[Settings] audio refresh failed:', error);
+        }
+        finally {
+            this.updateOutputButtons();
         }
     }
     async handleTvToggle() {
@@ -197,6 +211,13 @@ export class Settings {
         }
     }
     updateOutputButtons() {
+        if (!this.audioOutputManager.isStateLoaded()) {
+            this.outputButtons.forEach((btn) => {
+                btn.disabled = this.outputBusy;
+                btn.classList.remove('active');
+            });
+            return;
+        }
         const current = this.audioOutputManager.getCurrentOutput();
         this.outputButtons.forEach((btn, key) => {
             btn.disabled = this.outputBusy;
@@ -223,7 +244,7 @@ export class Settings {
             targetElement.removeChild(targetElement.firstChild);
         }
         targetElement.appendChild(element);
-        void this.refreshAll();
+        await this.refreshAll();
         return element;
     }
     renderTvCard() {
@@ -350,8 +371,10 @@ export class Settings {
         const labels = {
             speakers: 'Динамики',
             headphones: 'Наушники',
+            динамики: 'Динамики',
+            наушники: 'Наушники',
         };
-        return labels[key] ?? key;
+        return labels[key.toLowerCase()] ?? key;
     }
     svgTv(size) {
         return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="13" rx="2" ry="2"></rect><polyline points="17 2 12 7 7 2"></polyline></svg>`;
