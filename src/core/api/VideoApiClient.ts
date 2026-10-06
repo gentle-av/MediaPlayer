@@ -63,10 +63,13 @@ export class VideoApiClient extends BaseApiClient<unknown> {
 
   public async toggleVideoPlayback(): Promise<boolean> {
     try {
-      const response = await this.request<{ isPlaying: boolean }>(
-        'api/video/toggle-play',
-        { method: 'POST' },
-      );
+      const status = await this.getVideoStatus('');
+      const isPaused = status ? status.paused : false;
+      const nextCommand = isPaused ? 'play' : 'pause';
+      const response = await this.request<unknown>('api/mpv/control', {
+        method: 'POST',
+        body: JSON.stringify({ command: nextCommand }),
+      });
       return response.status === 200;
     } catch (error) {
       console.error(error);

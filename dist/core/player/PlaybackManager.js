@@ -109,7 +109,13 @@ export class PlaybackManager {
             }
         }
         else if (this.currentType === 'video') {
-            await this.videoApiClient.toggleVideoPlayback();
+            const isSuccess = await this.videoApiClient.toggleVideoPlayback();
+            if (isSuccess) {
+                const status = await this.videoApiClient.getVideoStatus(this.currentVideoPath);
+                if (status) {
+                    this.mediaPlayer.setPlayState(!status.paused);
+                }
+            }
         }
     }
     async stop() {
@@ -203,6 +209,9 @@ export class PlaybackManager {
                         if (this.currentType === 'music' && reachedEnd) {
                             this.playNextTrack();
                         }
+                    }
+                    if (this.currentType === 'video' && metrics.paused !== undefined) {
+                        this.mediaPlayer.setPlayState(!metrics.paused);
                     }
                     if (this.currentType === 'music' &&
                         typeof metrics.currentIndex === 'number' &&
