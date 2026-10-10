@@ -34,7 +34,7 @@ export class PlaybackManager {
                 await fetch(`${Config.getConfig().baseUrl}/api/mpv/seek`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ time: seconds }),
+                    body: JSON.stringify({ time: Number(seconds) }),
                 });
             }
             catch (error) {
