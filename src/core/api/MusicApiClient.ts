@@ -469,4 +469,31 @@ export class MusicApiClient extends BaseApiClient<unknown> {
       return false;
     }
   }
+
+  public async startLibraryScan(directory?: string): Promise<boolean> {
+    try {
+      const body = directory ? JSON.stringify({ dir: directory }) : '{}';
+      const response = await this.request<{ success: boolean }>(
+        'api/music/scan',
+        { method: 'POST', body },
+      );
+      return response.status === 200 && (response.data?.success ?? false);
+    } catch (error) {
+      console.error('[MusicApiClient] startLibraryScan failed:', error);
+      return false;
+    }
+  }
+
+  public async getScanStatus(): Promise<boolean> {
+    try {
+      const response = await this.request<{ scanning: boolean }>(
+        'api/music/scan/status',
+        { method: 'GET' },
+      );
+      return response.data?.scanning ?? false;
+    } catch (error) {
+      console.error('[MusicApiClient] getScanStatus failed:', error);
+      return false;
+    }
+  }
 }

@@ -374,5 +374,26 @@ export class MusicApiClient extends BaseApiClient {
             return false;
         }
     }
+    async startLibraryScan(directory) {
+        try {
+            const body = directory ? JSON.stringify({ dir: directory }) : '{}';
+            const response = await this.request('api/music/scan', { method: 'POST', body });
+            return response.status === 200 && (response.data?.success ?? false);
+        }
+        catch (error) {
+            console.error('[MusicApiClient] startLibraryScan failed:', error);
+            return false;
+        }
+    }
+    async getScanStatus() {
+        try {
+            const response = await this.request('api/music/scan/status', { method: 'GET' });
+            return response.data?.scanning ?? false;
+        }
+        catch (error) {
+            console.error('[MusicApiClient] getScanStatus failed:', error);
+            return false;
+        }
+    }
 }
 //# sourceMappingURL=MusicApiClient.js.map
