@@ -84,3 +84,25 @@ div.dynamic-confirm-modal-overlay .dynamic-confirm-dialog-panel {
 .dynamic-confirm-footer-actions button.dynamic-confirm-btn-confirm:hover {
   background: var(--confirm-btn-hover-bg);
 }
+
+.library-scan-dialog .library-scan-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 12px;
+  margin-top: 4px;
+  background: var(--bg0);
+  border: 1px solid var(--bg3);
+  border-radius: 8px;
+  color: var(--fg0);
+  font-size: 0.9rem;
+  outline: none;
+}
+.library-scan-dialog .library-scan-input:focus {
+  border-color: var(--yellow);
+}
+.library-scan-dialog .library-scan-status {
+  margin-top: 10px;
+  font-size: 0.8rem;
+  color: var(--fg3);
+  min-height: 16px;
+}
