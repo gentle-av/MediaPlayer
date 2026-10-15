@@ -46,26 +46,17 @@ export class PlayerControls {
     videoPath?: string,
     playbackType?: 'music' | 'video',
   ): void {
-    if (playbackType === 'video' || videoPath) {
+    const shouldShow = playbackType === 'video' || !!videoPath;
+    if (shouldShow) {
       this.activeVideoPath = videoPath || '';
-      if (this.audioStreamButton) {
-        this.audioStreamButton.style.visibility = 'visible';
-        this.audioStreamButton.style.pointerEvents = 'auto';
-      }
-      if (this.subtitleButton) {
-        this.subtitleButton.style.visibility = 'visible';
-        this.subtitleButton.style.pointerEvents = 'auto';
-      }
     } else {
       this.activeVideoPath = '';
-      if (this.audioStreamButton) {
-        this.audioStreamButton.style.visibility = 'hidden';
-        this.audioStreamButton.style.pointerEvents = 'none';
-      }
-      if (this.subtitleButton) {
-        this.subtitleButton.style.visibility = 'hidden';
-        this.subtitleButton.style.pointerEvents = 'none';
-      }
+    }
+    if (this.audioStreamButton) {
+      this.audioStreamButton.classList.toggle('visible', shouldShow);
+    }
+    if (this.subtitleButton) {
+      this.subtitleButton.classList.toggle('visible', shouldShow);
     }
   }
 
