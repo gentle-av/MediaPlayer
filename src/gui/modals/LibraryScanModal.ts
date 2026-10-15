@@ -27,6 +27,12 @@ export class LibraryScanModal {
     const status = document.createElement('div');
     status.className = 'library-scan-status';
     status.textContent = '';
+    const progressWrapper = document.createElement('div');
+    progressWrapper.className = 'library-scan-progress';
+    const progressFill = document.createElement('div');
+    progressFill.className = 'library-scan-progress-fill';
+    progressFill.style.width = '0%';
+    progressWrapper.appendChild(progressFill);
     const footer = document.createElement('div');
     footer.className = 'dynamic-confirm-footer-actions';
     const cancelBtn = document.createElement('button');
@@ -46,45 +52,58 @@ export class LibraryScanModal {
       }
       startBtn.disabled = true;
       input.disabled = true;
-      cancelBtn.disabled = true;
+      cancelBtn.style.display = 'none';
       status.textContent = 'Запуск сканирования...';
       const started = await this.apiClient.startLibraryScan(dir);
       if (!started) {
         status.textContent = 'Не удалось запустить сканирование.';
         startBtn.disabled = false;
         input.disabled = false;
-        cancelBtn.disabled = false;
+        cancelBtn.style.display = '';
         return;
       }
       status.textContent = 'Сканирование выполняется...';
-      this.pollStatus(status);
+      this.pollStatus(status, progressFill);
     });
     footer.append(cancelBtn, startBtn);
-    dialog.append(header, body, input, status, footer);
+    dialog.append(header, body, input, progressWrapper, status, footer);
     this.container.appendChild(dialog);
     document.body.appendChild(this.container);
   }
 
-  private pollStatus(statusEl: HTMLElement): void {
+  private pollStatus(statusEl: HTMLElement, progressEl: HTMLElement): void {
     const tick = async () => {
-      const scanning = await this.apiClient.getScanStatus();
-      if (!scanning) {
-        if (this.pollTimer !== null) {
-          window.clearInterval(this.pollTimer);
-          this.pollTimer = null;
-        }
-        statusEl.textContent = 'Сканирование завершено.';
+      const state = await this.apiClient.getScanStatus();
+      if (!state) {
+        return;
+      }
+      if (state.scanning) {
+        statusEl.textContent = `Сканирование выполняется... ${state.processed} / ${state.total}`;
+        progressEl.style.width = `${Math.min(100, Math.max(0, state.progress))}%`;
+        return;
+      }
+      if (this.pollTimer !== null) {
+        window.clearInterval(this.pollTimer);
+        this.pollTimer = null;
+      }
+      progressEl.style.width = '100%';
+      if (state.scanResult === 'ok') {
+        statusEl.textContent = `Сканирование завершено. Обработано файлов: ${state.processed}`;
         ToastService.getInstance().show(
           'Медиатека успешно обновлена',
           'success',
         );
-        setTimeout(() => {
-          this.close();
-          window.location.reload();
-        }, 800);
-        return;
+      } else {
+        statusEl.textContent = 'Сканирование завершилось с ошибкой.';
+        ToastService.getInstance().show(
+          'Ошибка сканирования медиатеки',
+          'error',
+        );
       }
-      statusEl.textContent = 'Сканирование выполняется...';
+      setTimeout(() => {
+        this.close();
+        window.location.reload();
+      }, 1500);
     };
     void tick();
     this.pollTimer = window.setInterval(tick, 1500);

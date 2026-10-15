@@ -97,12 +97,21 @@ div.dynamic-confirm-modal-overlay .dynamic-confirm-dialog-panel {
   font-size: 0.9rem;
   outline: none;
 }
+
 .library-scan-dialog .library-scan-input:focus {
   border-color: var(--yellow);
 }
+
 .library-scan-dialog .library-scan-status {
   margin-top: 10px;
   font-size: 0.8rem;
   color: var(--fg3);
   min-height: 16px;
+}
+
+.dynamic-confirm-footer-actions button.dynamic-confirm-btn-confirm:disabled,
+.dynamic-confirm-footer-actions button.dynamic-confirm-btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
 }

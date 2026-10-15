@@ -10,6 +10,7 @@ import { ContextMenu } from '../menu/ContextMenu.js';
 import { ToastService } from '../components/ToastService.js';
 import { AlbumImageSafetyProvider } from '../components/AlbumImageSafetyProvider.js';
 import { AlbumDeleteConfirmModal } from '../modals/AlbumDeleteConfirmModal.js';
+import { LibraryScanModal } from '../modals/LibraryScanModal.js';
 
 export class MusicContentContainer implements Component {
   private readonly backgroundMenu: MusicBackgroundMenu;
@@ -43,8 +44,9 @@ export class MusicContentContainer implements Component {
       activeTracks = this.musicStore.searchTracks(filterTerm);
     }
     if (activeTracks.length === 0) {
-      targetElement.innerHTML =
-        '<div class="empty">🎵 Альбомы не найдены</div>';
+      targetElement.appendChild(
+        this.createEmptyState(filterTerm, targetElement),
+      );
       return null;
     }
     const gridElement = document.createElement('div');
@@ -113,6 +115,37 @@ export class MusicContentContainer implements Component {
         AlbumImageSafetyProvider.revokeUrlByKey(uniqueUid);
       }
     });
+  }
+
+  private createEmptyState(
+    filterTerm: string,
+    targetElement: HTMLElement,
+  ): HTMLElement {
+    const empty = document.createElement('div');
+    empty.className = 'library-empty-state';
+    const icon = document.createElement('div');
+    icon.className = 'library-empty-icon';
+    icon.textContent = '🎵';
+    const title = document.createElement('div');
+    title.className = 'library-empty-title';
+    title.textContent = filterTerm ? 'Ничего не найдено' : 'Медиатека пуста';
+    const subtitle = document.createElement('div');
+    subtitle.className = 'library-empty-subtitle';
+    subtitle.textContent = filterTerm
+      ? 'Попробуйте изменить поисковый запрос.'
+      : 'Запустите сканирование директории, чтобы добавить треки.';
+    empty.append(icon, title, subtitle);
+    if (!filterTerm) {
+      const button = document.createElement('button');
+      button.className = 'library-empty-scan-btn';
+      button.textContent = 'Запустить сканирование';
+      button.addEventListener('click', () => {
+        const modal = new LibraryScanModal();
+        modal.open();
+      });
+      empty.appendChild(button);
+    }
+    return empty;
   }
 
   private groupTracksByAlbum(tracks: Metadata[]): Map<string, Metadata[]> {

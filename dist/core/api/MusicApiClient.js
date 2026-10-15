@@ -387,12 +387,24 @@ export class MusicApiClient extends BaseApiClient {
     }
     async getScanStatus() {
         try {
-            const response = await this.request('api/music/scan/status', { method: 'GET' });
-            return response.data?.scanning ?? false;
+            const response = await this.request('api/music/scan/status', {
+                method: 'GET',
+            });
+            const data = response.data ?? {};
+            return {
+                scanning: !!data.scanning,
+                finished: !!data.finished,
+                scanResult: data.scan_result === 'ok' || data.scan_result === 'error'
+                    ? data.scan_result
+                    : 'unknown',
+                total: typeof data.total === 'number' ? data.total : 0,
+                processed: typeof data.processed === 'number' ? data.processed : 0,
+                progress: typeof data.progress === 'number' ? data.progress : 0,
+            };
         }
         catch (error) {
             console.error('[MusicApiClient] getScanStatus failed:', error);
-            return false;
+            return null;
         }
     }
 }
