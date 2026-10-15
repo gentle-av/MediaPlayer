@@ -1,9 +1,12 @@
 import { AudioTrackMenu } from '../menu/AudioTrackMenu.js';
+import { SubtitleMenu } from '../menu/SubtitleMenu.js';
 export class PlayerControls {
     constructor() {
         this.playButtonIcon = null;
         this.audioStreamButton = null;
+        this.subtitleButton = null;
         this.audioTrackMenu = new AudioTrackMenu();
+        this.subtitleMenu = new SubtitleMenu();
         this.activeVideoPath = '';
     }
     setPlayState(isPlaying) {
@@ -46,6 +49,10 @@ export class PlayerControls {
                 this.audioStreamButton.style.visibility = 'visible';
                 this.audioStreamButton.style.pointerEvents = 'auto';
             }
+            if (this.subtitleButton) {
+                this.subtitleButton.style.visibility = 'visible';
+                this.subtitleButton.style.pointerEvents = 'auto';
+            }
         }
         else {
             this.activeVideoPath = '';
@@ -53,12 +60,17 @@ export class PlayerControls {
                 this.audioStreamButton.style.visibility = 'hidden';
                 this.audioStreamButton.style.pointerEvents = 'none';
             }
+            if (this.subtitleButton) {
+                this.subtitleButton.style.visibility = 'hidden';
+                this.subtitleButton.style.pointerEvents = 'none';
+            }
         }
     }
     render(onPlayPause, onStop, onNext, onPrevious) {
         const controlsContainer = document.createElement('div');
         controlsContainer.className = 'universal-bottom-player-controls';
         this.audioStreamButton = this.createAudioStreamButton();
+        this.subtitleButton = this.createSubtitleButton();
         const skipBackwardBtn = this.createControlButton('polygon', { points: '19 20 9 12 19 4 19 20', fill: 'currentColor' }, 'line', {
             x1: '5',
             y1: '19',
@@ -104,7 +116,7 @@ export class PlayerControls {
         skipForwardBtn.addEventListener('click', () => {
             onNext();
         });
-        controlsContainer.append(this.audioStreamButton, skipBackwardBtn, standardPlayBtn, stopBtn, skipForwardBtn);
+        controlsContainer.append(this.audioStreamButton, this.subtitleButton, skipBackwardBtn, standardPlayBtn, stopBtn, skipForwardBtn);
         return controlsContainer;
     }
     createAudioStreamButton() {
@@ -142,6 +154,49 @@ export class PlayerControls {
             this.audioTrackMenu.show(clickEvent, this.activeVideoPath);
         });
         return streamButton;
+    }
+    createSubtitleButton() {
+        const subtitleButton = document.createElement('button');
+        subtitleButton.className = 'universal-bottom-player-btn subtitle-btn';
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const vectorRoot = document.createElementNS(SVG_NS, 'svg');
+        vectorRoot.setAttribute('width', '16');
+        vectorRoot.setAttribute('height', '16');
+        vectorRoot.setAttribute('viewBox', '0 0 24 24');
+        vectorRoot.setAttribute('fill', 'none');
+        vectorRoot.setAttribute('stroke', 'currentColor');
+        vectorRoot.setAttribute('stroke-width', '2');
+        vectorRoot.setAttribute('stroke-linecap', 'round');
+        vectorRoot.setAttribute('stroke-linejoin', 'round');
+        const rectNode = document.createElementNS(SVG_NS, 'rect');
+        rectNode.setAttribute('x', '2');
+        rectNode.setAttribute('y', '4');
+        rectNode.setAttribute('width', '20');
+        rectNode.setAttribute('height', '16');
+        rectNode.setAttribute('rx', '2');
+        const lineNode1 = document.createElementNS(SVG_NS, 'line');
+        lineNode1.setAttribute('x1', '6');
+        lineNode1.setAttribute('y1', '14');
+        lineNode1.setAttribute('x2', '10');
+        lineNode1.setAttribute('y2', '14');
+        const lineNode2 = document.createElementNS(SVG_NS, 'line');
+        lineNode2.setAttribute('x1', '14');
+        lineNode2.setAttribute('y1', '14');
+        lineNode2.setAttribute('x2', '18');
+        lineNode2.setAttribute('y2', '14');
+        const lineNode3 = document.createElementNS(SVG_NS, 'line');
+        lineNode3.setAttribute('x1', '6');
+        lineNode3.setAttribute('y1', '10');
+        lineNode3.setAttribute('x2', '18');
+        lineNode3.setAttribute('y2', '10');
+        vectorRoot.append(rectNode, lineNode1, lineNode2, lineNode3);
+        subtitleButton.appendChild(vectorRoot);
+        subtitleButton.addEventListener('click', (clickEvent) => {
+            clickEvent.preventDefault();
+            clickEvent.stopPropagation();
+            this.subtitleMenu.show(clickEvent);
+        });
+        return subtitleButton;
     }
     createControlButton(nodeType1, attributes1, nodeType2, attributes2) {
         const controlButton = document.createElement('button');
