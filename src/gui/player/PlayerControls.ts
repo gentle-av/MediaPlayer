@@ -1,9 +1,12 @@
 import { AudioTrackMenu } from '../menu/AudioTrackMenu.js';
+import { SubtitleMenu } from '../menu/SubtitleMenu.js';
 
 export class PlayerControls {
   private playButtonIcon: HTMLElement | null = null;
   private audioStreamButton: HTMLButtonElement | null = null;
+  private subtitleButton: HTMLButtonElement | null = null;
   private audioTrackMenu = new AudioTrackMenu();
+  private subtitleMenu = new SubtitleMenu();
   private activeVideoPath = '';
 
   public setPlayState(isPlaying: boolean): void {
@@ -49,11 +52,19 @@ export class PlayerControls {
         this.audioStreamButton.style.visibility = 'visible';
         this.audioStreamButton.style.pointerEvents = 'auto';
       }
+      if (this.subtitleButton) {
+        this.subtitleButton.style.visibility = 'visible';
+        this.subtitleButton.style.pointerEvents = 'auto';
+      }
     } else {
       this.activeVideoPath = '';
       if (this.audioStreamButton) {
         this.audioStreamButton.style.visibility = 'hidden';
         this.audioStreamButton.style.pointerEvents = 'none';
+      }
+      if (this.subtitleButton) {
+        this.subtitleButton.style.visibility = 'hidden';
+        this.subtitleButton.style.pointerEvents = 'none';
       }
     }
   }
@@ -67,6 +78,7 @@ export class PlayerControls {
     const controlsContainer = document.createElement('div');
     controlsContainer.className = 'universal-bottom-player-controls';
     this.audioStreamButton = this.createAudioStreamButton();
+    this.subtitleButton = this.createSubtitleButton();
     const skipBackwardBtn = this.createControlButton(
       'polygon',
       { points: '19 20 9 12 19 4 19 20', fill: 'currentColor' },
@@ -124,6 +136,7 @@ export class PlayerControls {
     });
     controlsContainer.append(
       this.audioStreamButton,
+      this.subtitleButton,
       skipBackwardBtn,
       standardPlayBtn,
       stopBtn,
@@ -170,6 +183,50 @@ export class PlayerControls {
       this.audioTrackMenu.show(clickEvent, this.activeVideoPath);
     });
     return streamButton;
+  }
+
+  private createSubtitleButton(): HTMLButtonElement {
+    const subtitleButton = document.createElement('button');
+    subtitleButton.className = 'universal-bottom-player-btn subtitle-btn';
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const vectorRoot = document.createElementNS(SVG_NS, 'svg');
+    vectorRoot.setAttribute('width', '16');
+    vectorRoot.setAttribute('height', '16');
+    vectorRoot.setAttribute('viewBox', '0 0 24 24');
+    vectorRoot.setAttribute('fill', 'none');
+    vectorRoot.setAttribute('stroke', 'currentColor');
+    vectorRoot.setAttribute('stroke-width', '2');
+    vectorRoot.setAttribute('stroke-linecap', 'round');
+    vectorRoot.setAttribute('stroke-linejoin', 'round');
+    const rectNode = document.createElementNS(SVG_NS, 'rect');
+    rectNode.setAttribute('x', '2');
+    rectNode.setAttribute('y', '4');
+    rectNode.setAttribute('width', '20');
+    rectNode.setAttribute('height', '16');
+    rectNode.setAttribute('rx', '2');
+    const lineNode1 = document.createElementNS(SVG_NS, 'line');
+    lineNode1.setAttribute('x1', '6');
+    lineNode1.setAttribute('y1', '14');
+    lineNode1.setAttribute('x2', '10');
+    lineNode1.setAttribute('y2', '14');
+    const lineNode2 = document.createElementNS(SVG_NS, 'line');
+    lineNode2.setAttribute('x1', '14');
+    lineNode2.setAttribute('y1', '14');
+    lineNode2.setAttribute('x2', '18');
+    lineNode2.setAttribute('y2', '14');
+    const lineNode3 = document.createElementNS(SVG_NS, 'line');
+    lineNode3.setAttribute('x1', '6');
+    lineNode3.setAttribute('y1', '10');
+    lineNode3.setAttribute('x2', '18');
+    lineNode3.setAttribute('y2', '10');
+    vectorRoot.append(rectNode, lineNode1, lineNode2, lineNode3);
+    subtitleButton.appendChild(vectorRoot);
+    subtitleButton.addEventListener('click', (clickEvent) => {
+      clickEvent.preventDefault();
+      clickEvent.stopPropagation();
+      this.subtitleMenu.show(clickEvent);
+    });
+    return subtitleButton;
   }
 
   private createControlButton(
