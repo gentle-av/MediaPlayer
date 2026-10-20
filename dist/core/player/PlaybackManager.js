@@ -145,6 +145,10 @@ export class PlaybackManager {
         if (this.isAdvancing) {
             return;
         }
+        if (this.currentType === 'video') {
+            this.seek(5).catch((error) => console.error(error));
+            return;
+        }
         if (this.currentType !== 'music' || this.currentPlaylist.length === 0) {
             return;
         }
@@ -161,6 +165,10 @@ export class PlaybackManager {
         }
     }
     playPreviousTrack() {
+        if (this.currentType === 'video') {
+            this.seek(-5).catch((error) => console.error(error));
+            return;
+        }
         if (this.currentType !== 'music' || this.currentPlaylist.length === 0) {
             return;
         }
