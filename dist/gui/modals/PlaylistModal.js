@@ -8,6 +8,7 @@ export class PlaylistModal {
         this.modalElement = null;
         this.draggedRow = null;
         this.unsubscribeFromStore = null;
+        this.currentGeneratedCoverUrl = null;
     }
     open() {
         this.close();
@@ -37,6 +38,10 @@ export class PlaylistModal {
         });
     }
     close() {
+        if (this.currentGeneratedCoverUrl) {
+            URL.revokeObjectURL(this.currentGeneratedCoverUrl);
+            this.currentGeneratedCoverUrl = null;
+        }
         if (this.unsubscribeFromStore) {
             this.unsubscribeFromStore();
             this.unsubscribeFromStore = null;
@@ -52,7 +57,10 @@ export class PlaylistModal {
         headerElement.className = 'modal-header album-modal-custom-header';
         const leftIconContainer = document.createElement('div');
         leftIconContainer.className = 'album-modal-cover-left';
-        leftIconContainer.innerHTML = `
+        // Создаем плейсхолдер (иконку), которая будет видна, если нет обложки
+        const placeholderIcon = document.createElement('div');
+        placeholderIcon.className = 'album-modal-cover-placeholder';
+        placeholderIcon.innerHTML = `
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
         stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
         stroke-linejoin="round">
@@ -64,6 +72,30 @@ export class PlaylistModal {
         <line x1="3" y1="18" x2="3.01" y2="18"></line>
       </svg>
     `;
+        leftIconContainer.appendChild(placeholderIcon);
+        // Пытаемся загрузить обложку для первого трека в плейлисте
+        if (this.playlistTracks.length > 0) {
+            const firstTrack = this.playlistTracks[0];
+            if (firstTrack.album && firstTrack.artist) {
+                const imgElement = document.createElement('img');
+                imgElement.className = 'album-modal-dynamic-cover-img';
+                this.musicStore
+                    .getAlbumArtBlob(firstTrack.album, firstTrack.artist)
+                    .then((blob) => {
+                    if (blob && blob.size > 0) {
+                        const forcedBlob = new Blob([blob], { type: 'image/jpeg' });
+                        const url = URL.createObjectURL(forcedBlob);
+                        this.currentGeneratedCoverUrl = url;
+                        imgElement.src = url;
+                        // Скрываем плейсхолдер и показываем картинку
+                        placeholderIcon.style.display = 'none';
+                        imgElement.style.display = 'block';
+                    }
+                })
+                    .catch(() => { });
+                leftIconContainer.appendChild(imgElement);
+            }
+        }
         const rightInfoContainer = document.createElement('div');
         rightInfoContainer.className = 'album-modal-info-right';
         const titleElement = document.createElement('div');
