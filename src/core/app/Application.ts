@@ -12,6 +12,7 @@ import { TvPlaybackManager } from '../../gui/managers/TvPlaybackManager.js';
 import { AudioOutputManager } from '../../gui/managers/AudioOutputManager.js';
 import { PlaylistClearConfirmModal } from '../../gui/modals/PlaylistClearConfirmModal.js';
 import { AlbumDeleteConfirmModal } from '../../gui/modals/AlbumDeleteConfirmModal.js';
+import { BookStore } from '../store/BookStore.js';
 
 export class Application {
   private mainContainer: HTMLElement | null;
@@ -27,6 +28,7 @@ export class Application {
   private audioOutputManager: AudioOutputManager;
   private clearModal: PlaylistClearConfirmModal;
   private deleteAlbumModal: AlbumDeleteConfirmModal;
+  private bookStore: BookStore;
 
   constructor() {
     console.log('🚀 [Application] Инициализация конструктора...');
@@ -45,6 +47,7 @@ export class Application {
     this.audioOutputManager = new AudioOutputManager(
       new AudioOutputApiClient(),
     );
+    this.bookStore = new BookStore();
     this.clearModal = new PlaylistClearConfirmModal();
     this.deleteAlbumModal = new AlbumDeleteConfirmModal();
     this.mainFrame = new MainFrame(
