@@ -1,6 +1,6 @@
 import { Component } from './Component.js';
 
-export type TabType = 'video' | 'audio' | 'settings';
+export type TabType = 'video' | 'audio' | 'books' | 'settings';
 
 export class ComponentFactory {
   private readonly registries = new Map<TabType, () => Component>();

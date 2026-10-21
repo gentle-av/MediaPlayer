@@ -53,6 +53,7 @@ export class Application {
     this.mainFrame = new MainFrame(
       this.musicStore,
       this.videoStore,
+      this.bookStore,
       this.playlistStore,
       this.playbackManager,
       this.player,

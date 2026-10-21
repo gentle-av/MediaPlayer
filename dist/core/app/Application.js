@@ -28,7 +28,7 @@ export class Application {
         this.bookStore = new BookStore();
         this.clearModal = new PlaylistClearConfirmModal();
         this.deleteAlbumModal = new AlbumDeleteConfirmModal();
-        this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.playlistStore, this.playbackManager, this.player, this.tvPlaybackManager, this.audioOutputManager, this.clearModal, this.deleteAlbumModal);
+        this.mainFrame = new MainFrame(this.musicStore, this.videoStore, this.bookStore, this.playlistStore, this.playbackManager, this.player, this.tvPlaybackManager, this.audioOutputManager, this.clearModal, this.deleteAlbumModal);
         this.initialPlaybackSyncService = new InitialPlaybackSyncService(this.playbackManager, this.musicStore, this.playlistStore);
         this.hashRouter = new HashRouter();
         this.render();
