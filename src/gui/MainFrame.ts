@@ -4,10 +4,12 @@ import { Player } from './Player.js';
 import { Settings } from './Settings.js';
 import { MusicStore } from '../core/store/MusicStore.js';
 import { VideoStore } from '../core/store/VideoStore.js';
+import { BookStore } from '../core/store/BookStore.js';
 import { PlaylistStore } from '../core/store/PlaylistStore.js';
 import { PlaybackManager } from '../core/player/PlaybackManager.js';
 import { VideoContentContainer } from './containers/VideoContentContainer.js';
 import { MusicContentContainer } from './containers/MusicContentContainer.js';
+import { BooksContentContainer } from './containers/BooksContentContainer.js';
 import { ComponentFactory, TabType } from './components/ComponentFactory.js';
 import { Component } from './components/Component.js';
 import { UiStateStore, UiState } from '../core/store/UiStateStore.js';
@@ -28,6 +30,7 @@ export class MainFrame {
   constructor(
     private musicStore: MusicStore,
     private videoStore: VideoStore,
+    private bookStore: BookStore,
     private playlistStore: PlaylistStore,
     private playbackManager: PlaybackManager,
     private player: Player,
@@ -83,8 +86,11 @@ export class MainFrame {
       const isPathChanged =
         state.currentTab === 'video' &&
         this.videoStore.getCurrentPath() !== state.currentPath;
+      const isBookPathChanged =
+        state.currentTab === 'books' &&
+        this.bookStore.getCurrentPath() !== state.currentBookPath;
       const currentRenderedQuery = this.contentArea?.dataset?.lastQuery || '';
-      if (isTabChanged || isPathChanged) {
+      if (isTabChanged || isPathChanged || isBookPathChanged) {
         this.currentTab = state.currentTab;
         await this.updateContent(state.currentTab);
       } else if (currentRenderedQuery !== state.searchQuery) {
@@ -131,6 +137,10 @@ export class MainFrame {
           this.deleteAlbumModal,
         ),
     );
+    this.componentFactory.register(
+      'books',
+      () => new BooksContentContainer(this.bookStore),
+    );
     this.componentFactory.register('settings', () => this.settings);
   }
 
@@ -164,6 +174,7 @@ export class MainFrame {
     const tabConfigs = {
       video: { icon: 'fa-film', text: 'Видео' },
       audio: { icon: 'fa-music', text: 'Аудио' },
+      books: { icon: 'fa-book', text: 'Книги' },
       settings: { icon: 'fa-cog', text: 'Настройки' },
     };
     const config = tabConfigs[targetTab];

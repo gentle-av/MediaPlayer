@@ -4,6 +4,7 @@ export class UiStateStore {
             currentTab: 'video',
             searchQuery: '',
             currentPath: '/mnt/video',
+            currentBookPath: '/mnt/books',
         };
         this.listeners = [];
     }
@@ -27,6 +28,10 @@ export class UiStateStore {
     }
     setCurrentPath(path) {
         this.state.currentPath = path;
+        this.notify();
+    }
+    setBookPath(path) {
+        this.state.currentBookPath = path;
         this.notify();
     }
     subscribe(listener) {

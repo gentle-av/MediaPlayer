@@ -3,12 +3,14 @@ import { Sidebar } from './Sidebar.js';
 import { Settings } from './Settings.js';
 import { VideoContentContainer } from './containers/VideoContentContainer.js';
 import { MusicContentContainer } from './containers/MusicContentContainer.js';
+import { BooksContentContainer } from './containers/BooksContentContainer.js';
 import { ComponentFactory } from './components/ComponentFactory.js';
 import { UiStateStore } from '../core/store/UiStateStore.js';
 export class MainFrame {
-    constructor(musicStore, videoStore, playlistStore, playbackManager, player, tvPlaybackManager, audioOutputManager, clearModal, deleteAlbumModal) {
+    constructor(musicStore, videoStore, bookStore, playlistStore, playbackManager, player, tvPlaybackManager, audioOutputManager, clearModal, deleteAlbumModal) {
         this.musicStore = musicStore;
         this.videoStore = videoStore;
+        this.bookStore = bookStore;
         this.playlistStore = playlistStore;
         this.playbackManager = playbackManager;
         this.player = player;
@@ -57,8 +59,10 @@ export class MainFrame {
             const isTabChanged = this.currentTab !== state.currentTab;
             const isPathChanged = state.currentTab === 'video' &&
                 this.videoStore.getCurrentPath() !== state.currentPath;
+            const isBookPathChanged = state.currentTab === 'books' &&
+                this.bookStore.getCurrentPath() !== state.currentBookPath;
             const currentRenderedQuery = this.contentArea?.dataset?.lastQuery || '';
-            if (isTabChanged || isPathChanged) {
+            if (isTabChanged || isPathChanged || isBookPathChanged) {
                 this.currentTab = state.currentTab;
                 await this.updateContent(state.currentTab);
             }
@@ -90,6 +94,7 @@ export class MainFrame {
     initFactory() {
         this.componentFactory.register('video', () => new VideoContentContainer(this.videoStore, this.playbackManager));
         this.componentFactory.register('audio', () => new MusicContentContainer(this.musicStore, this.playlistStore, this.playbackManager, this.deleteAlbumModal));
+        this.componentFactory.register('books', () => new BooksContentContainer(this.bookStore));
         this.componentFactory.register('settings', () => this.settings);
     }
     async switchTab(targetTab) {
@@ -117,6 +122,7 @@ export class MainFrame {
         const tabConfigs = {
             video: { icon: 'fa-film', text: 'Видео' },
             audio: { icon: 'fa-music', text: 'Аудио' },
+            books: { icon: 'fa-book', text: 'Книги' },
             settings: { icon: 'fa-cog', text: 'Настройки' },
         };
         const config = tabConfigs[targetTab];
