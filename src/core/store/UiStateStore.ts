@@ -1,9 +1,10 @@
-export type TabType = 'video' | 'audio' | 'settings';
+export type TabType = 'video' | 'audio' | 'books' | 'settings';
 
 export interface UiState {
   currentTab: TabType;
   searchQuery: string;
   currentPath: string;
+  currentBookPath: string;
 }
 
 export class UiStateStore {
@@ -12,6 +13,7 @@ export class UiStateStore {
     currentTab: 'video',
     searchQuery: '',
     currentPath: '/mnt/video',
+    currentBookPath: '/mnt/books',
   };
   private listeners: Array<(state: UiState) => void> = [];
 
@@ -41,6 +43,11 @@ export class UiStateStore {
 
   public setCurrentPath(path: string): void {
     this.state.currentPath = path;
+    this.notify();
+  }
+
+  public setBookPath(path: string): void {
+    this.state.currentBookPath = path;
     this.notify();
   }
 
