@@ -130,6 +130,10 @@ export class BookStore {
     }
   }
 
+  async getBookCover(path: string): Promise<Blob | null> {
+    return this.bookApiClient.getBookCover(path);
+  }
+
   private notifyListeners(): void {
     this.listeners.forEach((listener) => listener());
   }
