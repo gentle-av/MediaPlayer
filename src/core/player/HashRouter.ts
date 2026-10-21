@@ -11,7 +11,7 @@ export class HashRouter {
     window.addEventListener('hashchange', () => this.handleHashChange());
     UiStateStore.getInstance().subscribe((state) => {
       if (this.isUpdatingFromStore) return;
-      this.updateHashFromState(state.currentTab, state.currentPath);
+      this.updateHashFromState(state.currentTab, state.currentPath, state.currentBookPath);
     });
     this.handleHashChange();
   }
@@ -22,22 +22,32 @@ export class HashRouter {
     const tab = rawPath.replace('/', '') as TabType;
     const store = UiStateStore.getInstance();
     const params = new URLSearchParams(queryString || '');
-    const path =
-      params.get('path') || store.getState().currentPath || '/mnt/video';
+    const path = params.get('path') || store.getState().currentPath || '/mnt/video';
     this.isUpdatingFromStore = true;
     if (store.getState().currentTab !== tab) {
       store.setTab(tab);
     }
-    if (store.getState().currentPath !== path) {
+    if (tab === 'books') {
+      if (store.getState().currentBookPath !== path) {
+        store.setBookPath(path);
+      }
+    } else if (store.getState().currentPath !== path) {
       store.setCurrentPath(path);
     }
     this.isUpdatingFromStore = false;
   }
 
-  private updateHashFromState(tab: TabType, currentPath: string): void {
+  private updateHashFromState(
+    tab: TabType,
+    currentPath: string,
+    currentBookPath: string,
+  ): void {
     let newHash = `#/${tab}`;
     if (tab === 'video' && currentPath !== '/mnt/video') {
       newHash += `?path=${encodeURIComponent(currentPath)}`;
+    }
+    if (tab === 'books' && currentBookPath !== '/mnt/books') {
+      newHash += `?path=${encodeURIComponent(currentBookPath)}`;
     }
     if (window.location.hash !== newHash) {
       window.location.hash = newHash;
