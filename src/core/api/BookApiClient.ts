@@ -6,6 +6,30 @@ export interface BookAuthor {
   count: number;
 }
 
+export interface BookEntry {
+  id: number;
+  path: string;
+  title: string;
+  author: string;
+  genre: string;
+  lang: string;
+  sequence: string;
+  seq_number: number;
+  has_cover: boolean;
+}
+
+export interface AuthorInfo {
+  name: string;
+  full_name: string;
+  birth_year?: number | null;
+  death_year?: number | null;
+  photo_url?: string | null;
+  photo_base64?: string | null;
+  photo_mime?: string | null;
+  biography?: string | null;
+  books: BookEntry[];
+}
+
 export class BookApiClient extends BaseApiClient<unknown> {
   constructor() {
     super('api/books');
@@ -112,6 +136,40 @@ export class BookApiClient extends BaseApiClient<unknown> {
     } catch (error) {
       console.error('[BookApiClient] getAuthors failed:', error);
       return [];
+    }
+  }
+
+  public async getBooksByAuthor(author: string): Promise<BookEntry[]> {
+    try {
+      const response = await this.request<{
+        success: boolean;
+        books: BookEntry[];
+      }>(
+        `api/books/by-author?author=${encodeURIComponent(author)}`,
+        { method: 'GET' },
+      );
+      if (!response.data?.success) return [];
+      return response.data.books ?? [];
+    } catch (error) {
+      console.error('[BookApiClient] getBooksByAuthor failed:', error);
+      return [];
+    }
+  }
+
+  public async getAuthorInfo(author: string): Promise<AuthorInfo | null> {
+    try {
+      const response = await this.request<{
+        success: boolean;
+        data: AuthorInfo;
+      }>(
+        `api/books/author-info?name=${encodeURIComponent(author)}`,
+        { method: 'GET' },
+      );
+      if (!response.data?.success || !response.data.data) return null;
+      return response.data.data;
+    } catch (error) {
+      console.warn('[BookApiClient] getAuthorInfo unavailable, fallback:', error);
+      return null;
     }
   }
 }
