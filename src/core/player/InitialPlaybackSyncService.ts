@@ -30,8 +30,9 @@ export class InitialPlaybackSyncService {
         console.log('🎬 [SyncService] Активное видеовещание:', videoPath);
         this.playbackManager.syncInitialType('video');
         this.playbackManager.syncInitialVideoPath(videoPath);
+        const videoFileName = videoPath.split('/').pop() || 'Видео-трансляция';
         this.playbackManager['mediaPlayer'].updateMediaInfo(
-          videoStatus.name || 'Видео-трансляция',
+          videoFileName,
           'Видео-трансляция',
           videoPath,
           'video',

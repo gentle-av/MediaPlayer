@@ -23,7 +23,8 @@ export class InitialPlaybackSyncService {
                 console.log('🎬 [SyncService] Активное видеовещание:', videoPath);
                 this.playbackManager.syncInitialType('video');
                 this.playbackManager.syncInitialVideoPath(videoPath);
-                this.playbackManager['mediaPlayer'].updateMediaInfo(videoStatus.name || 'Видео-трансляция', 'Видео-трансляция', videoPath, 'video');
+                const videoFileName = videoPath.split('/').pop() || 'Видео-трансляция';
+                this.playbackManager['mediaPlayer'].updateMediaInfo(videoFileName, 'Видео-трансляция', videoPath, 'video');
                 this.playbackManager['mediaPlayer'].setPlayState(true);
                 this.playbackManager.startPolling(videoPath);
                 return;

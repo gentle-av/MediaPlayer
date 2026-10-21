@@ -94,8 +94,7 @@ export class Player {
                 this.onPreviousTrackCallback();
             }
         });
-        rootPlayerElement.appendChild(timelineContainer);
-        contentWrapperElement.append(metadataContainer, controlsContainer);
+        contentWrapperElement.append(metadataContainer, timelineContainer, controlsContainer);
         rootPlayerElement.appendChild(contentWrapperElement);
         return rootPlayerElement;
     }

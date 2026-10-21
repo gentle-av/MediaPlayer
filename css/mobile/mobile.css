@@ -234,23 +234,23 @@
     display: flex;
   }
   .universal-bottom-player-content {
-    display: grid !important;
-    grid-template-columns: 1fr auto !important;
-    align-items: center !important;
-    gap: 16px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 12px !important;
     height: auto !important;
-    min-height: 44px !important;
     width: 100% !important;
     margin-top: 0 !important;
     padding: 0 !important;
   }
   .universal-bottom-player-info {
-    min-width: 0 !important;
-    flex: none !important;
-    gap: 10px !important;
-    width: 100% !important;
     display: flex !important;
     align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    width: 100% !important;
+    flex: none !important;
+    gap: 12px !important;
     height: auto !important;
     overflow: hidden !important;
   }
@@ -261,7 +261,10 @@
   }
   .universal-bottom-player-track-info {
     min-width: 0 !important;
-    flex: 1 !important;
+    flex: 0 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
   }
   .universal-bottom-player-track-name {
     font-size: 0.8rem !important;
@@ -278,19 +281,18 @@
     width: 100% !important;
   }
   .universal-bottom-player-controls {
-    gap: 6px !important;
-    flex: none !important;
     display: flex !important;
     flex-direction: row !important;
     align-items: center !important;
-    justify-content: flex-end !important;
-    min-width: auto !important;
-    width: auto !important;
-    height: auto !important;
+    justify-content: center !important;
+    width: 100% !important;
+    gap: 8px !important;
+    margin: 0 !important;
+    padding: 0 !important;
     position: static !important;
     background: transparent !important;
-    padding: 0 !important;
-    margin: 0 !important;
+    min-width: auto !important;
+    height: auto !important;
   }
   .universal-bottom-player-btn {
     display: flex !important;
@@ -319,6 +321,7 @@
   .universal-bottom-player-progress {
     display: flex !important;
     width: 100% !important;
+    order: 3 !important;
     padding: 0 !important;
     margin: 0 !important;
     height: 16px !important;
