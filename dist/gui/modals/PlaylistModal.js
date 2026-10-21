@@ -9,7 +9,6 @@ export class PlaylistModal {
         this.draggedRow = null;
         this.unsubscribeFromStore = null;
         this.currentGeneratedCoverUrl = null;
-        // Ссылки на элементы заголовка для динамического обновления
         this.coverContainer = null;
         this.placeholderIcon = null;
         this.coverImgElement = null;
@@ -29,16 +28,12 @@ export class PlaylistModal {
         modalContent.append(header, body, footer);
         this.modalElement.appendChild(modalContent);
         document.body.appendChild(this.modalElement);
-        // Первичная загрузка обложки
         this.updateCoverArt();
-        // Подписка на изменения стора (смена трека, обновление метаданных)
         this.unsubscribeFromStore = this.musicStore.subscribe(() => {
-            // Обновляем список треков
             const bodyContainer = this.modalElement?.querySelector('.modal-body');
             if (bodyContainer) {
                 bodyContainer.replaceChildren(this.createBodyContent());
             }
-            // Обновляем обложку в заголовке
             this.updateCoverArt();
         });
         this.modalElement.addEventListener('click', (e) => {
@@ -105,37 +100,27 @@ export class PlaylistModal {
         headerElement.append(this.coverContainer, rightInfoContainer, closeButton);
         return headerElement;
     }
-    /**
-     * Логика выбора и загрузки обложки.
-     * Приоритет: Текущий играющий трек -> Первый трек в плейлисте.
-     */
     async updateCoverArt() {
         if (!this.coverContainer || !this.placeholderIcon || !this.coverImgElement) {
             return;
         }
-        // Определяем, какой трек использовать для обложки
         let trackForCover = null;
-        // 1. Пытаемся взять текущий играющий трек
         const currentTrack = this.musicStore.getCurrentTrack();
         if (currentTrack && this.playlistTracks.some(t => t.filePath === currentTrack.filePath)) {
             trackForCover = currentTrack;
         }
-        // 2. Если ничего не играет из этого плейлиста, берем первый трек
         else if (this.playlistTracks.length > 0) {
             trackForCover = this.playlistTracks[0];
         }
-        // Если трека нет, показываем плейсхолдер
         if (!trackForCover) {
             this.showPlaceholder();
             return;
         }
         try {
             const blob = await this.musicStore.getAlbumArtBlob(trackForCover.album, trackForCover.artist);
-            // Проверяем, не закрыли ли модалку, пока ждали ответ
             if (!this.modalElement)
                 return;
             if (blob && blob.size > 0) {
-                // Очищаем предыдущий URL
                 if (this.currentGeneratedCoverUrl) {
                     URL.revokeObjectURL(this.currentGeneratedCoverUrl);
                 }

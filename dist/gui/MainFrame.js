@@ -47,6 +47,7 @@ export class MainFrame {
         mainContent.appendChild(sidebarElement);
         this.contentArea = document.createElement('div');
         this.contentArea.className = 'content-area';
+        this.contentArea.tabIndex = -1;
         mainContent.appendChild(this.contentArea);
         bodyWrapper.appendChild(mainContent);
         const renderedPlayer = this.player.render();
@@ -141,6 +142,7 @@ export class MainFrame {
         if (this.currentLiveComponent.onActivate) {
             await this.currentLiveComponent.onActivate();
         }
+        this.contentArea?.focus({ preventScroll: true });
     }
     bindPlayerControls() {
         this.player.bindControls(() => {
