@@ -9,6 +9,9 @@ export class PlaylistModal {
   private draggedRow: HTMLElement | null = null;
   private unsubscribeFromStore: (() => void) | null = null;
   private currentGeneratedCoverUrl: string | null = null;
+  private coverContainer: HTMLElement | null = null;
+  private placeholderIcon: HTMLElement | null = null;
+  private coverImgElement: HTMLImageElement | null = null;
 
   constructor(
     private readonly playlistTracks: Metadata[],
@@ -33,11 +36,13 @@ export class PlaylistModal {
     modalContent.append(header, body, footer);
     this.modalElement.appendChild(modalContent);
     document.body.appendChild(this.modalElement);
+    this.updateCoverArt();
     this.unsubscribeFromStore = this.musicStore.subscribe(() => {
       const bodyContainer = this.modalElement?.querySelector('.modal-body');
       if (bodyContainer) {
         bodyContainer.replaceChildren(this.createBodyContent());
       }
+      this.updateCoverArt();
     });
     this.modalElement.addEventListener('click', (e) => {
       if (e.target === this.modalElement) {
@@ -60,18 +65,19 @@ export class PlaylistModal {
       existingModal.parentNode.removeChild(existingModal);
     }
     this.modalElement = null;
+    this.coverContainer = null;
+    this.placeholderIcon = null;
+    this.coverImgElement = null;
   }
 
   private createHeader(): HTMLElement {
     const headerElement = document.createElement('div');
     headerElement.className = 'modal-header album-modal-custom-header';
-    const leftIconContainer = document.createElement('div');
-    leftIconContainer.className = 'album-modal-cover-left';
-    
-    // Создаем плейсхолдер (иконку), которая будет видна, если нет обложки
-    const placeholderIcon = document.createElement('div');
-    placeholderIcon.className = 'album-modal-cover-placeholder';
-    placeholderIcon.innerHTML = `
+    this.coverContainer = document.createElement('div');
+    this.coverContainer.className = 'album-modal-cover-left';
+    this.placeholderIcon = document.createElement('div');
+    this.placeholderIcon.className = 'album-modal-cover-placeholder';
+    this.placeholderIcon.innerHTML = `
       <svg width="32" height="32" viewBox="0 0 24 24" fill="none"
         stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
         stroke-linejoin="round">
@@ -83,34 +89,11 @@ export class PlaylistModal {
         <line x1="3" y1="18" x2="3.01" y2="18"></line>
       </svg>
     `;
-    leftIconContainer.appendChild(placeholderIcon);
-
-    // Пытаемся загрузить обложку для первого трека в плейлисте
-    if (this.playlistTracks.length > 0) {
-      const firstTrack = this.playlistTracks[0];
-      if (firstTrack.album && firstTrack.artist) {
-        const imgElement = document.createElement('img');
-        imgElement.className = 'album-modal-dynamic-cover-img';
-        
-        this.musicStore
-          .getAlbumArtBlob(firstTrack.album, firstTrack.artist)
-          .then((blob) => {
-            if (blob && blob.size > 0) {
-              const forcedBlob = new Blob([blob], { type: 'image/jpeg' });
-              const url = URL.createObjectURL(forcedBlob);
-              this.currentGeneratedCoverUrl = url;
-              imgElement.src = url;
-              // Скрываем плейсхолдер и показываем картинку
-              placeholderIcon.style.display = 'none';
-              imgElement.style.display = 'block';
-            }
-          })
-          .catch(() => {});
-        
-        leftIconContainer.appendChild(imgElement);
-      }
-    }
-
+    this.coverContainer.appendChild(this.placeholderIcon);
+    this.coverImgElement = document.createElement('img');
+    this.coverImgElement.className = 'album-modal-dynamic-cover-img';
+    this.coverImgElement.style.display = 'none'; // Изначально скрыта
+    this.coverContainer.appendChild(this.coverImgElement);
     const rightInfoContainer = document.createElement('div');
     rightInfoContainer.className = 'album-modal-info-right';
     const titleElement = document.createElement('div');
@@ -124,8 +107,56 @@ export class PlaylistModal {
     closeButton.className = 'modal-close';
     closeButton.innerHTML = '×';
     closeButton.addEventListener('click', () => this.close());
-    headerElement.append(leftIconContainer, rightInfoContainer, closeButton);
+    headerElement.append(this.coverContainer, rightInfoContainer, closeButton);
     return headerElement;
+  }
+
+  private async updateCoverArt(): Promise<void> {
+    if (!this.coverContainer || !this.placeholderIcon || !this.coverImgElement) {
+      return;
+    }
+    let trackForCover: Metadata | null = null;
+    const currentTrack = this.musicStore.getCurrentTrack();
+    if (currentTrack && this.playlistTracks.some(t => t.filePath === currentTrack.filePath)) {
+      trackForCover = currentTrack;
+    } 
+    else if (this.playlistTracks.length > 0) {
+      trackForCover = this.playlistTracks[0];
+    }
+    if (!trackForCover) {
+      this.showPlaceholder();
+      return;
+    }
+    try {
+      const blob = await this.musicStore.getAlbumArtBlob(trackForCover.album, trackForCover.artist);
+      if (!this.modalElement) return;
+      if (blob && blob.size > 0) {
+        if (this.currentGeneratedCoverUrl) {
+          URL.revokeObjectURL(this.currentGeneratedCoverUrl);
+        }
+        const forcedBlob = new Blob([blob], { type: 'image/jpeg' });
+        const url = URL.createObjectURL(forcedBlob);
+        this.currentGeneratedCoverUrl = url;
+        this.coverImgElement.src = url;
+        this.coverImgElement.style.display = 'block';
+        this.placeholderIcon.style.display = 'none';
+      } else {
+        this.showPlaceholder();
+      }
+    } catch (error) {
+      console.warn('Failed to load cover art for playlist:', error);
+      this.showPlaceholder();
+    }
+  }
+
+  private showPlaceholder(): void {
+    if (this.coverImgElement) {
+      this.coverImgElement.style.display = 'none';
+      this.coverImgElement.src = '';
+    }
+    if (this.placeholderIcon) {
+      this.placeholderIcon.style.display = 'flex';
+    }
   }
 
   private createBodyContent(): HTMLElement {
