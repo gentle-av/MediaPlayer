@@ -1,5 +1,10 @@
 import { BookItem } from '../entities/book/BookItem.js';
-import { BookApiClient, BookAuthor } from '../api/BookApiClient.js';
+import {
+  BookApiClient,
+  BookAuthor,
+  BookEntry,
+  AuthorInfo,
+} from '../api/BookApiClient.js';
 import { BookLibrary } from '../entities/book/BookLibrary.js';
 
 export class BookStore {
@@ -43,6 +48,27 @@ export class BookStore {
       console.error('❌ [BookStore] loadAuthors failed:', error);
       return [];
     }
+  }
+
+  async getBooksByAuthor(author: string): Promise<BookEntry[]> {
+    return await this.bookApiClient.getBooksByAuthor(author);
+  }
+
+  async getAuthorInfo(author: string): Promise<AuthorInfo | null> {
+    const remote = await this.bookApiClient.getAuthorInfo(author);
+    if (remote) return remote;
+    const books = await this.bookApiClient.getBooksByAuthor(author);
+    return {
+      name: author,
+      full_name: author,
+      birth_year: null,
+      death_year: null,
+      photo_url: null,
+      photo_base64: null,
+      photo_mime: null,
+      biography: null,
+      books,
+    };
   }
 
   getItems(): BookItem[] {
