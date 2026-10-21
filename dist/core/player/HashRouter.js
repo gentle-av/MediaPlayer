@@ -19,18 +19,21 @@ export class HashRouter {
         const tab = rawPath.replace('/', '');
         const store = UiStateStore.getInstance();
         const params = new URLSearchParams(queryString || '');
-        const path = params.get('path') || store.getState().currentPath || '/mnt/video';
         this.isUpdatingFromStore = true;
         if (store.getState().currentTab !== tab) {
             store.setTab(tab);
         }
         if (tab === 'books') {
+            const path = params.get('path') || '/mnt/books';
             if (store.getState().currentBookPath !== path) {
                 store.setBookPath(path);
             }
         }
-        else if (store.getState().currentPath !== path) {
-            store.setCurrentPath(path);
+        else {
+            const path = params.get('path') || '/mnt/video';
+            if (store.getState().currentPath !== path) {
+                store.setCurrentPath(path);
+            }
         }
         this.isUpdatingFromStore = false;
     }

@@ -3,31 +3,150 @@ import { BookReaderModal } from '../reader/BookReaderModal.js';
 export class BooksContentContainer {
     constructor(bookStore) {
         this.bookStore = bookStore;
+        this.authors = [];
+        this.authorsLoaded = false;
+        this.activeAuthorFilter = null;
+        this.rootElement = null;
+        this.authorsSectionElement = null;
+        this.gridHostElement = null;
         this.reader = new BookReaderModal(this.bookStore);
     }
     async render(targetElement) {
         if (!targetElement)
             return null;
+        targetElement.innerHTML = '';
+        this.rootElement = document.createElement('div');
+        this.rootElement.className = 'books-tab-root';
+        this.authorsSectionElement = document.createElement('div');
+        this.authorsSectionElement.className = 'books-authors-host';
+        this.gridHostElement = document.createElement('div');
+        this.gridHostElement.className = 'books-grid-host';
+        this.rootElement.append(this.authorsSectionElement, this.gridHostElement);
+        targetElement.appendChild(this.rootElement);
+        await this.reloadData();
+        return this.rootElement;
+    }
+    dispose() {
+        this.reader.close();
+        this.authors = [];
+        this.authorsLoaded = false;
+        this.activeAuthorFilter = null;
+        this.rootElement = null;
+        this.authorsSectionElement = null;
+        this.gridHostElement = null;
+    }
+    async reloadData() {
+        if (!this.gridHostElement || !this.authorsSectionElement)
+            return;
         const uiState = UiStateStore.getInstance().getState();
         const filterTerm = uiState.searchQuery;
         const activePath = uiState.currentBookPath || '/mnt/books';
-        if (!this.bookStore.isLoaded() ||
-            this.bookStore.getCurrentPath() !== activePath) {
-            await this.bookStore.loadLibrary(activePath);
+        try {
+            if (!this.bookStore.isLoaded() ||
+                this.bookStore.getCurrentPath() !== activePath) {
+                await this.bookStore.loadLibrary(activePath);
+            }
+            if (!this.authorsLoaded) {
+                this.authors = await this.bookStore.loadAuthors();
+                this.authorsLoaded = true;
+            }
         }
-        while (targetElement.firstChild) {
-            targetElement.removeChild(targetElement.firstChild);
+        catch (error) {
+            console.error('❌ [BooksContentContainer] load error:', error);
         }
+        this.renderAuthors(filterTerm);
+        this.renderBooks(filterTerm);
+    }
+    renderAuthors(filterTerm) {
+        if (!this.authorsSectionElement)
+            return;
+        this.authorsSectionElement.innerHTML = '';
+        const section = document.createElement('div');
+        section.className = 'books-authors-section';
+        const header = document.createElement('div');
+        header.className = 'books-authors-header';
+        const title = document.createElement('div');
+        title.className = 'books-authors-title';
+        title.textContent = `Авторы (${this.authors.length})`;
+        header.appendChild(title);
+        if (this.activeAuthorFilter) {
+            const resetBtn = document.createElement('button');
+            resetBtn.className = 'books-authors-reset-btn';
+            resetBtn.textContent = 'Сбросить';
+            resetBtn.addEventListener('click', () => {
+                this.activeAuthorFilter = null;
+                void this.reloadData();
+            });
+            header.appendChild(resetBtn);
+        }
+        section.appendChild(header);
+        if (this.authors.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'books-authors-empty';
+            empty.textContent = 'Авторы не найдены';
+            section.appendChild(empty);
+            this.authorsSectionElement.appendChild(section);
+            return;
+        }
+        const filterLower = (filterTerm || '').toLowerCase().trim();
+        const visibleAuthors = filterLower
+            ? this.authors.filter((a) => a.author.toLowerCase().includes(filterLower))
+            : this.authors;
+        if (visibleAuthors.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'books-authors-empty';
+            empty.textContent = 'Нет авторов по запросу';
+            section.appendChild(empty);
+            this.authorsSectionElement.appendChild(section);
+            return;
+        }
+        const chips = document.createElement('div');
+        chips.className = 'books-authors-chips';
+        visibleAuthors.forEach((authorItem) => {
+            const chip = document.createElement('button');
+            chip.className = 'books-author-chip';
+            if (this.activeAuthorFilter === authorItem.author) {
+                chip.classList.add('active');
+            }
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'books-author-chip-name';
+            nameSpan.textContent = authorItem.author;
+            const countSpan = document.createElement('span');
+            countSpan.className = 'books-author-chip-count';
+            countSpan.textContent = String(authorItem.count);
+            chip.append(nameSpan, countSpan);
+            chip.addEventListener('click', () => {
+                this.activeAuthorFilter =
+                    this.activeAuthorFilter === authorItem.author
+                        ? null
+                        : authorItem.author;
+                void this.reloadData();
+            });
+            chips.appendChild(chip);
+        });
+        section.appendChild(chips);
+        this.authorsSectionElement.appendChild(section);
+    }
+    renderBooks(filterTerm) {
+        if (!this.gridHostElement)
+            return;
+        this.gridHostElement.innerHTML = '';
         let allItems = this.bookStore.getItems();
         if (filterTerm) {
             allItems = this.bookStore.search(filterTerm);
         }
+        if (this.activeAuthorFilter) {
+            const authorLower = this.activeAuthorFilter.toLowerCase();
+            allItems = allItems.filter((item) => item.name.toLowerCase().includes(authorLower));
+        }
         if (allItems.length === 0) {
             const emptyDiv = document.createElement('div');
             emptyDiv.className = 'books-empty-state';
-            emptyDiv.textContent = '📚 Папка пуста';
-            targetElement.appendChild(emptyDiv);
-            return null;
+            emptyDiv.textContent = filterTerm
+                ? '📚 Ничего не найдено'
+                : '📚 Папка пуста';
+            this.gridHostElement.appendChild(emptyDiv);
+            return;
         }
         const gridElement = document.createElement('div');
         gridElement.className = 'books-grid';
@@ -44,11 +163,7 @@ export class BooksContentContainer {
             });
             gridElement.appendChild(card);
         });
-        targetElement.appendChild(gridElement);
-        return gridElement;
-    }
-    dispose() {
-        this.reader.close();
+        this.gridHostElement.appendChild(gridElement);
     }
     createBookCardElement(item) {
         const cardElement = document.createElement('figure');

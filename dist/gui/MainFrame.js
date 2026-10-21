@@ -21,6 +21,7 @@ export class MainFrame {
         this.currentTab = 'video';
         this.contentArea = null;
         this.currentLiveComponent = null;
+        this.isUpdatingContent = false;
         this.settings = new Settings(this.tvPlaybackManager, this.audioOutputManager);
         this.componentFactory = new ComponentFactory();
         this.initFactory();
@@ -56,6 +57,8 @@ export class MainFrame {
         bodyWrapper.appendChild(renderedPlayer);
         appContainer.appendChild(bodyWrapper);
         UiStateStore.getInstance().subscribe(async (state) => {
+            if (this.isUpdatingContent)
+                return;
             const isTabChanged = this.currentTab !== state.currentTab;
             const isPathChanged = state.currentTab === 'video' &&
                 this.videoStore.getCurrentPath() !== state.currentPath;
@@ -128,27 +131,50 @@ export class MainFrame {
         const config = tabConfigs[targetTab];
         this.header.setTitle(config.icon, config.text);
         this.header.togglePlaylistButtonVisibility(targetTab === 'audio');
+        this.currentTab = targetTab;
+        await this.updateContent(targetTab);
         UiStateStore.getInstance().setTab(targetTab);
-        if (this.currentTab !== targetTab) {
-            this.currentTab = targetTab;
-            await this.updateContent(targetTab);
-        }
     }
     async updateContent(activeTab) {
         console.log('📦 [MainFrame] updateContent:', activeTab);
         if (!this.contentArea)
             return;
-        if (this.currentLiveComponent) {
-            this.currentLiveComponent.dispose();
+        if (this.isUpdatingContent)
+            return;
+        this.isUpdatingContent = true;
+        try {
+            if (this.currentLiveComponent) {
+                this.currentLiveComponent.dispose();
+                this.currentLiveComponent = null;
+            }
+            while (this.contentArea.firstChild) {
+                this.contentArea.removeChild(this.contentArea.firstChild);
+            }
+            const currentQuery = UiStateStore.getInstance().getState().searchQuery;
+            this.contentArea.dataset.lastQuery = currentQuery;
+            const component = this.componentFactory.create(activeTab);
+            this.currentLiveComponent = component;
+            try {
+                await component.render(this.contentArea);
+                if (component.onActivate) {
+                    await component.onActivate();
+                }
+            }
+            catch (error) {
+                console.error(`❌ [MainFrame] Ошибка рендеринга вкладки "${activeTab}":`, error);
+                while (this.contentArea.firstChild) {
+                    this.contentArea.removeChild(this.contentArea.firstChild);
+                }
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'empty';
+                errorDiv.textContent = `Ошибка загрузки вкладки "${activeTab}"`;
+                this.contentArea.appendChild(errorDiv);
+            }
+            this.contentArea.focus({ preventScroll: true });
         }
-        const currentQuery = UiStateStore.getInstance().getState().searchQuery;
-        this.contentArea.dataset.lastQuery = currentQuery;
-        this.currentLiveComponent = this.componentFactory.create(activeTab);
-        await this.currentLiveComponent.render(this.contentArea);
-        if (this.currentLiveComponent.onActivate) {
-            await this.currentLiveComponent.onActivate();
+        finally {
+            this.isUpdatingContent = false;
         }
-        this.contentArea?.focus({ preventScroll: true });
     }
     bindPlayerControls() {
         this.player.bindControls(() => {

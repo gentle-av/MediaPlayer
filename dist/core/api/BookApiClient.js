@@ -13,7 +13,7 @@ export class BookApiClient extends BaseApiClient {
             return BookLibrary.fromJson(response.data);
         }
         catch (error) {
-            console.error(error);
+            console.error('❌ [BookApiClient] listBooks failed:', error);
             return new BookLibrary({ items: [], path, success: false });
         }
     }
@@ -73,6 +73,18 @@ export class BookApiClient extends BaseApiClient {
         catch (error) {
             console.error(error);
             return null;
+        }
+    }
+    async getAuthors() {
+        try {
+            const response = await this.request('api/books/authors', { method: 'GET' });
+            if (!response.data?.success)
+                return [];
+            return response.data.authors ?? [];
+        }
+        catch (error) {
+            console.error('[BookApiClient] getAuthors failed:', error);
+            return [];
         }
     }
 }

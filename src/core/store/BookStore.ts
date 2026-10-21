@@ -1,5 +1,5 @@
 import { BookItem } from '../entities/book/BookItem.js';
-import { BookApiClient } from '../api/BookApiClient.js';
+import { BookApiClient, BookAuthor } from '../api/BookApiClient.js';
 import { BookLibrary } from '../entities/book/BookLibrary.js';
 
 export class BookStore {
@@ -23,8 +23,26 @@ export class BookStore {
     if (path) {
       this.currentPath = path;
     }
-    this.currentLibrary = await this.bookApiClient.listBooks(this.currentPath);
+    try {
+      this.currentLibrary = await this.bookApiClient.listBooks(this.currentPath);
+    } catch (error) {
+      console.error('❌ [BookStore] loadLibrary failed:', error);
+      this.currentLibrary = new BookLibrary({
+        items: [],
+        path: this.currentPath,
+        success: false,
+      });
+    }
     this.notifyListeners();
+  }
+
+  async loadAuthors(): Promise<BookAuthor[]> {
+    try {
+      return await this.bookApiClient.getAuthors();
+    } catch (error) {
+      console.error('❌ [BookStore] loadAuthors failed:', error);
+      return [];
+    }
   }
 
   getItems(): BookItem[] {

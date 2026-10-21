@@ -1,6 +1,11 @@
 import { BaseApiClient } from './BaseApiClient.js';
 import { BookLibrary } from '../entities/book/BookLibrary.js';
 
+export interface BookAuthor {
+  author: string;
+  count: number;
+}
+
 export class BookApiClient extends BaseApiClient<unknown> {
   constructor() {
     super('api/books');
@@ -14,7 +19,7 @@ export class BookApiClient extends BaseApiClient<unknown> {
       });
       return BookLibrary.fromJson(response.data);
     } catch (error) {
-      console.error(error);
+      console.error('❌ [BookApiClient] listBooks failed:', error);
       return new BookLibrary({ items: [], path, success: false });
     }
   }
@@ -45,7 +50,12 @@ export class BookApiClient extends BaseApiClient<unknown> {
     try {
       const response = await this.request<{
         success: boolean;
-        data: { title?: string; author?: string; pages?: number; format?: string };
+        data: {
+          title?: string;
+          author?: string;
+          pages?: number;
+          format?: string;
+        };
       }>('api/books/meta', {
         method: 'POST',
         body: JSON.stringify({ path }),
@@ -58,10 +68,7 @@ export class BookApiClient extends BaseApiClient<unknown> {
     }
   }
 
-  public async saveProgress(
-    path: string,
-    position: number,
-  ): Promise<boolean> {
+  public async saveProgress(path: string, position: number): Promise<boolean> {
     try {
       const response = await this.request<{ success: boolean }>(
         'api/books/progress',
@@ -91,6 +98,20 @@ export class BookApiClient extends BaseApiClient<unknown> {
     } catch (error) {
       console.error(error);
       return null;
+    }
+  }
+
+  public async getAuthors(): Promise<BookAuthor[]> {
+    try {
+      const response = await this.request<{
+        success: boolean;
+        authors: BookAuthor[];
+      }>('api/books/authors', { method: 'GET' });
+      if (!response.data?.success) return [];
+      return response.data.authors ?? [];
+    } catch (error) {
+      console.error('[BookApiClient] getAuthors failed:', error);
+      return [];
     }
   }
 }
