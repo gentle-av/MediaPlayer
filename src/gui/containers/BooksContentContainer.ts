@@ -1,10 +1,10 @@
 import { BookStore } from '../../core/store/BookStore.js';
-import { BookItem } from '../../core/entities/book/BookItem.js';
 import { BookAuthor } from '../../core/api/BookApiClient.js';
 import { Component } from '../components/Component.js';
 import { UiStateStore } from '../../core/store/UiStateStore.js';
 import { BookReaderModal } from '../reader/BookReaderModal.js';
 import { AuthorInfoModal } from '../modals/AuthorInfoModal.js';
+import { BookCard } from '../components/BookCard.js';
 
 export class BooksContentContainer implements Component {
   private readonly reader: BookReaderModal;
@@ -15,6 +15,7 @@ export class BooksContentContainer implements Component {
   private rootElement: HTMLElement | null = null;
   private authorsSectionElement: HTMLElement | null = null;
   private gridHostElement: HTMLElement | null = null;
+  private activeCards: BookCard[] = [];
 
   constructor(private readonly bookStore: BookStore) {
     this.reader = new BookReaderModal(this.bookStore);
@@ -42,6 +43,8 @@ export class BooksContentContainer implements Component {
   }
 
   public dispose(): void {
+    this.activeCards.forEach((card) => card.dispose());
+    this.activeCards = [];
     this.reader.close();
     this.authorModal.close();
     this.authors = [];
@@ -153,6 +156,8 @@ export class BooksContentContainer implements Component {
 
   private renderBooks(filterTerm: string): void {
     if (!this.gridHostElement) return;
+    this.activeCards.forEach((card) => card.dispose());
+    this.activeCards = [];
     this.gridHostElement.innerHTML = '';
     let allItems = this.bookStore.getItems();
     if (filterTerm) {
@@ -161,7 +166,7 @@ export class BooksContentContainer implements Component {
     if (this.activeAuthorFilter) {
       const authorLower = this.activeAuthorFilter.toLowerCase();
       allItems = allItems.filter((item) =>
-        item.name.toLowerCase().includes(authorLower),
+        item.author?.toLowerCase().includes(authorLower),
       );
     }
     if (allItems.length === 0) {
@@ -176,8 +181,10 @@ export class BooksContentContainer implements Component {
     const gridElement = document.createElement('div');
     gridElement.className = 'books-grid';
     allItems.forEach((item) => {
-      const card = this.createBookCardElement(item);
-      card.addEventListener('click', async (e) => {
+      const bookCard = new BookCard(item, this.bookStore);
+      const cardElement = bookCard.render();
+      this.activeCards.push(bookCard);
+      cardElement.addEventListener('click', async (e) => {
         e.preventDefault();
         if (item.isDirectory) {
           UiStateStore.getInstance().setBookPath(item.path);
@@ -185,27 +192,8 @@ export class BooksContentContainer implements Component {
           await this.reader.open(item);
         }
       });
-      gridElement.appendChild(card);
+      gridElement.appendChild(cardElement);
     });
     this.gridHostElement.appendChild(gridElement);
-  }
-
-  private createBookCardElement(item: BookItem): HTMLElement {
-    const cardElement = document.createElement('figure');
-    cardElement.className = 'books-card';
-    const iconContainer = document.createElement('div');
-    iconContainer.className = 'books-card-icon';
-    if (item.isDirectory) {
-      iconContainer.classList.add('books-card-icon-folder');
-    } else if (item.isBook) {
-      iconContainer.classList.add('books-card-icon-book');
-    } else {
-      iconContainer.classList.add('books-card-icon-file');
-    }
-    const caption = document.createElement('figcaption');
-    caption.className = 'books-card-caption';
-    caption.textContent = item.name;
-    cardElement.append(iconContainer, caption);
-    return cardElement;
   }
 }

@@ -36,7 +36,6 @@ export class BookReaderModal {
             loading.textContent = 'Не удалось загрузить содержимое книги';
             return;
         }
-        // Парсим XML и создаем страницы
         this.pages = this.paginate(content);
         const savedPosition = await this.bookStore.getProgress(book.path);
         if (savedPosition !== null && savedPosition < this.pages.length) {
@@ -96,7 +95,6 @@ export class BookReaderModal {
     paginate(rawXml) {
         const parser = new DOMParser();
         const doc = parser.parseFromString(rawXml, 'text/xml');
-        // Находим все параграфы, заголовки и стихи в теле
         const body = doc.querySelector('body');
         if (!body)
             return [this.createErrorPage('Не удалось найти текст книги в файле.')];
@@ -122,7 +120,6 @@ export class BookReaderModal {
         for (let i = 0; i < paragraphs.length; i += chunkSize) {
             const pageEl = document.createElement('div');
             pageEl.className = 'book-reader-page';
-            // Склеиваем абзацы в одну HTML-строку и вставляем в div
             pageEl.innerHTML = paragraphs.slice(i, i + chunkSize).join('\n');
             pages.push(pageEl);
         }

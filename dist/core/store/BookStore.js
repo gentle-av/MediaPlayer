@@ -105,6 +105,9 @@ export class BookStore {
             this.loadLibrary(item.path);
         }
     }
+    async getBookCover(path) {
+        return this.bookApiClient.getBookCover(path);
+    }
     notifyListeners() {
         this.listeners.forEach((listener) => listener());
     }
