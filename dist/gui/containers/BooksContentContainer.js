@@ -1,5 +1,6 @@
 import { UiStateStore } from '../../core/store/UiStateStore.js';
 import { BookReaderModal } from '../reader/BookReaderModal.js';
+import { AuthorInfoModal } from '../modals/AuthorInfoModal.js';
 export class BooksContentContainer {
     constructor(bookStore) {
         this.bookStore = bookStore;
@@ -10,6 +11,7 @@ export class BooksContentContainer {
         this.authorsSectionElement = null;
         this.gridHostElement = null;
         this.reader = new BookReaderModal(this.bookStore);
+        this.authorModal = new AuthorInfoModal(this.bookStore, this.reader);
     }
     async render(targetElement) {
         if (!targetElement)
@@ -28,6 +30,7 @@ export class BooksContentContainer {
     }
     dispose() {
         this.reader.close();
+        this.authorModal.close();
         this.authors = [];
         this.authorsLoaded = false;
         this.activeAuthorFilter = null;
@@ -115,12 +118,16 @@ export class BooksContentContainer {
             countSpan.className = 'books-author-chip-count';
             countSpan.textContent = String(authorItem.count);
             chip.append(nameSpan, countSpan);
-            chip.addEventListener('click', () => {
-                this.activeAuthorFilter =
-                    this.activeAuthorFilter === authorItem.author
-                        ? null
-                        : authorItem.author;
-                void this.reloadData();
+            chip.addEventListener('click', async (event) => {
+                if (event.shiftKey || event.altKey) {
+                    this.activeAuthorFilter =
+                        this.activeAuthorFilter === authorItem.author
+                            ? null
+                            : authorItem.author;
+                    void this.reloadData();
+                    return;
+                }
+                await this.authorModal.open(authorItem.author);
             });
             chips.appendChild(chip);
         });

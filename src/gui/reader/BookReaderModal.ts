@@ -6,7 +6,7 @@ export class BookReaderModal {
   private modalElement: HTMLElement | null = null;
   private contentContainer: HTMLElement | null = null;
   private currentBook: BookItem | null = null;
-  private pages: string[] = [];
+  private pages: HTMLElement[] = [];
   private currentPage = 0;
   private saveTimer: number | null = null;
 
@@ -39,6 +39,7 @@ export class BookReaderModal {
       return;
     }
     this.pages = this.paginate(content);
+    
     const savedPosition = await this.bookStore.getProgress(book.path);
     if (savedPosition !== null && savedPosition < this.pages.length) {
       this.currentPage = savedPosition;
@@ -98,28 +99,49 @@ export class BookReaderModal {
     return footer;
   }
 
-  private paginate(content: string): string[] {
-    const paragraphs = content.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
-    const pages: string[] = [];
-    const chunkSize = 8;
-    for (let i = 0; i < paragraphs.length; i += chunkSize) {
-      pages.push(paragraphs.slice(i, i + chunkSize).join('\n\n'));
+  private paginate(rawXml: string): HTMLElement[] {
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(rawXml, 'text/xml');
+    const body = doc.querySelector('body');
+    if (!body) return [this.createErrorPage('Не удалось найти текст книги в файле.')];
+    const elements = body.querySelectorAll('p, title, subtitle, v');
+    const paragraphs: string[] = [];
+    elements.forEach(el => {
+      if (el.tagName === 'title' || el.tagName === 'subtitle') {
+        const text = el.textContent?.trim();
+        if (text) paragraphs.push(`<h2 class="book-chapter-title">${text}</h2>`);
+      } else {
+        const text = el.textContent?.trim();
+        if (text) paragraphs.push(`<p>${text}</p>`);
+      }
+    });
+    if (paragraphs.length === 0) {
+      return [this.createErrorPage('В книге нет текстового содержимого.')];
     }
-    return pages.length > 0 ? pages : ['(пустая книга)'];
+    const pages: HTMLElement[] = [];
+    const chunkSize = 10; // Количество абзацев на страницу
+    for (let i = 0; i < paragraphs.length; i += chunkSize) {
+      const pageEl = document.createElement('div');
+      pageEl.className = 'book-reader-page';
+      pageEl.innerHTML = paragraphs.slice(i, i + chunkSize).join('\n');
+      pages.push(pageEl);
+    }
+    return pages;
+  }
+
+  private createErrorPage(message: string): HTMLElement {
+    const pageEl = document.createElement('div');
+    pageEl.className = 'book-reader-page';
+    pageEl.textContent = message;
+    return pageEl;
   }
 
   private renderPage(): void {
     if (!this.contentContainer) return;
-    const page = this.pages[this.currentPage] ?? '';
+    const pageElement = this.pages[this.currentPage];
+    if (!pageElement) return;
     this.contentContainer.innerHTML = '';
-    const pageElement = document.createElement('div');
-    pageElement.className = 'book-reader-page';
-    page.split(/\n\s*\n/).forEach((paragraph) => {
-      const p = document.createElement('p');
-      p.textContent = paragraph;
-      pageElement.appendChild(p);
-    });
-    this.contentContainer.appendChild(pageElement);
+    this.contentContainer.appendChild(pageElement.cloneNode(true));
     this.contentContainer.scrollTop = 0;
     const pageInfo = document.getElementById('bookReaderPageInfo');
     if (pageInfo) {

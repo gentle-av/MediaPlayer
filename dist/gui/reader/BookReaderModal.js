@@ -36,6 +36,7 @@ export class BookReaderModal {
             loading.textContent = 'Не удалось загрузить содержимое книги';
             return;
         }
+        // Парсим XML и создаем страницы
         this.pages = this.paginate(content);
         const savedPosition = await this.bookStore.getProgress(book.path);
         if (savedPosition !== null && savedPosition < this.pages.length) {
@@ -92,28 +93,55 @@ export class BookReaderModal {
         footer.append(prevBtn, pageInfo, nextBtn);
         return footer;
     }
-    paginate(content) {
-        const paragraphs = content.split(/\n\s*\n/).filter((p) => p.trim().length > 0);
-        const pages = [];
-        const chunkSize = 8;
-        for (let i = 0; i < paragraphs.length; i += chunkSize) {
-            pages.push(paragraphs.slice(i, i + chunkSize).join('\n\n'));
+    paginate(rawXml) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(rawXml, 'text/xml');
+        // Находим все параграфы, заголовки и стихи в теле
+        const body = doc.querySelector('body');
+        if (!body)
+            return [this.createErrorPage('Не удалось найти текст книги в файле.')];
+        const elements = body.querySelectorAll('p, title, subtitle, v');
+        const paragraphs = [];
+        elements.forEach(el => {
+            if (el.tagName === 'title' || el.tagName === 'subtitle') {
+                const text = el.textContent?.trim();
+                if (text)
+                    paragraphs.push(`<h2 class="book-chapter-title">${text}</h2>`);
+            }
+            else {
+                const text = el.textContent?.trim();
+                if (text)
+                    paragraphs.push(`<p>${text}</p>`);
+            }
+        });
+        if (paragraphs.length === 0) {
+            return [this.createErrorPage('В книге нет текстового содержимого.')];
         }
-        return pages.length > 0 ? pages : ['(пустая книга)'];
+        const pages = [];
+        const chunkSize = 10; // Количество абзацев на страницу
+        for (let i = 0; i < paragraphs.length; i += chunkSize) {
+            const pageEl = document.createElement('div');
+            pageEl.className = 'book-reader-page';
+            // Склеиваем абзацы в одну HTML-строку и вставляем в div
+            pageEl.innerHTML = paragraphs.slice(i, i + chunkSize).join('\n');
+            pages.push(pageEl);
+        }
+        return pages;
+    }
+    createErrorPage(message) {
+        const pageEl = document.createElement('div');
+        pageEl.className = 'book-reader-page';
+        pageEl.textContent = message;
+        return pageEl;
     }
     renderPage() {
         if (!this.contentContainer)
             return;
-        const page = this.pages[this.currentPage] ?? '';
+        const pageElement = this.pages[this.currentPage];
+        if (!pageElement)
+            return;
         this.contentContainer.innerHTML = '';
-        const pageElement = document.createElement('div');
-        pageElement.className = 'book-reader-page';
-        page.split(/\n\s*\n/).forEach((paragraph) => {
-            const p = document.createElement('p');
-            p.textContent = paragraph;
-            pageElement.appendChild(p);
-        });
-        this.contentContainer.appendChild(pageElement);
+        this.contentContainer.appendChild(pageElement.cloneNode(true));
         this.contentContainer.scrollTop = 0;
         const pageInfo = document.getElementById('bookReaderPageInfo');
         if (pageInfo) {

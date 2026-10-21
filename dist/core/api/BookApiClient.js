@@ -87,5 +87,29 @@ export class BookApiClient extends BaseApiClient {
             return [];
         }
     }
+    async getBooksByAuthor(author) {
+        try {
+            const response = await this.request(`api/books/by-author?author=${encodeURIComponent(author)}`, { method: 'GET' });
+            if (!response.data?.success)
+                return [];
+            return response.data.books ?? [];
+        }
+        catch (error) {
+            console.error('[BookApiClient] getBooksByAuthor failed:', error);
+            return [];
+        }
+    }
+    async getAuthorInfo(author) {
+        try {
+            const response = await this.request(`api/books/author-info?name=${encodeURIComponent(author)}`, { method: 'GET' });
+            if (!response.data?.success || !response.data.data)
+                return null;
+            return response.data.data;
+        }
+        catch (error) {
+            console.warn('[BookApiClient] getAuthorInfo unavailable, fallback:', error);
+            return null;
+        }
+    }
 }
 //# sourceMappingURL=BookApiClient.js.map

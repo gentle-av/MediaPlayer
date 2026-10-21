@@ -1,4 +1,4 @@
-import { BookApiClient } from '../api/BookApiClient.js';
+import { BookApiClient, } from '../api/BookApiClient.js';
 import { BookLibrary } from '../entities/book/BookLibrary.js';
 export class BookStore {
     constructor() {
@@ -38,6 +38,26 @@ export class BookStore {
             console.error('❌ [BookStore] loadAuthors failed:', error);
             return [];
         }
+    }
+    async getBooksByAuthor(author) {
+        return await this.bookApiClient.getBooksByAuthor(author);
+    }
+    async getAuthorInfo(author) {
+        const remote = await this.bookApiClient.getAuthorInfo(author);
+        if (remote)
+            return remote;
+        const books = await this.bookApiClient.getBooksByAuthor(author);
+        return {
+            name: author,
+            full_name: author,
+            birth_year: null,
+            death_year: null,
+            photo_url: null,
+            photo_base64: null,
+            photo_mime: null,
+            biography: null,
+            books,
+        };
     }
     getItems() {
         return this.currentLibrary?.items || [];
