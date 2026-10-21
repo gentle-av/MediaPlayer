@@ -6,6 +6,8 @@ export class BookItem {
   path: string;
   size?: string;
   format?: string;
+  hasCover?: boolean;
+  author?: string;
 
   constructor(data: {
     icon: string;
@@ -15,6 +17,8 @@ export class BookItem {
     path: string;
     size?: string;
     format?: string;
+    hasCover?: boolean;
+    author?: string;
   }) {
     this.icon = data.icon;
     this.isDirectory = data.isDirectory;
@@ -23,6 +27,8 @@ export class BookItem {
     this.path = data.path;
     this.size = data.size;
     this.format = data.format;
+    this.hasCover = data.hasCover;
+    this.author = data.author;
   }
 
   static fromJson(json: any): BookItem {
@@ -34,6 +40,8 @@ export class BookItem {
       path: json.path,
       size: json.size,
       format: json.format,
+      hasCover: json.has_cover,
+      author: json.author,
     });
   }
 
@@ -46,6 +54,8 @@ export class BookItem {
       path: this.path,
       size: this.size,
       format: this.format,
+      hasCover: this.hasCover,
+      author: this.author,
     };
   }
 }
