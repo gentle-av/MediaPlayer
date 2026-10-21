@@ -172,4 +172,18 @@ export class BookApiClient extends BaseApiClient<unknown> {
       return null;
     }
   }
+
+  public async getBookCover(path: string): Promise<Blob | null> {
+    try {
+      const response = await fetch(
+        this.buildUrl(`api/books/cover?path=${encodeURIComponent(path)}`),
+        { method: 'GET' },
+      );
+      if (!response.ok) return null;
+      return await response.blob();
+    } catch (error) {
+      console.error(`[BookApiClient] getBookCover failed for ${path}:`, error);
+      return null;
+    }
+  }
 }
