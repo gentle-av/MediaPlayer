@@ -1,0 +1,49 @@
+.book-reader-body::-webkit-scrollbar {
+  width: 8px;
+}
+
+.book-reader-body::-webkit-scrollbar-track {
+  background: #32302f;
+}
+
+.book-reader-body::-webkit-scrollbar-thumb {
+  background: #665c54;
+  border-radius: 4px;
+}
+
+.book-reader-page p {
+  margin-bottom: 1.2em;
+  text-indent: 2em;
+}
+
+.book-chapter-title {
+  text-align: center;
+  margin: 2em 0 1em 0;
+  font-size: 1.4rem;
+  color: #fabd2f;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  text-indent: 0;
+}
+
+.book-reader-footer {
+  background: #3c3836;
+  border-top: 1px solid #504945;
+  padding: 12px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.book-reader-page-info {
+  font-family: monospace;
+  color: #a89984;
+  font-size: 0.9rem;
+}
+
+.book-reader-loading {
+  padding: 40px;
+  text-align: center;
+  color: #a89984;
+  font-style: italic;
+}

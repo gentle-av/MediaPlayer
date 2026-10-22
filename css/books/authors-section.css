@@ -1,0 +1,48 @@
+.books-authors-section {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px 20px 0;
+}
+
+.books-authors-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.books-authors-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--yellow);
+}
+
+.books-authors-reset-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--bg3);
+  background: var(--bg2);
+  color: var(--fg2);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.books-authors-reset-btn:hover {
+  background: var(--bg3);
+  border-color: var(--yellow);
+  color: var(--yellow);
+}
+
+.books-authors-empty {
+  font-size: 0.9rem;
+  color: var(--fg4);
+  padding: 10px 0;
+}
+
+.books-authors-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}

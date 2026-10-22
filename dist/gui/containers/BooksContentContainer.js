@@ -5,164 +5,57 @@ import { BookCard } from '../components/BookCard.js';
 export class BooksContentContainer {
     constructor(bookStore) {
         this.bookStore = bookStore;
-        this.authors = [];
-        this.authorsLoaded = false;
-        this.activeAuthorFilter = null;
-        this.rootElement = null;
-        this.authorsSectionElement = null;
-        this.gridHostElement = null;
         this.activeCards = [];
+        this.rootElement = null;
         this.reader = new BookReaderModal(this.bookStore);
         this.authorModal = new AuthorInfoModal(this.bookStore, this.reader);
     }
     async render(targetElement) {
         if (!targetElement)
             return null;
+        this.dispose();
         targetElement.innerHTML = '';
-        this.rootElement = document.createElement('div');
-        this.rootElement.className = 'books-tab-root';
-        this.authorsSectionElement = document.createElement('div');
-        this.authorsSectionElement.className = 'books-authors-host';
-        this.gridHostElement = document.createElement('div');
-        this.gridHostElement.className = 'books-grid-host';
-        this.rootElement.append(this.authorsSectionElement, this.gridHostElement);
-        targetElement.appendChild(this.rootElement);
-        await this.reloadData();
-        return this.rootElement;
-    }
-    dispose() {
-        this.activeCards.forEach((card) => card.dispose());
-        this.activeCards = [];
-        this.reader.close();
-        this.authorModal.close();
-        this.authors = [];
-        this.authorsLoaded = false;
-        this.activeAuthorFilter = null;
-        this.rootElement = null;
-        this.authorsSectionElement = null;
-        this.gridHostElement = null;
-    }
-    async reloadData() {
-        if (!this.gridHostElement || !this.authorsSectionElement)
-            return;
         const uiState = UiStateStore.getInstance().getState();
         const filterTerm = uiState.searchQuery;
         const activePath = uiState.currentBookPath || '/mnt/books';
-        try {
-            if (!this.bookStore.isLoaded() ||
-                this.bookStore.getCurrentPath() !== activePath) {
-                await this.bookStore.loadLibrary(activePath);
-            }
-            if (!this.authorsLoaded) {
-                this.authors = await this.bookStore.loadAuthors();
-                this.authorsLoaded = true;
-            }
+        if (!this.bookStore.isLoaded() || this.bookStore.getCurrentPath() !== activePath) {
+            await this.bookStore.loadLibrary(activePath);
         }
-        catch (error) {
-            console.error('❌ [BooksContentContainer] load error:', error);
-        }
-        this.renderAuthors(filterTerm);
-        this.renderBooks(filterTerm);
-    }
-    renderAuthors(filterTerm) {
-        if (!this.authorsSectionElement)
-            return;
-        this.authorsSectionElement.innerHTML = '';
-        const section = document.createElement('div');
-        section.className = 'books-authors-section';
-        const header = document.createElement('div');
-        header.className = 'books-authors-header';
-        const title = document.createElement('div');
-        title.className = 'books-authors-title';
-        title.textContent = `Авторы (${this.authors.length})`;
-        header.appendChild(title);
-        if (this.activeAuthorFilter) {
-            const resetBtn = document.createElement('button');
-            resetBtn.className = 'books-authors-reset-btn';
-            resetBtn.textContent = 'Сбросить';
-            resetBtn.addEventListener('click', () => {
-                this.activeAuthorFilter = null;
-                void this.reloadData();
-            });
-            header.appendChild(resetBtn);
-        }
-        section.appendChild(header);
-        if (this.authors.length === 0) {
-            const empty = document.createElement('div');
-            empty.className = 'books-authors-empty';
-            empty.textContent = 'Авторы не найдены';
-            section.appendChild(empty);
-            this.authorsSectionElement.appendChild(section);
-            return;
-        }
-        const filterLower = (filterTerm || '').toLowerCase().trim();
-        const visibleAuthors = filterLower
-            ? this.authors.filter((a) => a.author.toLowerCase().includes(filterLower))
-            : this.authors;
-        if (visibleAuthors.length === 0) {
-            const empty = document.createElement('div');
-            empty.className = 'books-authors-empty';
-            empty.textContent = 'Нет авторов по запросу';
-            section.appendChild(empty);
-            this.authorsSectionElement.appendChild(section);
-            return;
-        }
-        const chips = document.createElement('div');
-        chips.className = 'books-authors-chips';
-        visibleAuthors.forEach((authorItem) => {
-            const chip = document.createElement('button');
-            chip.className = 'books-author-chip';
-            if (this.activeAuthorFilter === authorItem.author) {
-                chip.classList.add('active');
-            }
-            const nameSpan = document.createElement('span');
-            nameSpan.className = 'books-author-chip-name';
-            nameSpan.textContent = authorItem.author;
-            const countSpan = document.createElement('span');
-            countSpan.className = 'books-author-chip-count';
-            countSpan.textContent = String(authorItem.count);
-            chip.append(nameSpan, countSpan);
-            chip.addEventListener('click', async (event) => {
-                if (event.shiftKey || event.altKey) {
-                    this.activeAuthorFilter =
-                        this.activeAuthorFilter === authorItem.author
-                            ? null
-                            : authorItem.author;
-                    void this.reloadData();
-                    return;
-                }
-                await this.authorModal.open(authorItem.author);
-            });
-            chips.appendChild(chip);
-        });
-        section.appendChild(chips);
-        this.authorsSectionElement.appendChild(section);
-    }
-    renderBooks(filterTerm) {
-        if (!this.gridHostElement)
-            return;
-        this.activeCards.forEach((card) => card.dispose());
-        this.activeCards = [];
-        this.gridHostElement.innerHTML = '';
+        const allAuthors = await this.bookStore.loadAuthors();
+        this.rootElement = document.createElement('div');
+        this.rootElement.className = 'books-tab-root';
+        let filteredAuthors = allAuthors;
         let allItems = this.bookStore.getItems();
         if (filterTerm) {
+            const lowerTerm = filterTerm.toLowerCase().trim();
+            filteredAuthors = allAuthors.filter((a) => a.author.toLowerCase().includes(lowerTerm));
             allItems = this.bookStore.search(filterTerm);
         }
-        if (this.activeAuthorFilter) {
-            const authorLower = this.activeAuthorFilter.toLowerCase();
-            allItems = allItems.filter((item) => item.author?.toLowerCase().includes(authorLower));
-        }
-        if (allItems.length === 0) {
+        if (filteredAuthors.length === 0 && allItems.length === 0) {
             const emptyDiv = document.createElement('div');
-            emptyDiv.className = 'books-empty-state';
-            emptyDiv.textContent = filterTerm
-                ? '📚 Ничего не найдено'
-                : '📚 Папка пуста';
-            this.gridHostElement.appendChild(emptyDiv);
-            return;
+            emptyDiv.className = 'books-global-empty-state';
+            emptyDiv.textContent = filterTerm ? '📚 Ничего не найдено' : '📚 Папка пуста';
+            this.rootElement.appendChild(emptyDiv);
+            targetElement.appendChild(this.rootElement);
+            return this.rootElement;
         }
         const gridElement = document.createElement('div');
-        gridElement.className = 'books-grid';
+        gridElement.className = 'books-unified-grid';
+        filteredAuthors.forEach((authorItem) => {
+            const authorCard = document.createElement('div');
+            authorCard.className = 'books-card author-special-card';
+            const coverWrap = document.createElement('div');
+            coverWrap.className = 'books-card-cover';
+            coverWrap.innerHTML = `<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--orange)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>`;
+            const caption = document.createElement('figcaption');
+            caption.className = 'books-card-caption';
+            caption.innerHTML = `<strong>${authorItem.author}</strong><br><span style="color: var(--fg4); font-size: 0.75rem;">${authorItem.count} кн.</span>`;
+            authorCard.append(coverWrap, caption);
+            authorCard.addEventListener('click', async () => {
+                await this.authorModal.open(authorItem.author);
+            });
+            gridElement.appendChild(authorCard);
+        });
         allItems.forEach((item) => {
             const bookCard = new BookCard(item, this.bookStore);
             const cardElement = bookCard.render();
@@ -178,7 +71,19 @@ export class BooksContentContainer {
             });
             gridElement.appendChild(cardElement);
         });
-        this.gridHostElement.appendChild(gridElement);
+        this.rootElement.appendChild(gridElement);
+        targetElement.appendChild(this.rootElement);
+        return this.rootElement;
+    }
+    dispose() {
+        if (this.rootElement && this.rootElement.parentNode) {
+            this.rootElement.parentNode.removeChild(this.rootElement);
+        }
+        this.activeCards.forEach((card) => card.dispose());
+        this.activeCards = [];
+        this.reader.close();
+        this.authorModal.close();
+        this.rootElement = null;
     }
 }
 //# sourceMappingURL=BooksContentContainer.js.map

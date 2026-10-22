@@ -1,0 +1,34 @@
+.books-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 24px 16px;
+  padding: 20px;
+  align-content: start;
+  justify-content: start;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.books-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 10px;
+  margin: 0;
+  background: var(--bg1);
+  border: 1px solid var(--bg2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all var(--transition-fast) ease;
+  box-sizing: border-box;
+  overflow: hidden;
+  min-width: 0;
+  width: 100%;
+}
+
+.books-card:hover {
+  background: var(--bg2);
+  border-color: var(--yellow);
+  transform: translateY(-2px);
+}

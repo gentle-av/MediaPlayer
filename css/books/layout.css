@@ -1,0 +1,33 @@
+.books-tab-root {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 100%;
+}
+
+.content-area .books-tab-root {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+}
+
+.books-authors-host {
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.books-grid-host {
+  width: 100%;
+  padding-bottom: 20px;
+}
+
+.books-empty-state {
+  display: block;
+  padding: 40px 20px;
+  color: var(--fg3);
+  font-size: 1rem;
+  text-align: center;
+  margin-top: 20px;
+  flex: 0 0 auto;
+}

@@ -5,6 +5,7 @@ export class AuthorInfoModal {
         this.reader = reader;
         this.modalElement = null;
         this.photoObjectUrl = null;
+        this.activeBookObjectUrls = [];
     }
     async open(authorName) {
         this.close();
@@ -44,14 +45,16 @@ export class AuthorInfoModal {
         }
         body.innerHTML = '';
         const top = this.createTopSection(info);
-        const table = this.createBooksTable(info);
-        body.append(top, table);
+        const grid = this.createBooksGrid(info);
+        body.append(top, grid);
     }
     close() {
         if (this.photoObjectUrl) {
             URL.revokeObjectURL(this.photoObjectUrl);
             this.photoObjectUrl = null;
         }
+        this.activeBookObjectUrls.forEach((url) => URL.revokeObjectURL(url));
+        this.activeBookObjectUrls = [];
         const existing = document.querySelector('.author-info-modal');
         if (existing && existing.parentNode) {
             existing.parentNode.removeChild(existing);
@@ -115,7 +118,7 @@ export class AuthorInfoModal {
             applySrc(info.photo_url);
         }
     }
-    createBooksTable(info) {
+    createBooksGrid(info) {
         const container = document.createElement('div');
         container.className = 'author-info-books';
         if (info.books.length === 0) {
@@ -125,60 +128,52 @@ export class AuthorInfoModal {
             container.appendChild(empty);
             return container;
         }
-        const table = document.createElement('table');
-        table.className = 'author-books-table';
-        const thead = document.createElement('thead');
-        const headerRow = document.createElement('tr');
-        ['#', 'Название', 'Серия', 'Номер', 'Формат'].forEach((label) => {
-            const th = document.createElement('th');
-            th.textContent = label;
-            headerRow.appendChild(th);
-        });
-        thead.appendChild(headerRow);
-        const tbody = document.createElement('tbody');
-        info.books.forEach((book, index) => {
-            tbody.appendChild(this.createBookRow(book, index));
-        });
-        table.append(thead, tbody);
-        container.appendChild(table);
-        return container;
-    }
-    createBookRow(book, index) {
-        const row = document.createElement('tr');
-        row.className = 'author-book-row';
-        const num = document.createElement('td');
-        num.className = 'author-book-number';
-        num.textContent = String(index + 1);
-        const title = document.createElement('td');
-        title.className = 'author-book-title';
-        title.textContent = book.title || '(без названия)';
-        const sequence = document.createElement('td');
-        sequence.className = 'author-book-sequence';
-        sequence.textContent = book.sequence || '—';
-        const seqNumber = document.createElement('td');
-        seqNumber.className = 'author-book-seqnumber';
-        seqNumber.textContent = book.seq_number ? String(book.seq_number) : '—';
-        const format = document.createElement('td');
-        format.className = 'author-book-format';
-        format.textContent = this.extractFormat(book.path);
-        row.append(num, title, sequence, seqNumber, format);
-        row.addEventListener('click', async () => {
-            const item = new BookItem({
-                icon: 'book',
-                isDirectory: false,
-                isBook: true,
-                name: book.title || book.path.split('/').pop() || book.path,
-                path: book.path,
-                format: this.extractFormat(book.path),
+        const grid = document.createElement('div');
+        grid.className = 'author-books-grid';
+        info.books.forEach((book) => {
+            const card = document.createElement('div');
+            card.className = 'author-book-card';
+            const coverContainer = document.createElement('div');
+            coverContainer.className = 'author-book-cover';
+            const placeholder = document.createElement('div');
+            placeholder.className = 'author-book-placeholder';
+            placeholder.innerHTML = `<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>`;
+            coverContainer.appendChild(placeholder);
+            if (book.has_cover) {
+                this.bookStore.getBookCover(book.path).then((blob) => {
+                    if (blob && blob.size > 0) {
+                        const url = URL.createObjectURL(blob);
+                        this.activeBookObjectUrls.push(url);
+                        const img = document.createElement('img');
+                        img.src = url;
+                        img.alt = book.title;
+                        img.style.display = 'block';
+                        placeholder.style.display = 'none';
+                        coverContainer.appendChild(img);
+                    }
+                }).catch(err => console.warn('Cover load error', err));
+            }
+            const titleContainer = document.createElement('div');
+            titleContainer.className = 'author-book-card-title';
+            titleContainer.textContent = book.title || '(без названия)';
+            titleContainer.title = book.title || '(без названия)';
+            card.append(coverContainer, titleContainer);
+            card.addEventListener('click', async () => {
+                const item = new BookItem({
+                    icon: 'book',
+                    isDirectory: false,
+                    isBook: true,
+                    name: book.title || book.path.split('/').pop() || book.path,
+                    path: book.path,
+                    format: 'FB2',
+                });
+                this.close();
+                await this.reader.open(item);
             });
-            this.close();
-            await this.reader.open(item);
+            grid.appendChild(card);
         });
-        return row;
-    }
-    extractFormat(path) {
-        const match = /\.([^./\\]+)$/.exec(path);
-        return match ? match[1].toUpperCase() : '—';
+        container.appendChild(grid);
+        return container;
     }
     formatYears(birth, death) {
         if (birth && death)

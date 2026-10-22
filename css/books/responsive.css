@@ -1,0 +1,37 @@
+@media (max-width: 768px) {
+  .books-grid {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 12px;
+    padding: 12px;
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+  .books-card { padding: 10px 6px; }
+  .books-card-placeholder svg { width: 32px; height: 32px; }
+  .books-card-caption { font-size: 0.72rem; }
+  .books-authors-section { padding: 10px 12px 0; }
+  .books-authors-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+  }
+  .author-card { padding: 10px; height: 85px; gap: 12px; }
+  .author-card-stack { width: 45px; height: 65px; }
+  .author-card-stack-placeholder svg { width: 20px; height: 20px; }
+  .author-card-name { font-size: 0.85rem; }
+  .author-card-count { font-size: 0.75rem; }
+  .author-info-modal-content { width: 95%; max-height: 90vh; }
+  .author-info-body { padding: 12px; gap: 14px; }
+  .author-info-top { gap: 12px; }
+  .author-info-photo { width: 100px; height: 100px; }
+  .author-info-photo-placeholder { font-size: 40px; }
+  .author-info-name { font-size: 1.05rem; }
+  .author-info-years { font-size: 0.85rem; }
+}
+
+@media (max-width: 480px) {
+  .books-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 8px; }
+  .books-card-placeholder svg { width: 28px; height: 28px; }
+  .author-card-name { font-size: 0.8rem; }
+  .author-info-top { flex-direction: column; align-items: center; text-align: center; }
+  .author-info-photo { width: 120px; height: 120px; }
+  .author-info-meta { align-items: center; }
+}
