@@ -16,5 +16,6 @@ export interface IMediaPlayer {
     onNext: () => void,
     onPrevious: () => void,
     onSeek?: (seconds: number) => void,
+    onToggleFullscreen?: () => void,
   ): void;
 }
