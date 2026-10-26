@@ -245,6 +245,9 @@ export class MainFrame {
       (seconds: number) => {
         this.playbackManager.seek(seconds);
       },
+      () => {
+        this.playbackManager.toggleFullscreen();
+      },
     );
   }
 

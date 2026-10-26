@@ -42,6 +42,11 @@ export class PlaybackManager {
             }
         }
     }
+    async toggleFullscreen() {
+        if (this.currentType === 'video') {
+            await this.videoApiClient.toggleFullscreen();
+        }
+    }
     async playVideo(videoItem) {
         this.stopCurrentPlayback();
         this.currentType = 'video';

@@ -12,6 +12,7 @@ export class Player {
         this.onNextTrackCallback = null;
         this.onPreviousTrackCallback = null;
         this.onSeekCallback = null;
+        this.onToggleFullscreenCallback = null;
         this.audioEngine = new Audio();
     }
     setVisibility(isVisible) {
@@ -24,13 +25,16 @@ export class Player {
             }
         }
     }
-    bindControls(onPlayPause, onStop, onNext, onPrevious, onSeek) {
+    bindControls(onPlayPause, onStop, onNext, onPrevious, onSeek, onToggleFullscreen) {
         this.onPlayPauseCallback = onPlayPause;
         this.onStopCallback = onStop;
         this.onNextTrackCallback = onNext;
         this.onPreviousTrackCallback = onPrevious;
         if (onSeek) {
             this.onSeekCallback = onSeek;
+        }
+        if (onToggleFullscreen) {
+            this.onToggleFullscreenCallback = onToggleFullscreen;
         }
     }
     updateMediaInfo(mediaTitle, mediaArtist, videoPath, playbackType, albumName) {
@@ -92,6 +96,14 @@ export class Player {
         }, () => {
             if (this.onPreviousTrackCallback) {
                 this.onPreviousTrackCallback();
+            }
+        }, (seconds) => {
+            if (this.onSeekCallback) {
+                this.onSeekCallback(seconds);
+            }
+        }, () => {
+            if (this.onToggleFullscreenCallback) {
+                this.onToggleFullscreenCallback();
             }
         });
         contentWrapperElement.append(metadataContainer, timelineContainer, controlsContainer);

@@ -5,6 +5,7 @@ export class PlayerControls {
         this.playButtonIcon = null;
         this.audioStreamButton = null;
         this.subtitleButton = null;
+        this.fullscreenButton = null;
         this.audioTrackMenu = new AudioTrackMenu();
         this.subtitleMenu = new SubtitleMenu();
         this.activeVideoPath = '';
@@ -56,12 +57,16 @@ export class PlayerControls {
         if (this.subtitleButton) {
             this.subtitleButton.classList.toggle('visible', shouldShow);
         }
+        if (this.fullscreenButton) {
+            this.fullscreenButton.classList.toggle('visible', shouldShow);
+        }
     }
-    render(onPlayPause, onStop, onNext, onPrevious) {
+    render(onPlayPause, onStop, onNext, onPrevious, onToggleFullscreen) {
         const controlsContainer = document.createElement('div');
         controlsContainer.className = 'universal-bottom-player-controls';
         this.audioStreamButton = this.createAudioStreamButton();
         this.subtitleButton = this.createSubtitleButton();
+        this.fullscreenButton = this.createFullscreenButton(onToggleFullscreen);
         const skipBackwardBtn = this.createControlButton('polygon', { points: '19 20 9 12 19 4 19 20', fill: 'currentColor' }, 'line', {
             x1: '5',
             y1: '19',
@@ -107,7 +112,7 @@ export class PlayerControls {
         skipForwardBtn.addEventListener('click', () => {
             onNext();
         });
-        controlsContainer.append(this.audioStreamButton, this.subtitleButton, skipBackwardBtn, standardPlayBtn, stopBtn, skipForwardBtn);
+        controlsContainer.append(this.audioStreamButton, this.subtitleButton, this.fullscreenButton, skipBackwardBtn, standardPlayBtn, stopBtn, skipForwardBtn);
         return controlsContainer;
     }
     createAudioStreamButton() {
@@ -188,6 +193,36 @@ export class PlayerControls {
             this.subtitleMenu.show(clickEvent);
         });
         return subtitleButton;
+    }
+    createFullscreenButton(onToggle) {
+        const btn = document.createElement('button');
+        btn.className = 'universal-bottom-player-btn fullscreen-btn';
+        const SVG_NS = 'http://www.w3.org/2000/svg';
+        const vectorRoot = document.createElementNS(SVG_NS, 'svg');
+        vectorRoot.setAttribute('width', '16');
+        vectorRoot.setAttribute('height', '16');
+        vectorRoot.setAttribute('viewBox', '0 0 24 24');
+        vectorRoot.setAttribute('fill', 'none');
+        vectorRoot.setAttribute('stroke', 'currentColor');
+        vectorRoot.setAttribute('stroke-width', '2');
+        vectorRoot.setAttribute('stroke-linecap', 'round');
+        vectorRoot.setAttribute('stroke-linejoin', 'round');
+        const path1 = document.createElementNS(SVG_NS, 'path');
+        path1.setAttribute('d', 'M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3');
+        const path2 = document.createElementNS(SVG_NS, 'path');
+        path2.setAttribute('d', 'M15 9l-6 6');
+        const path3 = document.createElementNS(SVG_NS, 'path');
+        path3.setAttribute('d', 'M9 9l6 6');
+        vectorRoot.append(path1, path2, path3);
+        btn.appendChild(vectorRoot);
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (onToggle) {
+                onToggle();
+            }
+        });
+        return btn;
     }
     createControlButton(nodeType1, attributes1, nodeType2, attributes2) {
         const controlButton = document.createElement('button');
