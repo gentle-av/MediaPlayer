@@ -14,6 +14,7 @@ export class Player implements IMediaPlayer {
   private onNextTrackCallback: (() => void) | null = null;
   private onPreviousTrackCallback: (() => void) | null = null;
   private onSeekCallback: ((seconds: number) => void) | null = null;
+  private onToggleFullscreenCallback: (() => void) | null = null;
 
   constructor() {
     this.audioEngine = new Audio();
@@ -35,6 +36,7 @@ export class Player implements IMediaPlayer {
     onNext: () => void,
     onPrevious: () => void,
     onSeek?: (seconds: number) => void,
+    onToggleFullscreen?: () => void,
   ): void {
     this.onPlayPauseCallback = onPlayPause;
     this.onStopCallback = onStop;
@@ -42,6 +44,9 @@ export class Player implements IMediaPlayer {
     this.onPreviousTrackCallback = onPrevious;
     if (onSeek) {
       this.onSeekCallback = onSeek;
+    }
+    if (onToggleFullscreen) {
+      this.onToggleFullscreenCallback = onToggleFullscreen;
     }
   }
 
@@ -126,6 +131,16 @@ export class Player implements IMediaPlayer {
       () => {
         if (this.onPreviousTrackCallback) {
           this.onPreviousTrackCallback();
+        }
+      },
+      (seconds: number) => {
+        if (this.onSeekCallback) {
+          this.onSeekCallback(seconds);
+        }
+      },
+      () => {
+        if (this.onToggleFullscreenCallback) {
+          this.onToggleFullscreenCallback();
         }
       },
     );
