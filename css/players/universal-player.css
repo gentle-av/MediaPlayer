@@ -117,7 +117,7 @@
 }
 .universal-bottom-player-progress {
   flex: 1;
-  min-width: 150px; 
+  min-width: 150px;
   padding: 0;
   box-sizing: border-box;
   margin: 0;
@@ -461,4 +461,10 @@
 .universal-bottom-player.visible {
   display: flex;
   flex-direction: column;
+}
+.fullscreen-btn {
+  display: none;
+}
+.fullscreen-btn.visible {
+  display: flex;
 }
