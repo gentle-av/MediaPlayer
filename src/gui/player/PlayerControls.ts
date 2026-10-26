@@ -5,6 +5,7 @@ export class PlayerControls {
   private playButtonIcon: HTMLElement | null = null;
   private audioStreamButton: HTMLButtonElement | null = null;
   private subtitleButton: HTMLButtonElement | null = null;
+  private fullscreenButton: HTMLButtonElement | null = null;
   private audioTrackMenu = new AudioTrackMenu();
   private subtitleMenu = new SubtitleMenu();
   private activeVideoPath = '';
@@ -58,6 +59,9 @@ export class PlayerControls {
     if (this.subtitleButton) {
       this.subtitleButton.classList.toggle('visible', shouldShow);
     }
+    if (this.fullscreenButton) {
+      this.fullscreenButton.classList.toggle('visible', shouldShow);
+    }
   }
 
   public render(
@@ -65,11 +69,13 @@ export class PlayerControls {
     onStop: () => void,
     onNext: () => void,
     onPrevious: () => void,
+    onToggleFullscreen?: () => void,
   ): HTMLElement {
     const controlsContainer = document.createElement('div');
     controlsContainer.className = 'universal-bottom-player-controls';
     this.audioStreamButton = this.createAudioStreamButton();
     this.subtitleButton = this.createSubtitleButton();
+    this.fullscreenButton = this.createFullscreenButton(onToggleFullscreen);
     const skipBackwardBtn = this.createControlButton(
       'polygon',
       { points: '19 20 9 12 19 4 19 20', fill: 'currentColor' },
@@ -128,6 +134,7 @@ export class PlayerControls {
     controlsContainer.append(
       this.audioStreamButton,
       this.subtitleButton,
+      this.fullscreenButton,
       skipBackwardBtn,
       standardPlayBtn,
       stopBtn,
@@ -218,6 +225,39 @@ export class PlayerControls {
       this.subtitleMenu.show(clickEvent);
     });
     return subtitleButton;
+  }
+
+  private createFullscreenButton(
+    onToggle?: () => void,
+  ): HTMLButtonElement {
+    const btn = document.createElement('button');
+    btn.className = 'universal-bottom-player-btn fullscreen-btn';
+    const SVG_NS = 'http://www.w3.org/2000/svg';
+    const vectorRoot = document.createElementNS(SVG_NS, 'svg');
+    vectorRoot.setAttribute('width', '16');
+    vectorRoot.setAttribute('height', '16');
+    vectorRoot.setAttribute('viewBox', '0 0 24 24');
+    vectorRoot.setAttribute('fill', 'none');
+    vectorRoot.setAttribute('stroke', 'currentColor');
+    vectorRoot.setAttribute('stroke-width', '2');
+    vectorRoot.setAttribute('stroke-linecap', 'round');
+    vectorRoot.setAttribute('stroke-linejoin', 'round');
+    const path1 = document.createElementNS(SVG_NS, 'path');
+    path1.setAttribute('d', 'M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3');
+    const path2 = document.createElementNS(SVG_NS, 'path');
+    path2.setAttribute('d', 'M15 9l-6 6');
+    const path3 = document.createElementNS(SVG_NS, 'path');
+    path3.setAttribute('d', 'M9 9l6 6');
+    vectorRoot.append(path1, path2, path3);
+    btn.appendChild(vectorRoot);
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (onToggle) {
+        onToggle();
+      }
+    });
+    return btn;
   }
 
   private createControlButton(
