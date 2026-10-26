@@ -187,6 +187,8 @@ export class MainFrame {
             this.playbackManager.playPreviousTrack();
         }, (seconds) => {
             this.playbackManager.seek(seconds);
+        }, () => {
+            this.playbackManager.toggleFullscreen();
         });
     }
     bindHeaderEvents(containerElement) {

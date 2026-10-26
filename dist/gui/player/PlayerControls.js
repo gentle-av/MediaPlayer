@@ -61,7 +61,7 @@ export class PlayerControls {
             this.fullscreenButton.classList.toggle('visible', shouldShow);
         }
     }
-    render(onPlayPause, onStop, onNext, onPrevious, onToggleFullscreen) {
+    render(onPlayPause, onStop, onNext, onPrevious, onSeek, onToggleFullscreen) {
         const controlsContainer = document.createElement('div');
         controlsContainer.className = 'universal-bottom-player-controls';
         this.audioStreamButton = this.createAudioStreamButton();
@@ -208,12 +208,8 @@ export class PlayerControls {
         vectorRoot.setAttribute('stroke-linecap', 'round');
         vectorRoot.setAttribute('stroke-linejoin', 'round');
         const path1 = document.createElementNS(SVG_NS, 'path');
-        path1.setAttribute('d', 'M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3');
-        const path2 = document.createElementNS(SVG_NS, 'path');
-        path2.setAttribute('d', 'M15 9l-6 6');
-        const path3 = document.createElementNS(SVG_NS, 'path');
-        path3.setAttribute('d', 'M9 9l6 6');
-        vectorRoot.append(path1, path2, path3);
+        path1.setAttribute('d', 'M8 3v3a2 2 0 0 1-2 2H3m18 0h-3a2 2 0 0 1-2-2V3m0 18v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3');
+        vectorRoot.appendChild(path1);
         btn.appendChild(vectorRoot);
         btn.addEventListener('click', (e) => {
             e.preventDefault();
