@@ -49,6 +49,29 @@
   margin-top: 4px;
 }
 
+.author-card .book-cover img,
+.modal-body img {
+    max-height: 200px;
+    width: auto;
+    object-fit: contain;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto 15px;
+}
+
 .author-card.active .author-card-name {
   color: var(--yellow);
+}
+
+@media (max-width: 768px) {
+    .author-popup-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    .author-popup-container img {
+        max-width: 150px;
+        max-height: 220px;
+        margin-bottom: 15px;
+    }
 }

@@ -77,6 +77,19 @@ export class VideoApiClient extends BaseApiClient<unknown> {
     }
   }
 
+  public async toggleFullscreen(): Promise<boolean> {
+    try {
+      const response = await this.request<unknown>('api/mpv/control', {
+        method: 'POST',
+        body: JSON.stringify({ command: 'fullscreen' }),
+      });
+      return response.status === 200;
+    } catch (error) {
+      console.error(error);
+      return false;
+    }
+  }
+
   public async getVideoStatus(videoPath: string): Promise<any> {
     try {
       const path = `api/video/status?path=${encodeURIComponent(videoPath)}`;
