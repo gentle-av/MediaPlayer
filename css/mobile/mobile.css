@@ -310,10 +310,21 @@
     padding: 0 !important;
     margin: 0 !important;
   }
+
+  /* Скрываем кнопки потоков и фуллскрина по умолчанию в мобильной версии */
   .universal-bottom-player .audio-stream-btn,
-  .universal-bottom-player .subtitle-btn {
+  .universal-bottom-player .subtitle-btn,
+  .universal-bottom-player .fullscreen-btn {
     display: none !important;
   }
+
+  /* Показываем их только при наличии класса visible (что происходит только для видео) */
+  .universal-bottom-player .audio-stream-btn.visible,
+  .universal-bottom-player .subtitle-btn.visible,
+  .universal-bottom-player .fullscreen-btn.visible {
+    display: flex !important;
+  }
+
   .universal-bottom-player-play {
     display: flex !important;
     align-items: center !important;

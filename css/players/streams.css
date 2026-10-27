@@ -13,6 +13,7 @@
   pointer-events: none;
 }
 .audio-stream-btn.visible {
+  display: flex;
   visibility: visible;
   pointer-events: auto;
 }
