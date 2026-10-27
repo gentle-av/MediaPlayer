@@ -1,14 +1,14 @@
 export class PlayerMetadata {
   private trackNameElement: HTMLElement | null = null;
   private trackArtistElement: HTMLElement | null = null;
+  private trackPathElement: HTMLElement | null = null;
   private previewArtElement: HTMLElement | null = null;
   private artImageElement: HTMLImageElement | null = null;
-
   public update(
-    mediaTitle: string,
-    mediaArtist: string,
-    playbackType?: 'music' | 'video',
-    albumName?: string,
+  mediaTitle: string,
+  mediaArtist: string,
+  playbackType?: 'music' | 'video',
+  albumName?: string,
   ): void {
     if (this.trackNameElement) {
       this.trackNameElement.textContent = mediaTitle;
@@ -16,19 +16,30 @@ export class PlayerMetadata {
     if (this.trackArtistElement) {
       this.trackArtistElement.textContent = mediaArtist;
     }
+    if (this.trackPathElement) {
+      const musicStore = (window as any).app?.musicStore;
+      const currentTrack = musicStore?.getCurrentTrack();
+      if (currentTrack && currentTrack.filePath) {
+        this.trackPathElement.textContent = currentTrack.filePath;
+        this.trackPathElement.style.display = 'block';
+      } else {
+        this.trackPathElement.textContent = '';
+        this.trackPathElement.style.display = 'none';
+      }
+    }
     if (this.previewArtElement && this.artImageElement) {
       if (playbackType === 'video') {
         this.artImageElement.style.display = 'none';
         this.previewArtElement.querySelector('svg')?.remove();
         this.previewArtElement.insertAdjacentHTML(
-          'afterbegin',
-          `
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <path d="M23 7l-7 5 7 5V7z"></path>
-            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-          </svg>
+        'afterbegin',
+        `
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M23 7l-7 5 7 5V7z"></path>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
         `,
         );
       } else if (playbackType === 'music' && albumName && mediaArtist) {
@@ -36,23 +47,23 @@ export class PlayerMetadata {
         const musicStore = (window as any).app?.musicStore;
         if (musicStore) {
           musicStore
-            .getAlbumArtBlob(albumName, mediaArtist)
-            .then((blob: Blob | null) => {
-              if (blob && blob.size > 0 && this.artImageElement) {
-                const forcedBlob = new Blob([blob], { type: 'image/jpeg' });
-                const objectUrl = URL.createObjectURL(forcedBlob);
-                if (this.artImageElement.src.startsWith('blob:')) {
-                  URL.revokeObjectURL(this.artImageElement.src);
-                }
-                this.artImageElement.src = objectUrl;
-                this.artImageElement.style.display = 'block';
-              } else {
-                this.setDefaultMusicSvg();
+          .getAlbumArtBlob(albumName, mediaArtist)
+          .then((blob: Blob | null) => {
+            if (blob && blob.size > 0 && this.artImageElement) {
+              const forcedBlob = new Blob([blob], { type: 'image/jpeg' });
+              const objectUrl = URL.createObjectURL(forcedBlob);
+              if (this.artImageElement.src.startsWith('blob:')) {
+                URL.revokeObjectURL(this.artImageElement.src);
               }
-            })
-            .catch(() => {
+              this.artImageElement.src = objectUrl;
+              this.artImageElement.style.display = 'block';
+            } else {
               this.setDefaultMusicSvg();
-            });
+            }
+          })
+          .catch(() => {
+            this.setDefaultMusicSvg();
+          });
         } else {
           this.setDefaultMusicSvg();
         }
@@ -61,25 +72,23 @@ export class PlayerMetadata {
       }
     }
   }
-
   private setDefaultMusicSvg(): void {
     if (!this.previewArtElement || !this.artImageElement) return;
     this.artImageElement.style.display = 'none';
     this.previewArtElement.querySelector('svg')?.remove();
     this.previewArtElement.insertAdjacentHTML(
-      'afterbegin',
-      `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-        stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"></path>
-        <circle cx="6" cy="18" r="3"></circle>
-        <circle cx="18" cy="16" r="3"></circle>
-      </svg>
+    'afterbegin',
+    `
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+    stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+    stroke-linejoin="round">
+    <path d="M9 18V5l12-2v13"></path>
+    <circle cx="6" cy="18" r="3"></circle>
+    <circle cx="18" cy="16" r="3"></circle>
+    </svg>
     `,
     );
   }
-
   public render(): HTMLElement {
     const metadataContainer = document.createElement('div');
     metadataContainer.className = 'universal-bottom-player-info';
@@ -93,15 +102,15 @@ export class PlayerMetadata {
     this.artImageElement.className = 'player-dynamic-art-img';
     this.previewArtElement.appendChild(this.artImageElement);
     this.previewArtElement.insertAdjacentHTML(
-      'beforeend',
-      `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-        stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"></path>
-        <circle cx="6" cy="18" r="3"></circle>
-        <circle cx="18" cy="16" r="3"></circle>
-      </svg>
+    'beforeend',
+    `
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+    stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+    stroke-linejoin="round">
+    <path d="M9 18V5l12-2v13"></path>
+    <circle cx="6" cy="18" r="3"></circle>
+    <circle cx="18" cy="16" r="3"></circle>
+    </svg>
     `,
     );
     metadataContainer.appendChild(this.previewArtElement);
@@ -115,6 +124,10 @@ export class PlayerMetadata {
     this.trackArtistElement.className = 'universal-bottom-player-track-artist';
     this.trackArtistElement.textContent = '—';
     trackInfoContainer.appendChild(this.trackArtistElement);
+    this.trackPathElement = document.createElement('div');
+    this.trackPathElement.className = 'universal-bottom-player-track-path';
+    this.trackPathElement.style.display = 'none';
+    trackInfoContainer.appendChild(this.trackPathElement);
     metadataContainer.appendChild(trackInfoContainer);
     return metadataContainer;
   }

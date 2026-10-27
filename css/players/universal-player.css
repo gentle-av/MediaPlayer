@@ -110,6 +110,15 @@
   font-size: 0.8rem;
   color: var(--yellow);
 }
+.universal-bottom-player-track-path {
+  font-size: 0.7rem;
+  color: var(--fg4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-top: 2px;
+  font-family: monospace;
+}
 .universal-bottom-player-track-count {
   font-size: 0.7rem;
   color: var(--fg3);

@@ -2,6 +2,7 @@ export class PlayerMetadata {
     constructor() {
         this.trackNameElement = null;
         this.trackArtistElement = null;
+        this.trackPathElement = null;
         this.previewArtElement = null;
         this.artImageElement = null;
     }
@@ -12,17 +13,29 @@ export class PlayerMetadata {
         if (this.trackArtistElement) {
             this.trackArtistElement.textContent = mediaArtist;
         }
+        if (this.trackPathElement) {
+            const musicStore = window.app?.musicStore;
+            const currentTrack = musicStore?.getCurrentTrack();
+            if (currentTrack && currentTrack.filePath) {
+                this.trackPathElement.textContent = currentTrack.filePath;
+                this.trackPathElement.style.display = 'block';
+            }
+            else {
+                this.trackPathElement.textContent = '';
+                this.trackPathElement.style.display = 'none';
+            }
+        }
         if (this.previewArtElement && this.artImageElement) {
             if (playbackType === 'video') {
                 this.artImageElement.style.display = 'none';
                 this.previewArtElement.querySelector('svg')?.remove();
                 this.previewArtElement.insertAdjacentHTML('afterbegin', `
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round">
-            <path d="M23 7l-7 5 7 5V7z"></path>
-            <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
-          </svg>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round">
+        <path d="M23 7l-7 5 7 5V7z"></path>
+        <rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect>
+        </svg>
         `);
             }
             else if (playbackType === 'music' && albumName && mediaArtist) {
@@ -64,13 +77,13 @@ export class PlayerMetadata {
         this.artImageElement.style.display = 'none';
         this.previewArtElement.querySelector('svg')?.remove();
         this.previewArtElement.insertAdjacentHTML('afterbegin', `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-        stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"></path>
-        <circle cx="6" cy="18" r="3"></circle>
-        <circle cx="18" cy="16" r="3"></circle>
-      </svg>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+    stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+    stroke-linejoin="round">
+    <path d="M9 18V5l12-2v13"></path>
+    <circle cx="6" cy="18" r="3"></circle>
+    <circle cx="18" cy="16" r="3"></circle>
+    </svg>
     `);
     }
     render() {
@@ -86,13 +99,13 @@ export class PlayerMetadata {
         this.artImageElement.className = 'player-dynamic-art-img';
         this.previewArtElement.appendChild(this.artImageElement);
         this.previewArtElement.insertAdjacentHTML('beforeend', `
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
-        stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
-        stroke-linejoin="round">
-        <path d="M9 18V5l12-2v13"></path>
-        <circle cx="6" cy="18" r="3"></circle>
-        <circle cx="18" cy="16" r="3"></circle>
-      </svg>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+    stroke="var(--yellow)" stroke-width="2" stroke-linecap="round"
+    stroke-linejoin="round">
+    <path d="M9 18V5l12-2v13"></path>
+    <circle cx="6" cy="18" r="3"></circle>
+    <circle cx="18" cy="16" r="3"></circle>
+    </svg>
     `);
         metadataContainer.appendChild(this.previewArtElement);
         const trackInfoContainer = document.createElement('div');
@@ -105,6 +118,10 @@ export class PlayerMetadata {
         this.trackArtistElement.className = 'universal-bottom-player-track-artist';
         this.trackArtistElement.textContent = '—';
         trackInfoContainer.appendChild(this.trackArtistElement);
+        this.trackPathElement = document.createElement('div');
+        this.trackPathElement.className = 'universal-bottom-player-track-path';
+        this.trackPathElement.style.display = 'none';
+        trackInfoContainer.appendChild(this.trackPathElement);
         metadataContainer.appendChild(trackInfoContainer);
         return metadataContainer;
     }
